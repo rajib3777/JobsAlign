@@ -1,0 +1,55 @@
+#for Activate env
+
+ .\env\Scripts\Activate.ps1
+
+
+#installation packages
+
+pip install django djangorestframework
+pip install django-cors-headers
+pip install djangorestframework-simplejwt
+pip install drf-yasg
+pip install django-filter
+pip install python-decouple
+pip install pillow
+pip install requests
+pip install stripe paypalrestsdk
+pip install sslcommerz-lib
+pip install django-bkash
+pip install nagad_payment #not found data
+pip install django-allauth
+pip install dj-rest-auth
+pip install channels
+pip install channels-redis
+pip install django-storages boto3
+pip install cloudinary
+pip install django-referral
+pip install django-money
+pip install django-admin-interface
+pip install matplotlib
+pip install pandas
+pip install drf-spectacular
+pip install whitenoise
+pip install gunicorn
+pip install psycopg2-binary
+
+
+#goggle_authentication
+
+pip install django-allauth
+pip install dj-rest-auth[social]
+pip install social-auth-app-django
+
+
+#apps
+
+django-admin startproject jobsalign
+python manage.py startapp accounts
+python manage.py startapp marketplace
+python manage.py startapp payments
+python manage.py startapp chats
+python manage.py startapp referrals
+python manage.py startapp reviews
+python manage.py startapp notifications
+python manage.py startapp support
+python manage.py startapp analytics
