@@ -248,3 +248,6 @@ DEFAULT_FROM_EMAIL = config("EMAIL")
 #     _original_fk_init(self, *args, **kwargs)
 
 # ForeignKey.__init__ = _patched_fk_init
+
+AUTH_USER_MODEL = 'accounts.User'
+

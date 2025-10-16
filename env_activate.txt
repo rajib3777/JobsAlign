@@ -2,6 +2,8 @@
 
  .\env\Scripts\Activate.ps1
 
+ .\env\Scripts\Activate
+
 
 #installation packages
 
@@ -53,3 +55,62 @@ python manage.py startapp reviews
 python manage.py startapp notifications
 python manage.py startapp support
 python manage.py startapp analytics
+
+
+
+#accounts api endpoints
+
+🔹 Accounts App – Complete Endpoint List
+
+🧩 Authentication
+Method	Endpoint	Description
+POST	/api/accounts/register/	নতুন ইউজার তৈরি (Buyer/Seller role সহ)
+POST	/api/accounts/login/	লগইন (JWT token রিটার্ন করে)
+POST	/api/accounts/logout/	লগআউট করে refresh token blacklist করে
+POST	/api/accounts/token/refresh/	নতুন access token তৈরি
+GET	/api/accounts/email-verify/	ইমেইল ভেরিফিকেশন
+POST	/api/accounts/google/	Google authentication / signup
+
+👤 User Profile
+Method	Endpoint	Description
+GET	/api/accounts/profile/	লগইন করা ইউজারের প্রোফাইল তথ্য
+PUT	/api/accounts/profile/update/	প্রোফাইল আপডেট
+PUT	/api/accounts/change-password/	পাসওয়ার্ড পরিবর্তন
+POST	/api/accounts/reset-password/	পাসওয়ার্ড রিসেট লিংক পাঠানো
+POST	/api/accounts/reset-password/confirm/	নতুন পাসওয়ার্ড সেট করা
+
+💼 Seller & Buyer Specific
+Method	Endpoint	Description
+GET	/api/accounts/seller/profile/	সেলার প্রোফাইল তথ্য
+PUT	/api/accounts/seller/profile/update/	সেলার প্রোফাইল আপডেট
+GET	/api/accounts/buyer/profile/	বায়ার প্রোফাইল তথ্য
+PUT	/api/accounts/buyer/profile/update/	বায়ার প্রোফাইল আপডেট
+
+💰 Referral System
+Method	Endpoint	Description
+GET	/api/accounts/referral/	নিজের রেফারেল কোড ও ইনকাম দেখা
+POST	/api/accounts/referral/use/	রেজিস্ট্রেশনের সময় রেফারেল কোড ব্যবহার
+
+🔔 Notifications (optional)
+Method	Endpoint	Description
+GET	/api/accounts/notifications/	নোটিফিকেশন লিস্ট
+PUT	/api/accounts/notifications/read/	সব নোটিফিকেশন রিড হিসেবে মার্ক করা
+
+⚙️ Admin / Analytics
+Method	Endpoint	Description
+GET	/api/accounts/all-users/	সব ইউজারের লিস্ট (admin only)
+DELETE	/api/accounts/delete/<int:id>/	নির্দিষ্ট ইউজার ডিলিট
+GET	/api/accounts/stats/	নতুন ইউজার, অ্যাক্টিভ ইউজার, রোল অনুযায়ী গণনা
+
+🧠 JWT Token Endpoints (Default by SimpleJWT)
+Method	Endpoint	Description
+POST	/api/token/	Login করে token পাওয়া
+POST	/api/token/refresh/	Refresh token দিয়ে নতুন access token
+POST	/api/token/verify/	Token বৈধ কিনা যাচাই করা
+
+
+Email: rajibulislam3777@gmail.com
+Full name: Md.Rajibul Islam Shuvo
+Password: rajib11001
+Password (again): rajib11001
+Superuser created successfully.
