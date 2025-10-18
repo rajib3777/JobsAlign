@@ -44,6 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     ]
 
     # 🧩 Basic Info
+    username = models.CharField(max_length=150, blank=True, null=True, default='user')
     email = models.EmailField(unique=True)
     full_name = models.CharField(max_length=255)
     user_type = models.CharField(max_length=20, choices=USER_TYPES, default="buyer")
@@ -85,6 +86,41 @@ class User(AbstractBaseUser, PermissionsMixin):
     linkedin = models.URLField(blank=True, null=True)
     github = models.URLField(blank=True, null=True)
     website = models.URLField(blank=True, null=True)
+    
+     # 🪪 KYC / Identity Verification
+    is_identity_verified = models.BooleanField(default=False)
+    identity_document = models.FileField(
+        upload_to="kyc/documents/",
+        validators=[FileExtensionValidator(["jpg", "jpeg", "png", "pdf"])],
+        blank=True,
+        null=True,
+        help_text="Government ID or Passport"
+    )
+
+    # 🏆 Professional Metrics (Levels / Scores)
+    level = models.CharField(max_length=50, default="New", help_text="Freelancer level like Level 1, Level 2, Top Rated")
+    trust_score = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.00"))
+
+    # 💼 Portfolio & Skills
+    skills = models.JSONField(default=list, blank=True, help_text="List of key skills")
+    portfolio_url = models.URLField(blank=True, null=True, help_text="External portfolio link")
+    portfolio_description = models.TextField(blank=True, null=True)
+
+    # 📊 Marketplace Analytics
+    total_projects = models.PositiveIntegerField(default=0)
+    completed_orders = models.PositiveIntegerField(default=0)
+    total_earnings = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
+
+    # 👥 Social Metrics
+    followers = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
+
+    # 🕵️ Login Tracking (for security and insights)
+    last_login_ip = models.GenericIPAddressField(blank=True, null=True)
+    last_login_device = models.CharField(max_length=255, blank=True, null=True)
+
+    # 🔔 Notification Preferences
+    allow_email_notifications = models.BooleanField(default=True)
+    allow_system_notifications = models.BooleanField(default=True)
 
     # # 💰 External Relations (via other apps)
     # referral = models.OneToOneField(
@@ -94,13 +130,13 @@ class User(AbstractBaseUser, PermissionsMixin):
     #     blank=True,
     #     related_name="user_account",
     # )
-    # wallet = models.OneToOneField(
-    #     "payments.Wallet",
-    #     on_delete=models.SET_NULL,
-    #     null=True,
-    #     blank=True,
-    #     related_name="user_account",
-    # )
+    wallet = models.OneToOneField(
+        "payments.Wallet",
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="user_account",
+    )
 
     # ⭐ Rating System
     rating = models.DecimalField(max_digits=3, decimal_places=2, default=Decimal("0.00"))

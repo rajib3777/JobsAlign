@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import password_validation, authenticate
 from django.utils import timezone
-
+from .utils import send_verification_email
 from .models import User
 
 # Helper to safely get related data (wallet/referral may be in other apps)
@@ -36,13 +36,13 @@ class UserSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'email', 'full_name', 'user_type', 'gender', 'date_of_birth',
             'profile_photo', 'cover_photo', 'tagline', 'bio',
-            'is_verified', 'country', 'city', 'address',
+            'is_verified', 'is_identity_verified', 'identity_document',
+            'country', 'city', 'address',
             'linkedin', 'github', 'website',
-            'google_auth', 'google_id', 'google_avatar',
-            'rating', 'total_reviews',
-            'is_online', 'last_seen',
-            'profile_completion', 'date_joined', 'last_login',
-            'wallet', 'referral',
+            'level', 'trust_score', 'skills', 'portfolio_url', 'portfolio_description',
+            'total_projects', 'completed_orders', 'total_earnings',
+            'followers', 'rating', 'total_reviews',
+            'is_online', 'last_seen', 'profile_completion', 'date_joined', 'last_login'
         ]
         read_only_fields = [
             'id', 'rating', 'total_reviews', 'profile_completion',
@@ -96,10 +96,19 @@ class RegisterSerializer(serializers.ModelSerializer):
         return attrs
 
     def create(self, validated_data):
+        request = self.context.get('request')
         referral_code = validated_data.pop('referral_code', None)
         password = validated_data.pop('password')
         user = self.Meta.model.objects.create_user(password=password, **validated_data)
-        # referral linking handled by referral app via signals or a dedicated endpoint
+
+        # make user inactive until email verification
+        user.is_active = False
+        user.save()
+
+        # send verification email
+        if request:
+            send_verification_email(request, user)
+
         return user
 
 
