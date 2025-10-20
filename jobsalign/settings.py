@@ -57,9 +57,10 @@ INSTALLED_APPS = [
     'chats',
     #'referrals',
     'reviews',
-    #'notifications',
+    'notifications',
     'support',
     'analytics',
+    'recommendations',
 
 ]
 
