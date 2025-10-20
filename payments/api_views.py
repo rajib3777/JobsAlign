@@ -4,6 +4,8 @@ from .models import Wallet, Transaction, PaymentGateway
 from .serializers import WalletSerializer, TransactionSerializer, PaymentInitSerializer
 from .utils import initiate_payment_gateway
 from django.shortcuts import get_object_or_404
+from .utils import send_payment_system_message
+
 
 class WalletDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.IsAuthenticated]

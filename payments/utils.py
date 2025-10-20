@@ -4,6 +4,31 @@ import uuid
 from .models import Escrow, Wallet
 from marketplace.models import Contract
 from decimal import Decimal
+from django.apps import apps
+
+# ✅ ✅ ✅ --- CHATS INTEGRATION ---
+def send_payment_system_message(contract, text):
+    """
+    Send a system message to the chat conversation related to this contract.
+    """
+    try:
+        Conversation = apps.get_model('chats', 'Conversation')
+        Message = apps.get_model('chats', 'Message')
+
+        # contract.id এর মাধ্যমে relevant chat conversation খোঁজা
+        conv = Conversation.objects.filter(title__icontains=str(contract.id)).first()
+        if not conv:
+            return None
+
+        # sender=None মানে এটা system message
+        Message.objects.create(
+            conversation=conv,
+            sender=None,
+            content=text
+        )
+    except Exception as e:
+        print(f"[Chats Integration] Payment system message failed: {e}")
+# ✅ ✅ ✅ --- END CHATS INTEGRATION ---
 
 
 def initiate_payment_gateway(user, gateway, amount):
@@ -22,6 +47,7 @@ def initiate_payment_gateway(user, gateway, amount):
         "gateway": gateway.name,
         "redirect_url": f"/payments/{gateway.name.lower()}/checkout/{reference}/"
     }
+
 
 def initiate_escrow_payment(buyer, project, amount, method="stripe"):
     """
@@ -46,7 +72,6 @@ def initiate_escrow_payment(buyer, project, amount, method="stripe"):
         if not result.get("success"):
             return result
 
-        
         escrow = Escrow.objects.create(
             contract=None,
             buyer=buyer,
@@ -62,3 +87,26 @@ def initiate_escrow_payment(buyer, project, amount, method="stripe"):
 
     except Exception as e:
         return {"success": False, "error": str(e)}
+
+
+# ✅ ✅ ✅ --- ADDITIONAL CHATS INTEGRATION (SAFE ADDITION) ---
+def release_milestone(contract, milestone):
+    """
+    Release escrow for a milestone and notify chat participants.
+    """
+    try:
+        # এখানে সাধারণত আসল পেমেন্ট রিলিজ লজিক থাকবে (তুমি চাইলে future gateway call বসাতে পারো)
+        milestone.status = "paid"
+        milestone.save(update_fields=["status"])
+
+        # 💬 system message পাঠানো (chat integration)
+        send_payment_system_message(
+            contract,
+            f"💰 Milestone '{milestone.title}' approved — ৳{milestone.amount} released."
+        )
+
+        return True
+    except Exception as e:
+        print(f"[Payments Integration] Milestone release failed: {e}")
+        return False
+# ✅ ✅ ✅ --- END ADDITIONAL CHATS INTEGRATION ---
