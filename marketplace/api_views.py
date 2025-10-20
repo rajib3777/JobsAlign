@@ -15,7 +15,6 @@ from payments.utils import initiate_escrow_payment
 from rest_framework.permissions import IsAuthenticated
 
 
-
 class ProjectCreateView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -45,7 +44,7 @@ class ProjectCreateView(APIView):
 
 
 class ProjectRetrieveUpdateView(generics.RetrieveUpdateAPIView):
-    queryset = Project.objects.all().select_related("owner").prefetch_related("skills","attachments")
+    queryset = Project.objects.all().select_related("owner").prefetch_related("skills", "attachments")
     serializer_class = ProjectSerializer
     permission_classes = [IsOwnerOrReadOnly]
 
@@ -95,11 +94,21 @@ class AcceptBidView(views.APIView):
         )
         # set project status
         project.status = "in_progress"
-        project.save(update_fields=["status","updated_at"])
+        project.save(update_fields=["status", "updated_at"])
         # create escrow via payments utils (async or sync)
         escrow_ref = utils.create_escrow_for_contract(contract)
         contract.escrow_reference = escrow_ref
         contract.save(update_fields=["escrow_reference"])
+
+        # ✅ ✅ ✅ CHATS INTEGRATION ✅ ✅ ✅
+        # safely create chat conversation between buyer and freelancer
+        try:
+            from .utils import create_conversation_for_contract
+            create_conversation_for_contract(contract)
+        except Exception as e:
+            print(f"[Chats Integration] Conversation creation failed: {e}")
+        # ✅ ✅ ✅ END CHATS INTEGRATION ✅ ✅ ✅
+
         return Response(ContractSerializer(contract).data, status=status.HTTP_201_CREATED)
 
 
@@ -122,17 +131,17 @@ class MilestoneApproveView(views.APIView):
         contract = milestone.contract
         # only buyer can approve
         if contract.buyer != request.user:
-            return Response({"detail":"Forbidden"}, status=403)
+            return Response({"detail": "Forbidden"}, status=403)
         # mark approved and trigger payment release for milestone
         milestone.status = "approved"
-        milestone.save(update_fields=["status","updated_at"])
+        milestone.save(update_fields=["status", "updated_at"])
         # ask payments app to release escrow for this milestone
         success = utils.release_milestone_payment(contract, milestone)
         if success:
             milestone.status = "paid"
-            milestone.save(update_fields=["status","updated_at"])
-            return Response({"detail":"Milestone paid"}, status=200)
-        return Response({"detail":"Payment release failed"}, status=500)
+            milestone.save(update_fields=["status", "updated_at"])
+            return Response({"detail": "Milestone paid"}, status=200)
+        return Response({"detail": "Payment release failed"}, status=500)
 
 
 class ContractDetailView(generics.RetrieveAPIView):

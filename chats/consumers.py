@@ -1,103 +1,83 @@
 import json
-from channels.generic.websocket import AsyncWebsocketConsumer
+from channels.generic.websocket import AsyncJsonWebsocketConsumer
 from channels.db import database_sync_to_async
-from urllib.parse import parse_qs
-from .models import Conversation, Message
-from .utils import moderate_message_text
+from django.shortcuts import get_object_or_404
+from django.utils import timezone
+from .models import Conversation, Participant, Message, MessageReceipt
+from .serializers import MessageSerializer
 from django.contrib.auth import get_user_model
-from django.conf import settings
-import jwt
-from datetime import datetime
+
 User = get_user_model()
 
-# simple in-memory rate limit per connection (production: use Redis)
-MAX_MESSAGES_PER_MINUTE = 60
-
-class ChatConsumer(AsyncWebsocketConsumer):
+class ChatConsumer(AsyncJsonWebsocketConsumer):
     async def connect(self):
-        qs = parse_qs(self.scope['query_string'].decode())
-        token = qs.get('token', [None])[0]
-        conversation_id = self.scope['url_route']['kwargs']['conversation_id']
-        user = await self.get_user_from_token(token)
-        if not user:
-            await self.close(code=4003)
+        user = self.scope.get('user')
+        if not user or not user.is_authenticated:
+            await self.close()
             return
-        self.scope['user'] = user
-        self.user = user
-        self.conversation_id = conversation_id
-        self.group_name = f"conversation_{conversation_id}"
-        conv = await database_sync_to_async(lambda: Conversation.objects.filter(id=conversation_id).first())()
-        if not conv:
-            await self.close(code=4004)
+        self.conversation_id = self.scope['url_route']['kwargs']['conversation_id']
+        self.group_name = f'chat_{self.conversation_id}'
+        # verify participant
+        is_participant = await self._is_participant()
+        if not is_participant:
+            await self.close()
             return
-        is_member = await database_sync_to_async(lambda: conv.participants.filter(id=user.id).exists())()
-        if not is_member:
-            await self.close(code=4005)
-            return
-
-        # rate-limiting state
-        self.msg_count = 0
-        self.msg_window_start = datetime.utcnow()
-
         await self.channel_layer.group_add(self.group_name, self.channel_name)
+        # presence: mark as online in Redis
         await self.accept()
+        await self.channel_layer.group_send(self.group_name, {'type':'presence.join','user_id':str(user.id)})
 
-    async def disconnect(self, close_code):
+    async def disconnect(self, code):
+        await self.channel_layer.group_discard(self.group_name, self.channel_name)
+        user = self.scope.get('user')
+        await self.channel_layer.group_send(self.group_name, {'type':'presence.leave','user_id':str(user.id)})
+
+    async def receive_json(self, content):
+        action = content.get('action')
+        user = self.scope.get('user')
+        if action == 'send_message':
+            data = content.get('data', {})
+            msg = await database_sync_to_async(self._create_message)(user, data)
+            serialized = MessageSerializer(msg).data
+            await self.channel_layer.group_send(self.group_name, {'type':'chat.message','message':serialized})
+        elif action == 'typing':
+            await self.channel_layer.group_send(self.group_name, {'type':'chat.typing','user_id':str(user.id)})
+        elif action == 'mark_read':
+            await database_sync_to_async(self._mark_read)(user)
+
+    def _create_message(self, user, data):
+        conv = Conversation.objects.get(id=self.conversation_id)
+        msg = Message.objects.create(
+            conversation=conv,
+            sender=user,
+            content=data.get('content'),
+            attachments=data.get('attachments', [])
+        )
+        # create receipts for other participants
+        participants = conv.participants.exclude(user=user)
+        for p in participants:
+            MessageReceipt.objects.get_or_create(message=msg, user=p.user)
+        return msg
+
+    def _mark_read(self, user):
+        conv = Conversation.objects.get(id=self.conversation_id)
         try:
-            await self.channel_layer.group_discard(self.group_name, self.channel_name)
-        except Exception:
+            p = conv.participants.get(user=user)
+            p.last_read_at = timezone.now()
+            p.save(update_fields=['last_read_at'])
+        except Participant.DoesNotExist:
             pass
+        MessageReceipt.objects.filter(message__conversation=conv, user=user, read_at__isnull=True).update(read_at=timezone.now())
 
-    async def receive(self, text_data=None, bytes_data=None):
-        if text_data is None:
-            return
-        try:
-            data = json.loads(text_data)
-        except Exception:
-            return
-
-        # simple rate-limiting sliding window (production: use Redis counters)
-        now = datetime.utcnow()
-        delta = (now - self.msg_window_start).total_seconds()
-        if delta > 60:
-            self.msg_window_start = now
-            self.msg_count = 0
-        self.msg_count += 1
-        if self.msg_count > MAX_MESSAGES_PER_MINUTE:
-            await self.send(json.dumps({"error":"rate_limit_exceeded"}))
-            return
-
-        if data.get("type") == "message.create":
-            text = data.get("text","").strip()
-            # moderation
-            mod = moderate_message_text(text)
-            if mod.get("blocked"):
-                await self.send(json.dumps({"error":"message_blocked","reason":mod.get("reason")}))
-                return
-            # save message
-            msg = await database_sync_to_async(lambda: Message.objects.create(conversation_id=self.conversation_id, sender=self.user, text=text))()
-            # broadcast
-            payload = {"type":"chat.message", "message":{
-                "id": str(msg.id),
-                "conversation": str(msg.conversation_id),
-                "text": msg.text,
-                "sender": {"id": self.user.id, "full_name": getattr(self.user, "full_name", str(self.user))},
-                "created_at": msg.created_at.isoformat()
-            }}
-            await self.channel_layer.group_send(self.group_name, {"type":"chat.message", "message": payload["message"]})
-
+    # group handlers
     async def chat_message(self, event):
-        # forward to WebSocket
-        await self.send(text_data=json.dumps(event["message"]))
+        await self.send_json({'type':'message','message': event['message']})
 
-    @database_sync_to_async
-    def get_user_from_token(self, token):
-        if not token:
-            return None
-        try:
-            payload = jwt.decode(token, settings.SECRET_KEY, algorithms=["HS256"])
-            user_id = payload.get("user_id")
-            # optionally verify conversation_id matches payload
-            return User.objects.filter(id=user_id).first()
-        except Exception:
-            return None
+    async def chat_typing(self, event):
+        await self.send_json({'type':'typing','user_id': event.get('user_id')})
+
+    async def presence_join(self, event):
+        await self.send_json({'type':'presence','action':'join','user_id': event.get('user_id')})
+
+    async def presence_leave(self, event):
+        await self.send_json({'type':'presence','action':'leave','user_id': event.get('user_id')})
