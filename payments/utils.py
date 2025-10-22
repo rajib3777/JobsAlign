@@ -6,6 +6,7 @@ from marketplace.models import Contract
 from decimal import Decimal
 from django.apps import apps
 
+
 # ✅ ✅ ✅ --- CHATS INTEGRATION ---
 def send_payment_system_message(contract, text):
     """
@@ -110,3 +111,78 @@ def release_milestone(contract, milestone):
         print(f"[Payments Integration] Milestone release failed: {e}")
         return False
 # ✅ ✅ ✅ --- END ADDITIONAL CHATS INTEGRATION ---
+
+
+# ✅ ✅ ✅ --- DISPUTES INTEGRATION (ENTERPRISE-LEVEL, SAFE ADDITION) ---
+from django.utils import timezone
+
+def freeze_escrow_for_contract(contract, reason=None):
+    """
+    Freeze escrow funds when a dispute is opened.
+    Used by disputes app.
+    """
+    try:
+        escrow = getattr(contract, "escrow", None)
+        if not escrow:
+            # optional fallback: search by contract.id reference
+            escrow = Escrow.objects.filter(contract_id=contract.id).first()
+        if not escrow:
+            print(f"[Disputes Integration] No escrow found for contract {contract.id}")
+            return False
+
+        escrow.is_frozen = True
+        escrow.meta = {**(getattr(escrow, "meta", {}) or {}), "freeze_reason": reason or "dispute_opened"}
+        escrow.save(update_fields=["is_frozen", "meta"])
+        
+        # 💬 system message
+        send_payment_system_message(contract, f"⚠️ Escrow temporarily frozen due to dispute.")
+        return True
+    except Exception as e:
+        print(f"[Disputes Integration] Escrow freeze failed: {e}")
+        return False
+
+
+def resolve_escrow_for_dispute(contract, dispute, release_to="freelancer"):
+    """
+    Unfreeze and resolve escrow funds based on dispute outcome.
+    release_to: 'buyer' | 'freelancer' | 'split'
+    """
+    try:
+        escrow = getattr(contract, "escrow", None)
+        if not escrow:
+            escrow = Escrow.objects.filter(contract_id=contract.id).first()
+        if not escrow:
+            print(f"[Disputes Integration] No escrow found for resolution: {contract.id}")
+            return False
+
+        # Release decision logic
+        if release_to in ("freelancer", "freelancer_wins"):
+            escrow.status = "released"
+            escrow.released_at = timezone.now()
+            escrow.is_frozen = False
+            escrow.save(update_fields=["status", "released_at", "is_frozen"])
+            send_payment_system_message(contract, "✅ Dispute resolved — funds released to Freelancer.")
+        
+        elif release_to in ("buyer", "buyer_wins"):
+            escrow.status = "refunded"
+            escrow.released_at = timezone.now()
+            escrow.is_frozen = False
+            escrow.save(update_fields=["status", "released_at", "is_frozen"])
+            send_payment_system_message(contract, "💸 Dispute resolved — funds refunded to Buyer.")
+        
+        elif release_to == "split":
+            escrow.status = "split_resolved"
+            escrow.released_at = timezone.now()
+            escrow.is_frozen = False
+            escrow.save(update_fields=["status", "released_at", "is_frozen"])
+            send_payment_system_message(contract, "⚖️ Dispute resolved — funds split between Buyer & Freelancer.")
+        
+        else:
+            print(f"[Disputes Integration] Invalid release_to option: {release_to}")
+            return False
+
+        return True
+    except Exception as e:
+        print(f"[Disputes Integration] Escrow resolve failed: {e}")
+        return False
+# ✅ ✅ ✅ --- END DISPUTES INTEGRATION ---
