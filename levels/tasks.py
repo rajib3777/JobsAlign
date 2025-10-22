@@ -7,8 +7,8 @@ def daily_streak_update():
     """
     Give XP to users who log in daily (engagement reward)
     """
-    from accounts.models import CustomUser
-    users = CustomUser.objects.filter(is_active=True)
+    from accounts.models import User
+    users = User.objects.filter(is_active=True)
     for u in users:
         prog, _ = UserLevelProgress.objects.get_or_create(user=u)
         prog.streak_days += 1

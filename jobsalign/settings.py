@@ -64,6 +64,8 @@ INSTALLED_APPS = [
     'disputes',
     'levels',
     'subscriptions',
+    'categories',
+    'verification',
 
 ]
 
@@ -278,4 +280,17 @@ CELERY_RESULT_BACKEND = "redis://localhost:6379/0"
 
 # DEFAULT_FROM_EMAIL = 'noreply@jobsalign.com'
 
+
+DEFAULT_FILE_STORAGE = 'django.core.files.storage.FileSystemStorage'
+
+
+
+VERIFICATION = {
+    'OCR_PROVIDER': 'onfido', 
+    'FACE_MATCH_PROVIDER': 'rekognition',
+    'MAX_DOCUMENT_SIZE_MB': 15,
+    'ALLOWED_DOCUMENT_TYPES': ['image/jpeg','image/png','application/pdf'],
+    'AUTO_APPROVE_THRESHOLD': 0.95,  
+    'RETENTION_DAYS': 365,  
+}
 

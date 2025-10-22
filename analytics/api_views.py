@@ -1,7 +1,7 @@
 from rest_framework import generics, permissions
 from .models import UserAnalytics, PlatformAnalytics, TrendForecast
 from .serializers import UserAnalyticsSerializer, PlatformAnalyticsSerializer, ForecastSerializer
-from accounts.models import CustomUser
+from accounts.models import User
 from .utils import calculate_user_metrics
 from .models import JobMarketInsight
 from .serializers import JobMarketInsightSerializer

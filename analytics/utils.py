@@ -1,11 +1,11 @@
 from django.utils import timezone
-from accounts.models import UserProfile
+from accounts.models import User
 from marketplace.models import Contract
 from payments.models import Transaction
 from reviews.models import Review
 from disputes.models import Dispute
 from notifications.models import Notification
-from recommendations.models import Recommendation
+from recommendations.models import ProjectRecommendation
 from .models import UserAnalytics, PlatformAnalytics
 from django.db.models import Avg, Sum, Count
 from marketplace.models import Project, Bid
@@ -57,10 +57,10 @@ def aggregate_platform_metrics():
     Collect global metrics from all apps.
     """
     data = {}
-    from accounts.models import CustomUser
+    from accounts.models import User
 
-    data["total_users"] = CustomUser.objects.count()
-    data["active_users"] = CustomUser.objects.filter(is_active=True).count()
+    data["total_users"] = User.objects.count()
+    data["active_users"] = User.objects.filter(is_active=True).count()
     data["total_projects"] = Contract.objects.count()
     data["total_disputes"] = Dispute.objects.count()
     data["total_revenue"] = Transaction.objects.filter(type="credit").aggregate(s=Sum("amount"))["s"] or 0
