@@ -61,6 +61,9 @@ INSTALLED_APPS = [
     'support',
     'analytics',
     'recommendations',
+    'disputes',
+    'levels',
+    'subscriptions',
 
 ]
 
