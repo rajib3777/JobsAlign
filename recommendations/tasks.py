@@ -5,6 +5,10 @@ from .models import ProjectRecommendation, UserRecommendation
 from .utils import compute_candidate_score
 from django.utils import timezone
 from django.conf import settings
+from celery import shared_task
+from accounts.models import User  
+from .utils import calculate_recommendations 
+
 
 User = get_user_model()
 
@@ -67,3 +71,41 @@ def compute_recommendations_for_user(self, user_id, top_k=20):
         source='heuristic'
     )
     return True
+
+
+@shared_task
+def compute_recommendations_for_project(project_id):
+    """
+    Calculate recommended freelancers for a given project.
+
+    This task runs asynchronously when a new project is created.
+    """
+    try:
+        project = Project.objects.get(id=project_id)
+    except Project.DoesNotExist:
+        return
+
+   
+    try:
+        
+        from categories.models import FreelancerCategory
+        if project.category:
+            freelancers = FreelancerCategory.objects.filter(
+                category=project.category,
+                verified=True
+            ).select_related('user')[:10]
+
+            project.recommended_freelancers = [
+                {
+                    "user_id": str(f.user.id),
+                    "username": f.user.username,
+                    "category": f.category.name,
+                    "subcategory": f.subcategory.name if f.subcategory else None
+                }
+                for f in freelancers
+            ]
+            project.recommended_score = 0.85 
+            project.save(update_fields=["recommended_freelancers", "recommended_score"])
+
+    except Exception as e:
+        print(f"[Recommendations] Failed for Project {project_id}: {e}")

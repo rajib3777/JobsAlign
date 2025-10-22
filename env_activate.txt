@@ -65,7 +65,7 @@ python manage.py startapp notifications
 python manage.py startapp recommendations
 python manage.py startapp levels
 python manage.py startapp subscriptions
-
+python manage.py startapp disputes
 
 
 

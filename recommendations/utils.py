@@ -96,3 +96,32 @@ def compute_candidate_score(project, candidate_user, weights=None):
     # normalize roughly to 0..1 using tanh for smoothing:
     score = math.tanh(raw * 1.2)
     return float(round(score, 4))
+
+
+def calculate_recommendations(project_id):
+    """
+    Main function called by tasks.py — compute best freelancers for a given project.
+    Returns a list of {"user_id": ..., "score": ..., "reason": ...}
+    """
+    try:
+        project = Project.objects.get(id=project_id)
+    except Project.DoesNotExist:
+        return []
+
+    # basic candidate pool (freelancers only)
+    freelancers = User.objects.filter(is_active=True, is_staff=False)
+    results = []
+
+    for freelancer in freelancers:
+        score = compute_candidate_score(project, freelancer)[0]
+        if score > 0.3:  # threshold
+            results.append({
+                "user_id": str(freelancer.id),
+                "username": getattr(freelancer, "username", ""),
+                "score": score,
+                "reason": "matched_skills/trust"
+            })
+
+    # sort descending
+    results = sorted(results, key=lambda x: x["score"], reverse=True)
+    return results[:20]

@@ -2,12 +2,12 @@ from celery import shared_task
 from .utils import calculate_user_metrics, aggregate_platform_metrics
 from .models import TrendForecast
 from django.utils import timezone
-from accounts.models import CustomUser
+from accounts.models import User
 import random
 
 @shared_task
 def daily_user_analytics():
-    users = CustomUser.objects.all()
+    users = User.objects.all()
     for u in users:
         try:
             calculate_user_metrics(u)

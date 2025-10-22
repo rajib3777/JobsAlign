@@ -71,6 +71,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     )
     tagline = models.CharField(max_length=150, blank=True, null=True)
     bio = models.TextField(blank=True, null=True)
+    summary = models.TextField(blank=True)
 
     # ✅ Account & Verification
     is_verified = models.BooleanField(default=False)

@@ -8,5 +8,14 @@ urlpatterns = [
     path("api/chats/", include("chats.urls")),
     path("api/reviews/", include("reviews.urls")),
     path("api/notifications/", include("notifications.urls")),
+    path("api/analytics/", include("analytics.urls")),
+    path("api/categories/", include("categories.urls")),
+    path("api/disputes/", include("disputes.urls")),
+    path("api/levels/", include("levels.urls")),
+    path("api/subscriptions/", include("subscriptions.urls")),
+    path("api/verification/", include("verification.urls")),
     path("api/payments/", include("payments.urls")),
+    path("api/recommendations/", include("recommendations.urls")),
+    path("api/support/", include("support.urls")),
+
 ]

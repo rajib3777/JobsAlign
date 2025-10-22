@@ -26,6 +26,14 @@ class Project(models.Model):
         ("cancelled", "Cancelled"),
     ]
 
+    category = models.ForeignKey(
+    'categories.Category',
+    null=True,
+    blank=True,
+    on_delete=models.SET_NULL,
+    related_name='projects'
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     owner = models.ForeignKey(User, on_delete=models.CASCADE, related_name="projects")
     title = models.CharField(max_length=255)
