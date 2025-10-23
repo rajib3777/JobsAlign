@@ -2,6 +2,7 @@
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -98,7 +99,7 @@ ROOT_URLCONF = 'jobsalign.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / 'frontend'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -294,3 +295,8 @@ VERIFICATION = {
     'RETENTION_DAYS': 365,  
 }
 
+STATICFILES_DIRS = [ BASE_DIR / "frontend" ]
+STATIC_URL = "/static/"
+
+
+TEMPLATES[0]['DIRS'] = [BASE_DIR / "frontend"]
