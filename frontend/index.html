@@ -1,163 +1,203 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>JobsAlign — Work. Hire. Grow.</title>
-  <meta name="description" content="JobsAlign — Verified freelancers, escrow payments and real-time collaboration." />
-  <meta name="theme-color" content="#0f172a" />
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JobsAlign – Smarter Freelance Marketplace</title>
 
-  <!-- Tailwind (dev) and custom -->
+  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="style.css">
-  <style>/* tiny critical fallback to prevent FOUS */ :root{--brand:#06b6d4;--accent:#7c3aed} </style>
+
+  <!-- Custom inline Tailwind config -->
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            primary: '#2563eb',
+            secondary: '#1e293b',
+            accent: '#06b6d4',
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Custom CSS -->
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+    .nav-shadow {
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    }
+    .fade-up {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: all 0.8s ease;
+    }
+    .fade-up.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-b from-slate-50 to-white text-slate-900 antialiased">
-  <!-- FLOATING NAV -->
-  <header id="siteHeader" class="fixed w-full z-50 top-4 px-4">
-    <div class="max-w-7xl mx-auto flex items-center justify-between bg-white/80 backdrop-blur-lg rounded-2xl p-3 shadow-md">
-      <a href="/" class="flex items-center gap-3">
-        <img src="images/logo.svg" alt="JobsAlign" class="h-9 w-9"/>
-        <span class="font-extrabold text-lg text-slate-900">JobsAlign</span>
+<body class="font-sans text-gray-800 bg-gray-50">
+
+  <!-- Navbar -->
+  <nav id="navbar" class="fixed top-0 left-0 w-full bg-white z-50 nav-shadow transition-all duration-300">
+    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+      <a href="#" class="flex items-center space-x-2 text-primary font-bold text-xl">
+        <img src="images/logo.jpeg" alt="JobsAlign Logo" class="w-8 h-8">
+        <span>JobsAlign</span>
       </a>
-      <nav class="hidden md:flex items-center gap-4">
-        <a class="nav-link" href="/pages/jobs.html">Jobs</a>
-        <a class="nav-link" href="/pages/jobs.html#services">Services</a>
-        <a class="nav-link" href="/pages/support.html">Support</a>
-        <button id="nav_cta" class="ml-4 px-4 py-2 rounded-lg bg-gradient-to-r from-emerald-500 to-indigo-600 text-white shadow-md hover:scale-105 transition">Get started</button>
-      </nav>
-      <div class="md:hidden">
-        <button id="mobileMenu" class="p-2 rounded-md bg-white/70">☰</button>
+      <div class="hidden md:flex items-center space-x-8">
+        <a href="#features" class="hover:text-primary">Features</a>
+        <a href="#categories" class="hover:text-primary">Categories</a>
+        <a href="#pricing" class="hover:text-primary">Pricing</a>
+        <a href="#contact" class="hover:text-primary">Contact</a>
+      </div>
+      <div class="space-x-3 hidden md:flex">
+        <button class="px-4 py-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white">Login</button>
+        <button class="px-4 py-2 rounded-md bg-primary text-white hover:bg-blue-700">Sign Up</button>
+      </div>
+      <button id="menuBtn" class="md:hidden text-2xl focus:outline-none">
+        ☰
+      </button>
+    </div>
+    <!-- Mobile menu -->
+    <div id="mobileMenu" class="hidden bg-white border-t border-gray-100 flex flex-col px-6 py-4 space-y-3">
+      <a href="#features">Features</a>
+      <a href="#categories">Categories</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#contact">Contact</a>
+      <hr />
+      <button class="px-4 py-2 rounded-md border border-primary text-primary">Login</button>
+      <button class="px-4 py-2 rounded-md bg-primary text-white">Sign Up</button>
+    </div>
+  </nav>
+
+
+  <!-- Hero Section -->
+  <section class="pt-28 md:pt-32 pb-20 bg-gradient-to-b from-blue-50 to-white text-center">
+    <div class="max-w-5xl mx-auto px-6 fade-up">
+      <h1 class="text-4xl md:text-6xl font-bold text-secondary mb-6">Connect, Collaborate, and Get Work Done Smarter</h1>
+      <p class="text-lg text-gray-600 mb-8">JobsAlign helps you find the best talent or the right project, powered by AI-matching, verified profiles, and secure payments.</p>
+      <div class="flex justify-center space-x-4">
+        <button class="px-6 py-3 bg-primary text-white rounded-md hover:bg-blue-700">Find Work</button>
+        <button class="px-6 py-3 bg-accent text-white rounded-md hover:bg-cyan-500">Hire Talent</button>
+      </div>
+      <img src="./images/hero-illustration.svg" alt="hero" class="mx-auto mt-12 w-3/4 md:w-1/2">
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="py-20 bg-white fade-up">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-10">Why Choose JobsAlign?</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="p-6 bg-gray-50 rounded-lg shadow hover:shadow-lg transition">
+          <h3 class="font-semibold text-xl mb-2 text-primary">AI-Powered Matching</h3>
+          <p>We connect clients with freelancers using smart matching algorithms that ensure skill and need alignment.</p>
+        </div>
+        <div class="p-6 bg-gray-50 rounded-lg shadow hover:shadow-lg transition">
+          <h3 class="font-semibold text-xl mb-2 text-primary">Secure Payments</h3>
+          <p>Our escrow-based system ensures peace of mind for both freelancers and clients throughout the project.</p>
+        </div>
+        <div class="p-6 bg-gray-50 rounded-lg shadow hover:shadow-lg transition">
+          <h3 class="font-semibold text-xl mb-2 text-primary">Verified Profiles</h3>
+          <p>Every freelancer is ID-verified to maintain trust and quality across the JobsAlign ecosystem.</p>
+        </div>
       </div>
     </div>
-  </header>
+  </section>
 
-  <!-- HERO -->
-  <main class="pt-28">
-    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
-        <div class="lg:col-span-6 space-y-6">
-          <h1 class="text-4xl sm:text-5xl font-extrabold leading-tight">
-            Build with <span class="bg-clip-text text-transparent bg-gradient-to-r from-emerald-500 to-indigo-600">trusted</span> talent. Get paid securely.
-          </h1>
-          <p class="text-lg text-slate-600 max-w-xl">Smart matching, escrow payments, real-time chat and full analytics — JobsAlign ties your whole freelance lifecycle together.</p>
-
-          <!-- SEARCH -->
-          <form id="searchForm" class="mt-6 flex gap-3" onsubmit="return false;">
-            <input id="q" class="flex-1 rounded-2xl border border-slate-200 px-4 py-3 focus:ring-2 focus:ring-emerald-100" placeholder="Search jobs, skills or freelancers (e.g. React, Logo)" aria-label="Search jobs"/>
-            <button id="searchBtn" class="px-5 py-3 rounded-2xl bg-gradient-to-r from-emerald-500 to-indigo-600 text-white shadow hover:scale-105 transition">Search</button>
-          </form>
-
-          <!-- KPI row -->
-          <div class="mt-8 grid grid-cols-3 gap-4">
-            <div class="bg-white p-4 rounded-2xl shadow-sm text-center">
-              <div class="text-xs text-slate-400">Active Projects</div>
-              <div id="stat_projects" class="mt-2 text-2xl font-bold">—</div>
-            </div>
-            <div class="bg-white p-4 rounded-2xl shadow-sm text-center">
-              <div class="text-xs text-slate-400">Freelancers</div>
-              <div id="stat_freelancers" class="mt-2 text-2xl font-bold">—</div>
-            </div>
-            <div class="bg-white p-4 rounded-2xl shadow-sm text-center">
-              <div class="text-xs text-slate-400">Total Paid</div>
-              <div id="stat_paid" class="mt-2 text-2xl font-bold">৳—</div>
-            </div>
-          </div>
-
-          <!-- REFERRAL -->
-          <div class="mt-6 flex gap-3 items-center">
-            <div class="flex-1 bg-gradient-to-r from-emerald-50 to-white p-4 rounded-2xl border border-emerald-100">
-              <div class="text-emerald-700 font-semibold">Invite & Earn</div>
-              <div class="text-sm text-slate-600">Share your referral link — earn <strong>2%</strong> commission from referred user's transactions.</div>
-            </div>
-            <div>
-              <button id="copyReferral" class="px-4 py-2 rounded-xl bg-emerald-600 text-white shadow hover:scale-105 transition">Copy link</button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Right: Illustration + featured -->
-        <aside class="lg:col-span-6 relative">
-          <div class="rounded-3xl overflow-hidden shadow-2xl">
-            <img src="images/hero-illustration.svg" alt="Hero" class="w-full h-auto object-cover" loading="lazy"/>
-          </div>
-
-          <div id="featured" class="absolute -bottom-8 left-6 bg-white rounded-2xl shadow-2xl p-4 w-80 transform translate-y-8 opacity-0">
-            <div class="flex items-start justify-between">
-              <div class="text-xs text-slate-400">Featured</div>
-              <div id="featured_price" class="text-emerald-600 font-bold">৳0</div>
-            </div>
-            <div id="featured_title" class="mt-1 font-semibold">Loading…</div>
-            <a id="featured_link" class="mt-3 inline-block text-emerald-600 text-sm" href="#">View job</a>
-          </div>
-        </aside>
+  <!-- Categories Section -->
+  <section id="categories" class="py-20 bg-blue-50 fade-up">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-10">Explore Top Categories</h2>
+      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
+        <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg">Web Development</div>
+        <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg">Graphic Design</div>
+        <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg">Digital Marketing</div>
+        <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg">Writing & Translation</div>
       </div>
-
-      <!-- RECOMMENDED JOBS -->
-      <section class="mt-14">
-        <div class="flex items-center justify-between">
-          <h2 class="text-2xl font-bold">Recommended for you</h2>
-          <a class="text-emerald-600" href="/pages/jobs.html">See all</a>
-        </div>
-
-        <div id="jobsGrid" class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <!-- JS will render cards here; initial skeletons: -->
-          <div class="p-6 bg-white rounded-2xl shadow animate-pulse h-36"></div>
-          <div class="p-6 bg-white rounded-2xl shadow animate-pulse h-36"></div>
-          <div class="p-6 bg-white rounded-2xl shadow animate-pulse h-36"></div>
-        </div>
-      </section>
-
-      <!-- EXTRA SECTIONS -->
-      <section class="mt-16 grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div class="lg:col-span-2 space-y-6">
-          <div id="categoriesCard" class="bg-white p-6 rounded-2xl shadow-sm">
-            <h3 class="font-semibold">Top Categories</h3>
-            <div id="categories" class="mt-4 grid grid-cols-3 gap-3"></div>
-          </div>
-
-          <div id="testimonialsCard" class="bg-white p-6 rounded-2xl shadow-sm">
-            <h3 class="font-semibold">Client testimonials</h3>
-            <div id="testimonials" class="mt-4 space-y-4"></div>
-          </div>
-        </div>
-
-        <aside class="space-y-6">
-          <div id="freelancersCard" class="bg-white p-4 rounded-2xl shadow-sm">
-            <h4 class="font-semibold">Top Freelancers</h4>
-            <div id="freelancers" class="mt-4 space-y-3"></div>
-          </div>
-
-          <div id="miniDash" class="bg-white p-4 rounded-2xl shadow-sm">
-            <h4 class="font-semibold">Your summary</h4>
-            <div id="miniSummary" class="mt-3 text-sm text-slate-600">Loading...</div>
-          </div>
-        </aside>
-      </section>
-    </section>
-  </main>
-
-  <!-- FOOTER -->
-  <footer class="mt-20">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-12">
-      <div class="grid md:grid-cols-3 gap-6">
-        <div>
-          <div class="flex items-center gap-3"><img src="images/logo.svg" class="h-8" alt="JobsAlign"/><span class="font-bold text-emerald-600">JobsAlign</span></div>
-          <p class="mt-3 text-sm text-slate-500">Secure payments • Verified talent • 24/7 support</p>
-        </div>
-        <div class="text-sm text-slate-600">
-          <h5 class="font-semibold mb-2">Company</h5>
-          <ul class="space-y-1"><li><a href="/pages/jobs.html">Jobs</a></li><li><a href="/pages/support.html">Support</a></li></ul>
-        </div>
-        <div>
-          <h5 class="font-semibold mb-2">Resources</h5>
-          <ul class="text-sm text-slate-600 space-y-1"><li><a href="/pages/privacy.html">Privacy</a></li><li><a href="/pages/terms.html">Terms</a></li></ul>
-        </div>
-      </div>
-      <div class="mt-8 text-xs text-slate-400">© 2025 JobsAlign. All rights reserved.</div>
     </div>
+  </section>
+
+  <!-- Pricing Section -->
+  <section id="pricing" class="py-20 bg-white fade-up">
+    <div class="max-w-6xl mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-4xl font-bold mb-10">Flexible Plans for Everyone</h2>
+      <div class="grid md:grid-cols-3 gap-8">
+        <div class="p-8 border rounded-lg shadow hover:shadow-lg">
+          <h3 class="text-xl font-bold mb-4">Free</h3>
+          <p class="text-gray-600 mb-6">Best for beginners exploring freelancing.</p>
+          <p class="text-3xl font-bold mb-6">$0</p>
+          <button class="px-6 py-2 bg-primary text-white rounded-md">Get Started</button>
+        </div>
+        <div class="p-8 border rounded-lg shadow-lg border-primary">
+          <h3 class="text-xl font-bold mb-4 text-primary">Pro</h3>
+          <p class="text-gray-600 mb-6">For experienced freelancers and small teams.</p>
+          <p class="text-3xl font-bold mb-6">$29/mo</p>
+          <button class="px-6 py-2 bg-primary text-white rounded-md">Subscribe</button>
+        </div>
+        <div class="p-8 border rounded-lg shadow hover:shadow-lg">
+          <h3 class="text-xl font-bold mb-4">Enterprise</h3>
+          <p class="text-gray-600 mb-6">For agencies and large organizations.</p>
+          <p class="text-3xl font-bold mb-6">Custom</p>
+          <button class="px-6 py-2 bg-accent text-white rounded-md">Contact Sales</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact / Footer -->
+  <footer id="contact" class="bg-secondary text-gray-200 py-12 fade-up">
+    <div class="max-w-6xl mx-auto px-6 grid md:grid-cols-3 gap-8">
+      <div>
+        <h3 class="font-bold text-lg mb-3">JobsAlign</h3>
+        <p>Empowering freelancers and businesses to connect and grow smarter together.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Quick Links</h4>
+        <ul class="space-y-1">
+          <li><a href="#features" class="hover:text-primary">Features</a></li>
+          <li><a href="#pricing" class="hover:text-primary">Pricing</a></li>
+          <li><a href="#categories" class="hover:text-primary">Categories</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-2">Stay Connected</h4>
+        <input type="email" placeholder="Enter your email" class="w-full px-3 py-2 rounded-md text-black mb-3">
+        <button class="px-4 py-2 bg-primary rounded-md text-white w-full">Subscribe</button>
+      </div>
+    </div>
+    <p class="text-center text-gray-400 mt-10">&copy; 2025 JobsAlign. All rights reserved.</p>
   </footer>
 
-  <script type="module" src="app.js" defer></script>
+  <!-- JS for animations + menu -->
+  <script>
+    const nav = document.getElementById('navbar');
+    window.addEventListener('scroll', () => {
+      if (window.scrollY > 20) nav.classList.add('shadow-lg');
+      else nav.classList.remove('shadow-lg');
+    });
+
+    const menuBtn = document.getElementById('menuBtn');
+    const mobileMenu = document.getElementById('mobileMenu');
+    menuBtn.addEventListener('click', () => {
+      mobileMenu.classList.toggle('hidden');
+    });
+
+    const fadeElements = document.querySelectorAll('.fade-up');
+    const observer = new IntersectionObserver(entries => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.2 });
+
+    fadeElements.forEach(el => observer.observe(el));
+  </script>
 </body>
 </html>

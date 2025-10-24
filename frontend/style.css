@@ -1,36 +1,4 @@
-/* style.css — custom microstyles + animations (Tailwind utilities handle layout) */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* float animation for hero */
-@keyframes floaty {
-  0%,100%{transform:translateY(0)}
-  50%{transform:translateY(-10px)}
-}
-img.object-cover { will-change: transform; }
-
-/* featured reveal */
-#featured { transition: transform .6s cubic-bezier(.2,.9,.3,1), opacity .45s; transform: translateY(18px); opacity: 0; }
-#featured.visible { transform: translateY(0); opacity: 1; }
-
-/* tiny fade-up util */
-@keyframes fadeUp { from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:none} }
-.animate-fade-up { animation: fadeUp .6s ease-out both; }
-
-/* nav link */
-.nav-link { color: #0f172a; transition: color .18s; }
-.nav-link:hover { color: #06b6d4; }
-
-/* card hover */
-.card-hover { transition: transform .22s cubic-bezier(.2,.9,.3,1), box-shadow .22s; }
-.card-hover:hover { transform: translateY(-8px); box-shadow: 0 24px 40px rgba(2,6,23,0.08); }
-
-/* skeleton safe size for job cards */
-@media (max-width:640px){ #featured{left:1rem;right:1rem;width:calc(100% - 2rem);} }
-
-/* focus / accessibility */
-:focus { outline: none; box-shadow: 0 0 0 4px rgba(6,182,212,0.12); border-radius: 0.5rem; }
-
-/* minor responsive tweaks */
-@media (max-width: 768px) {
-  .animate-fade-up { animation-duration: .45s; }
-  .card-hover:hover { transform: none; box-shadow: 0 8px 16px rgba(2,6,23,0.04); }
-}
