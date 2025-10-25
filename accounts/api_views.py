@@ -15,7 +15,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from rest_framework.generics import UpdateAPIView
 from django.urls import reverse
-
+from django.shortcuts import redirect
 # Google Login dependencies
 from allauth.socialaccount.providers.google.views import GoogleOAuth2Adapter
 from dj_rest_auth.registration.views import SocialLoginView
@@ -196,7 +196,7 @@ class VerifyEmailView(APIView):
             user.is_verified = True
             user.is_active = True
             user.save()
-            return Response({"detail": "Email verified successfully!"}, status=status.HTTP_200_OK)
+            return redirect('/frontend/pages/login.html?verified=true')
         else:
             return Response({"detail": "Invalid or expired verification link."}, status=status.HTTP_400_BAD_REQUEST)
 

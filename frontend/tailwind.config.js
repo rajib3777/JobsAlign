@@ -1,5 +1,5 @@
 module.exports = {
-  content: ["./*.html", "./pages/**/*.html", "./components/**/*.html"],
+  content: ["./*.html", "./pages/**/*.html"],
   theme: {
     extend: {
       colors: {
@@ -9,4 +9,5 @@ module.exports = {
     },
   },
   plugins: [],
-}
+};
+
