@@ -7,15 +7,21 @@ from .api_views import (
     PasswordChangeView, PasswordResetConfirmView, PasswordResetRequestView,VerifyEmailView
     ,KYCUploadView
 )
+from .import views
 
 urlpatterns = [
+
+    path("login-page/", views.login_page, name="login_page"),
+    path("register-page/", views.register_page, name="register_page"),
+
+    
     # 🔹 User Registration and Profile
     path("register/", RegisterView.as_view(), name="register"),
     path("verify-email/<uidb64>/<token>/", VerifyEmailView.as_view(), name="verify-email"),
     path("profile/", UserProfileView.as_view(), name="user-profile"),
 
     # 🔹 JWT Token Authentication
-    path("login/", TokenObtainPairView.as_view(), name="token_obtain_pair"),
+    path("login/", TokenObtainPairView.as_view(), name="login"),
     path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
     path("logout/", LogoutView.as_view(), name="logout"),
 
