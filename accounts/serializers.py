@@ -35,7 +35,7 @@ class UserSerializer(serializers.ModelSerializer):
         model = User
         fields = [
             'id', 'email', 'full_name', 'user_type', 'gender', 'date_of_birth',
-            'profile_photo', 'cover_photo', 'tagline', 'bio',
+            'profile_photo', 'cover_photo', 'tagline', 'bio','wallet','referral',
             'is_verified', 'is_identity_verified', 'identity_document',
             'country', 'city', 'address',
             'linkedin', 'github', 'website',

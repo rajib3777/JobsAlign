@@ -5,51 +5,39 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login | JobsAlign</title>
-
-  <!-- ✅ Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 
 <body class="relative flex items-center justify-center min-h-screen overflow-hidden">
 
-  <!-- 🔹 Background Image -->
+  <!-- Background -->
   <div class="absolute inset-0">
-    <img src="{% static 'images/login.jpg' %}" 
-         alt="Background" 
-         class="w-full h-full object-cover filter blur-lg scale-105 brightness-50">
+    <img src="{% static 'images/login.jpg' %}" class="w-full h-full object-cover filter blur-lg scale-105 brightness-50">
   </div>
 
-  <!-- 🔹 Main Container -->
+  <!-- Container -->
   <div class="relative z-10 flex flex-col md:flex-row w-full max-w-5xl bg-white/10 backdrop-blur-md shadow-2xl rounded-2xl overflow-hidden border border-white/20">
-
-    <!-- 🔹 Left Side Image -->
     <div class="hidden md:flex md:w-1/2 items-center justify-center bg-gradient-to-br from-blue-600 to-cyan-500 p-8">
-      <img src="{% static 'images/login.jpg' %}" 
-           alt="Login illustration" 
-           class="w-4/5 rounded-lg shadow-lg">
+      <img src="{% static 'images/login.jpg' %}" class="w-4/5 rounded-lg shadow-lg">
     </div>
 
-    <!-- 🔹 Right Login Section -->
+    <!-- Login Section -->
     <div class="w-full md:w-1/2 p-10 flex flex-col justify-center text-center text-gray-200">
-      <img src="{% static 'images/logo.jpeg' %}" 
-           alt="JobsAlign Logo" 
-           class="w-36 h-auto mx-auto mb-6 rounded-full bg-white p-2 shadow-lg ring-4 ring-blue-300/50">
-
+      <img src="{% static 'images/logo.jpeg' %}" class="w-36 h-auto mx-auto mb-6 rounded-full bg-white p-2 shadow-lg ring-4 ring-blue-300/50">
       <h2 class="text-3xl font-bold mb-4 text-white">Welcome Back</h2>
       <p class="text-gray-300 mb-8">Login to your JobsAlign account</p>
 
       <form id="loginForm" class="space-y-5 text-left">
-        {% csrf_token %}
         <div>
           <label class="block text-gray-100 mb-1">Email</label>
           <input id="email" type="email" placeholder="Enter your email"
-            class="w-full px-4 py-2 border border-gray-400 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none bg-white/10 text-white placeholder-gray-300">
+                 class="w-full px-4 py-2 border border-gray-400 rounded-md focus:ring-2 focus:ring-blue-400 bg-white/10 text-white placeholder-gray-300">
         </div>
 
         <div>
           <label class="block text-gray-100 mb-1">Password</label>
           <input id="password" type="password" placeholder="Enter your password"
-            class="w-full px-4 py-2 border border-gray-400 rounded-md focus:ring-2 focus:ring-blue-400 focus:outline-none bg-white/10 text-white placeholder-gray-300">
+                 class="w-full px-4 py-2 border border-gray-400 rounded-md focus:ring-2 focus:ring-blue-400 bg-white/10 text-white placeholder-gray-300">
         </div>
 
         <div class="flex items-center justify-between text-sm">
@@ -57,7 +45,7 @@
         </div>
 
         <button type="submit"
-          class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition">
+                class="w-full py-3 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-md transition">
           Login
         </button>
       </form>
@@ -71,65 +59,75 @@
     </div>
   </div>
 
-  <!-- ✅ JS: Backend Integration -->
+  <!-- ✅ JS -->
   <script>
-    document.getElementById("loginForm").addEventListener("submit", async function(e) {
+    document.getElementById("loginForm").addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const messageBox = document.getElementById("message");
+      const email = document.getElementById("email").value.trim();
+      const password = document.getElementById("password").value.trim();
+      const msg = document.getElementById("message");
 
       if (!email || !password) {
-        messageBox.textContent = "⚠️ Please enter both email and password.";
-        messageBox.className = "text-yellow-300 text-center";
+        msg.textContent = "⚠️ Please fill in both fields.";
+        msg.className = "text-yellow-300 text-center";
         return;
       }
 
-      messageBox.textContent = "⏳ Logging in...";
-      messageBox.className = "text-yellow-300 text-center";
+      msg.textContent = "⏳ Logging in...";
+      msg.className = "text-yellow-300 text-center";
 
       try {
-        const response = await fetch("/api/accounts/login/", {
+        // 1️⃣ Login Request
+        const resp = await fetch("/api/accounts/login/", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password })
         });
 
-        const result = await response.json();
+        const data = await resp.json();
 
-        if (response.ok) {
-          // ✅ Token save
-          localStorage.setItem("access_token", result.access);
-          localStorage.setItem("refresh_token", result.refresh);
-          localStorage.setItem("user_type", result.user_type);
-
-          messageBox.className = "text-green-400 text-center";
-          messageBox.textContent = "✅ Login successful! Redirecting...";
-
-          // ✅ Role-based redirect
-          setTimeout(() => {
-            if (result.user_type === "freelancer") {
-              window.location.href = "/frontend/pages/freelancer_dashboard.html";
-            } else if (result.user_type === "buyer") {
-              window.location.href = "/frontend/pages/buyer_dashboard.html";
-            } else if (result.user_type === "referrer") {
-              window.location.href = "/frontend/pages/referrer_dashboard.html";
-            } else {
-              window.location.href = "/";
-            }
-          }, 1500);
-
-        } else {
-          messageBox.className = "text-red-400 text-center";
-          messageBox.textContent = result.detail || "Invalid credentials.";
+        if (!resp.ok) {
+          msg.className = "text-red-400 text-center";
+          msg.textContent = data.detail || "❌ Invalid credentials.";
+          return;
         }
-      } catch (error) {
-        messageBox.className = "text-red-400 text-center";
-        messageBox.textContent = "⚠️ Server error. Please try again later.";
+
+        // 2️⃣ Save Tokens
+        localStorage.setItem("access_token", data.access);
+        localStorage.setItem("refresh_token", data.refresh);
+
+        // 3️⃣ Fetch Profile to detect role
+        const profileResp = await fetch("/api/accounts/profile/", {
+          headers: { "Authorization": "Bearer " + data.access }
+        });
+        const profile = await profileResp.json();
+        const role = profile.user_type?.toLowerCase() || "unknown";
+
+        localStorage.setItem("user_type", role);
+
+        msg.className = "text-green-400 text-center";
+        msg.textContent = "✅ Login successful! Redirecting...";
+
+        // 4️⃣ Role-based redirect
+        setTimeout(() => {
+          if (role === "freelancer") {
+            window.location.href = "/frontend/pages/freelancer_dashboard.html";
+          } else if (role === "buyer") {
+            window.location.href = "/frontend/pages/buyer_dashboard.html";
+          } else if (role === "referrer") {
+            window.location.href = "/frontend/pages/referrer_dashboard.html";
+          } else {
+            window.location.href = "/";
+          }
+        }, 1000);
+
+      } catch (err) {
+        console.error("Login error:", err);
+        msg.className = "text-red-400 text-center";
+        msg.textContent = "⚠️ Server error. Please try again.";
       }
     });
   </script>
-
 </body>
 </html>

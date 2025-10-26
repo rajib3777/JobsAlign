@@ -1,0 +1,642 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Freelancer Dashboard • JobsAlign</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* Professional color tweaks */
+    :root{
+      --brand: #2563eb;      /* indigo-600 */
+      --accent: #0ea5a4;     /* teal-500 */
+      --muted: #6b7280;      /* text-gray-500 */
+      --card: #ffffff;
+    }
+    .card { background: var(--card); border-radius: .75rem; box-shadow: 0 6px 18px rgba(15,23,42,0.06); padding: 1rem; }
+    .spark { stroke: #2563eb; fill:none; stroke-width:2; opacity:.9; }
+    /* responsive small fixes */
+    @media (max-width: 640px){
+      .desktop-only { display:none; }
+    }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800 min-h-screen">
+
+  <!-- NAVBAR -->
+  <header class="bg-white shadow-sm sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4">
+        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign" class="w-10 h-10 rounded" />
+        <div>
+          <div class="text-lg font-semibold">JobsAlign</div>
+          <div class="text-xs text-gray-500">Freelancer Dashboard</div>
+        </div>
+      </div>
+
+      <!-- Search & quick filters -->
+      <div class="flex-1 px-6">
+        <form id="globalSearchForm" class="flex items-center gap-2">
+          <input id="globalSearch" type="search" placeholder="Search jobs, skills, clients..." 
+                 class="w-full px-4 py-2 rounded-lg border border-gray-200 focus:ring-2 focus:ring-indigo-300 bg-white" />
+          <select id="filterCategory" class="px-3 py-2 rounded-lg border border-gray-200 bg-white desktop-only">
+            <option value="">All categories</option>
+            <!-- categories injected by JS -->
+          </select>
+          <select id="filterBudget" class="px-3 py-2 rounded-lg border border-gray-200 bg-white desktop-only">
+            <option value="">Any budget</option>
+            <option value="0-50">0 - 50</option>
+            <option value="50-200">50 - 200</option>
+            <option value="200+">200+</option>
+          </select>
+          <button type="submit" class="px-4 py-2 bg-indigo-600 text-white rounded-lg">Search</button>
+        </form>
+      </div>
+
+      <!-- Right actions -->
+      <div class="flex items-center gap-3">
+        <button id="notifBtn" class="relative p-2 rounded hover:bg-gray-100" title="Notifications">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none"><path d="M15 17H9" stroke="#374151" stroke-width="1.5" stroke-linecap="round"/></svg>
+          <span id="notifCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 rounded-full">0</span>
+        </button>
+
+        <div class="relative">
+          <button id="profileBtn" class="flex items-center gap-2 px-3 py-1 rounded hover:bg-gray-100">
+            <img id="profileAvatar" src="{% static 'images/default-avatar.png' %}" alt="avatar" class="w-8 h-8 rounded-full object-cover" />
+            <div class="text-left">
+              <div id="profileName" class="text-sm font-medium">Loading...</div>
+              <div id="profileRole" class="text-xs text-gray-500">Freelancer</div>
+            </div>
+          </button>
+        </div>
+        <button id="logoutBtn" class="px-3 py-2 rounded bg-red-50 text-red-600">Logout</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN GRID -->
+  <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-4 gap-6">
+    <!-- LEFT: PROFILE + ACTIONS -->
+    <aside class="lg:col-span-1 space-y-6">
+      <div class="card text-center">
+        <img id="leftAvatar" src="{% static 'images/default-avatar.png' %}" alt="avatar" class="w-28 h-28 rounded-full mx-auto object-cover" />
+        <h3 id="leftName" class="mt-3 text-lg font-semibold">—</h3>
+        <p id="leftTitle" class="text-sm text-gray-500">—</p>
+        <div class="mt-3">
+          <span id="verifyBadge" class="inline-block text-xs px-2 py-1 rounded"></span>
+        </div>
+        <div class="mt-4 space-y-2 text-left">
+          <button id="btnEditProfile" class="w-full px-3 py-2 border rounded">Edit profile</button>
+          <button id="btnPortfolio" class="w-full px-3 py-2 border rounded">Portfolio</button>
+          <button id="btnKyc" class="w-full px-3 py-2 bg-indigo-600 text-white rounded">Complete verification</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4 class="font-semibold">Wallet</h4>
+        <div class="mt-3">
+          <div class="text-2xl font-bold" id="walletBalance">0.00</div>
+          <div class="text-sm text-gray-500 mt-1">Available balance</div>
+        </div>
+        <div class="mt-4 flex gap-2">
+          <button id="addFunds" class="flex-1 px-3 py-2 bg-green-600 text-white rounded">Add funds</button>
+          <button id="withdraw" class="flex-1 px-3 py-2 border rounded">Withdraw</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4 class="font-semibold">Level & Badges</h4>
+        <div id="levelInfo" class="mt-3 text-sm text-gray-700">Loading...</div>
+        <div class="mt-3">
+          <div class="w-full bg-gray-100 h-2 rounded overflow-hidden"><div id="levelBar" class="h-2 bg-emerald-400" style="width:0%"></div></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h4 class="font-semibold">Referrals</h4>
+        <div id="referralSummary" class="text-sm mt-2 text-gray-700">—</div>
+        <button id="copyReferral" class="mt-3 w-full px-3 py-2 bg-indigo-50 text-indigo-700 rounded">Copy invite link</button>
+      </div>
+    </aside>
+
+    <!-- CENTER: MAIN CONTENT -->
+    <section class="lg:col-span-2 space-y-6">
+      <!-- HEAD CARDS -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="card">
+          <div class="text-sm text-gray-500">Active Projects</div>
+          <div class="text-xl font-semibold mt-2" id="statActive">0</div>
+          <div class="text-xs text-gray-400 mt-1">Projects you're working on</div>
+        </div>
+
+        <div class="card">
+          <div class="text-sm text-gray-500">Earnings (30d)</div>
+          <div class="text-xl font-semibold mt-2" id="statEarnings">0.00</div>
+          <div class="text-xs text-gray-400 mt-1">Completed payouts</div>
+        </div>
+
+        <div class="card">
+          <div class="text-sm text-gray-500">Open Bids</div>
+          <div class="text-xl font-semibold mt-2" id="statBids">0</div>
+          <div class="text-xs text-gray-400 mt-1">Proposals waiting</div>
+        </div>
+      </div>
+
+      <!-- JOBS: LIST + FILTERS -->
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold">Discover Jobs</h3>
+          <div class="flex items-center gap-2 text-sm text-gray-500">
+            <span id="jobsCount">— jobs</span>
+            <button id="refreshJobs" class="px-2 py-1 border rounded">Refresh</button>
+          </div>
+        </div>
+
+        <!-- filters (mobile collapsible) -->
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-4 gap-2">
+          <select id="jobCategory" class="px-3 py-2 border rounded">
+            <option value="">All Categories</option>
+          </select>
+          <select id="jobType" class="px-3 py-2 border rounded">
+            <option value="">Any type</option>
+            <option value="fixed">Fixed-price</option>
+            <option value="hourly">Hourly</option>
+          </select>
+          <select id="jobBudget" class="px-3 py-2 border rounded">
+            <option value="">Any budget</option>
+            <option value="0-50">0–50</option>
+            <option value="50-200">50–200</option>
+            <option value="200+">200+</option>
+          </select>
+          <select id="jobDelivery" class="px-3 py-2 border rounded">
+            <option value="">Any delivery</option>
+            <option value="1">1 day</option>
+            <option value="7">7 days</option>
+            <option value="30">30 days</option>
+          </select>
+        </div>
+
+        <!-- search inside jobs -->
+        <div class="mt-4">
+          <input id="jobSearch" type="text" placeholder="Search jobs by title or keyword" class="w-full px-4 py-2 border rounded" />
+        </div>
+
+        <!-- jobs list -->
+        <div id="jobsList" class="mt-4 space-y-3">
+          <!-- populated via JS -->
+          <div class="text-sm text-gray-400">Loading jobs…</div>
+        </div>
+      </div>
+
+      <!-- Proposals / My bids -->
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold">My Proposals</h3>
+          <div class="text-sm text-gray-500">Track and manage your bids</div>
+        </div>
+        <div id="bidsList" class="mt-4 space-y-3">
+          <div class="text-sm text-gray-400">Loading your proposals…</div>
+        </div>
+      </div>
+
+      <!-- Analytics -->
+      <div class="card">
+        <div class="flex items-center justify-between">
+          <h3 class="font-semibold">Analytics</h3>
+          <div class="text-sm text-gray-500">Last 30 days</div>
+        </div>
+        <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-3 bg-gray-50 rounded">
+            <div class="text-xs text-gray-500">Gross</div>
+            <div class="text-lg font-semibold" id="analyticsGross">0.00</div>
+            <svg class="w-full mt-2" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline class="spark" points="0,20 20,15 40,10 60,12 80,8 100,6"></polyline></svg>
+          </div>
+          <div class="p-3 bg-gray-50 rounded">
+            <div class="text-xs text-gray-500">Net</div>
+            <div class="text-lg font-semibold" id="analyticsNet">0.00</div>
+            <svg class="w-full mt-2" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline class="spark" points="0,18 20,14 40,12 60,16 80,10 100,8"></polyline></svg>
+          </div>
+          <div class="p-3 bg-gray-50 rounded">
+            <div class="text-xs text-gray-500">Jobs Completed</div>
+            <div class="text-lg font-semibold" id="analyticsJobs">0</div>
+            <svg class="w-full mt-2" viewBox="0 0 100 30" preserveAspectRatio="none"><polyline class="spark" points="0,22 20,18 40,12 60,9 80,10 100,12"></polyline></svg>
+          </div>
+        </div>
+      </div>
+
+    </section>
+
+    <!-- RIGHT: SIDE PANELS -->
+    <aside class="lg:col-span-1 space-y-6">
+      <!-- Messages -->
+      <div class="card">
+        <h4 class="font-semibold">Messages</h4>
+        <div id="messagesList" class="mt-3 space-y-2">
+          <div class="text-sm text-gray-400">Loading...</div>
+        </div>
+        <div class="mt-3">
+          <button id="openMessages" class="w-full px-3 py-2 border rounded">Open Inbox</button>
+        </div>
+      </div>
+
+      <!-- Notifications -->
+      <div class="card">
+        <h4 class="font-semibold">Notifications</h4>
+        <div id="miniNotifs" class="mt-3 text-sm text-gray-600">Loading...</div>
+      </div>
+
+      <!-- Reviews -->
+      <div class="card">
+        <h4 class="font-semibold">Recent Reviews</h4>
+        <div id="recentReviews" class="mt-3 text-sm text-gray-600">Loading…</div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- KYC Modal -->
+  <div id="kycModal" class="fixed inset-0 bg-black/40 hidden items-center justify-center z-50">
+    <div class="bg-white rounded-lg w-full max-w-2xl p-6">
+      <h3 class="font-semibold">Submit verification (KYC)</h3>
+      <form id="kycForm" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-3">
+        <input name="full_name" placeholder="Full name" class="px-3 py-2 border rounded" required />
+        <input name="nid_number" placeholder="ID / Passport number" class="px-3 py-2 border rounded" required />
+        <div>
+          <label class="block text-sm mb-1">Document (image / pdf)</label>
+          <input type="file" name="document" accept=".jpg,.png,.pdf" required />
+        </div>
+        <div>
+          <label class="block text-sm mb-1">Note (optional)</label>
+          <input name="note" placeholder="Anything else" class="px-3 py-2 border rounded" />
+        </div>
+        <div class="col-span-2 flex justify-end gap-2 mt-2">
+          <button type="button" id="kycCancel" class="px-3 py-2 border rounded">Cancel</button>
+          <button type="submit" class="px-3 py-2 bg-indigo-600 text-white rounded">Submit</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Single-file JS: tokens, fetchWithAuth, UI wiring -->
+  <script>
+  /* ---------------------------
+     TokenService & auth helpers
+     --------------------------- */
+  const TokenService = {
+    getAccess(){ return localStorage.getItem('access_token'); },
+    getRefresh(){ return localStorage.getItem('refresh_token'); },
+    setTokens({access,refresh}){ if(access) localStorage.setItem('access_token',access); if(refresh) localStorage.setItem('refresh_token',refresh); },
+    setUser(u){ if(u) localStorage.setItem('user', JSON.stringify(u)); },
+    getUser(){ try{ return JSON.parse(localStorage.getItem('user')||'null')}catch{return null} },
+    clear(){ localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token'); localStorage.removeItem('user'); localStorage.removeItem('user_type'); }
+  };
+
+  async function refreshAccessToken(){
+    const refresh = TokenService.getRefresh();
+    if(!refresh) throw new Error('No refresh token');
+    const res = await fetch('/api/accounts/token/refresh/', { /* ADJUST IF NEEDED */ method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({refresh}) });
+    if(!res.ok){ TokenService.clear(); throw new Error('Refresh failed'); }
+    const d = await res.json();
+    TokenService.setTokens({access: d.access, refresh});
+    return d.access;
+  }
+
+  async function fetchWithAuth(url, opts = {}){
+    opts.headers = opts.headers || {};
+    let access = TokenService.getAccess();
+    if(access) opts.headers['Authorization'] = 'Bearer ' + access;
+    let resp = await fetch(url, opts);
+    if(resp.status === 401){
+      try {
+        const newAccess = await refreshAccessToken();
+        opts.headers['Authorization'] = 'Bearer ' + newAccess;
+        resp = await fetch(url, opts);
+      } catch(err){
+        TokenService.clear();
+        window.location.href = '/frontend/pages/login.html';
+        throw err;
+      }
+    }
+    return resp;
+  }
+
+  /* ---------------------------
+     Utility helpers
+     --------------------------- */
+  function q(sel){ return document.querySelector(sel); }
+  function qAll(sel){ return Array.from(document.querySelectorAll(sel)); }
+  function safeText(v){ return v===null||v===undefined ? '' : String(v); }
+  function formatCurrency(v){ return (v===null||v===undefined) ? '0.00' : parseFloat(v).toFixed(2); }
+  function showModal(id){ const m = document.getElementById(id); m.classList.remove('hidden'); m.style.display='flex'; }
+  function hideModal(id){ const m = document.getElementById(id); m.classList.add('hidden'); m.style.display='none'; }
+
+  /* ---------------------------
+     Main initialization
+     --------------------------- */
+  async function initFreelancerDashboard(){
+    try {
+      // 1) PROFILE (must exist)
+      const profResp = await fetchWithAuth('/api/accounts/profile/'); /* ADJUST IF NEEDED */
+      if(!profResp.ok){ TokenService.clear(); window.location='/frontend/pages/login.html'; return; }
+      const user = await profResp.json();
+      TokenService.setUser(user);
+
+      // role guard
+      if((user.user_type || '').toLowerCase() !== 'freelancer'){
+        // redirect to appropriate dashboard if needed
+        const role = (user.user_type || '').toLowerCase();
+        if(role === 'buyer') window.location = '/frontend/pages/buyer_dashboard.html';
+        else if(role === 'referrer') window.location = '/frontend/pages/referrer_dashboard.html';
+        else window.location = '/';
+        return;
+      }
+
+      // render top profile
+      q('#profileName').innerText = safeText(user.full_name || user.username);
+      q('#profileRole').innerText = (user.user_type || 'Freelancer');
+      q('#leftName').innerText = safeText(user.full_name || user.username);
+      q('#leftTitle').innerText = safeText(user.title || '');
+      q('#leftAvatar').src = user.profile_image || '{% static "images/default-avatar.png" %}';
+      q('#profileAvatar').src = user.profile_image || '{% static "images/default-avatar.png" %}';
+      q('#verifyBadge').innerHTML = user.is_verified ? '<span class="text-xs px-2 py-1 rounded bg-emerald-50 text-emerald-700">Verified</span>' : '<span class="text-xs px-2 py-1 rounded bg-yellow-50 text-yellow-700">Unverified</span>';
+      if(!user.is_verified) q('#btnKyc').classList.remove('hidden'); else q('#btnKyc').classList.add('hidden');
+
+      // load categories for filters
+      loadCategories(); // populates selects
+
+      // parallel load: wallet, projects, bids, messages, notifications, analytics, reviews, referrals, level
+      await Promise.allSettled([
+        loadWallet(),
+        loadJobs(),
+        loadBids(),
+        loadMessages(),
+        loadNotifications(),
+        loadAnalytics(),
+        loadReviews(),
+        loadReferrals(),
+        loadLevel()
+      ]);
+
+      // wire handlers
+      wireUI();
+
+    } catch(err){
+      console.error('Init error', err);
+      TokenService.clear();
+      window.location = '/frontend/pages/login.html';
+    }
+  }
+
+  /* ---------------------------
+     Loaders: each call backend endpoints (ADJUST IF NEEDED)
+     --------------------------- */
+
+  async function loadCategories(){
+    try {
+      const resp = await fetch('/api/categories/'); /* ADJUST IF NEEDED */
+      if(!resp.ok) return;
+      const cats = await resp.json();
+      const selA = q('#filterCategory');
+      const selB = q('#jobCategory');
+      cats.forEach(c => {
+        const opt = document.createElement('option'); opt.value = c.slug || c.id; opt.textContent = c.name;
+        selA.appendChild(opt);
+        selB.appendChild(opt.cloneNode(true));
+      });
+    } catch(e){ console.warn('categories', e); }
+  }
+
+  async function loadWallet(){
+    try {
+      const r = await fetchWithAuth('/api/payments/wallet/'); /* ADJUST IF NEEDED */
+      if(!r.ok) return;
+      const w = await r.json();
+      q('#walletBalance').innerText = formatCurrency(w.balance);
+    } catch(e){ console.warn('wallet', e); }
+  }
+
+  async function loadJobs(){
+    try {
+      const params = new URLSearchParams();
+      // attach filters if selected
+      const cat = q('#jobCategory').value; if(cat) params.set('category', cat);
+      const kw = q('#jobSearch').value.trim(); if(kw) params.set('q', kw);
+      const type = q('#jobType').value; if(type) params.set('type', type);
+      const budget = q('#jobBudget').value; if(budget) params.set('budget', budget);
+      const delivery = q('#jobDelivery').value; if(delivery) params.set('delivery', delivery);
+
+      const url = '/api/marketplace/jobs/?' + params.toString(); /* ADJUST IF NEEDED */
+      const resp = await fetchWithAuth(url);
+      const el = q('#jobsList');
+      if(!resp.ok){ el.innerHTML = '<div class="text-sm text-gray-500">Unable to load jobs</div>'; return; }
+      const jobs = await resp.json();
+      q('#jobsCount').innerText = `${jobs.length} jobs`;
+      if(!jobs.length){ el.innerHTML = '<div class="text-sm text-gray-500">No jobs match your filters</div>'; return; }
+
+      el.innerHTML = jobs.map(j => {
+        const budget = j.budget ? (j.currency ? (j.currency + ' ') : '') + j.budget : '—';
+        return `
+          <div class="border rounded p-3 flex flex-col md:flex-row md:items-start md:justify-between gap-3">
+            <div class="flex-1">
+              <div class="flex items-center justify-between">
+                <div>
+                  <div class="font-semibold">${j.title}</div>
+                  <div class="text-xs text-gray-500 mt-1">${j.category_name || ''} • ${j.client_name || 'Client'}</div>
+                </div>
+                <div class="text-right">
+                  <div class="text-sm font-medium">${budget}</div>
+                  <div class="text-xs text-gray-400">${j.estimated_delivery ? j.estimated_delivery + ' days' : ''}</div>
+                </div>
+              </div>
+              <div class="text-sm text-gray-600 mt-2">${j.short_description || ''}</div>
+            </div>
+            <div class="flex flex-col items-end gap-2">
+              <button class="px-3 py-1 bg-indigo-600 text-white rounded" onclick="openJob(${j.id})">View</button>
+              <button class="px-3 py-1 border rounded" onclick="placeQuickBid(${j.id})">Place Bid</button>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch(e){ console.error('jobs', e); q('#jobsList').innerHTML = '<div class="text-sm text-gray-500">Error loading jobs</div>'; }
+  }
+
+  async function loadBids(){
+    try {
+      const resp = await fetchWithAuth('/api/marketplace/my-bids/'); /* ADJUST IF NEEDED */
+      const el = q('#bidsList');
+      if(!resp.ok){ el.innerHTML = '<div class="text-sm text-gray-500">Unable to load proposals</div>'; return; }
+      const bids = await resp.json();
+      q('#statBids').innerText = bids.length || 0;
+      if(!bids.length){ el.innerHTML = '<div class="text-sm text-gray-500">No proposals yet</div>'; return; }
+      el.innerHTML = bids.map(b => `
+        <div class="border-b py-2">
+          <div class="flex items-center justify-between">
+            <div><strong>${b.project_title}</strong><div class="text-xs text-gray-500">${b.client_name || ''}</div></div>
+            <div class="text-sm">${formatCurrency(b.amount)}</div>
+          </div>
+          <div class="text-xs text-gray-400 mt-1">Status: ${b.status || 'pending'}</div>
+        </div>
+      `).join('');
+    } catch(e){ console.warn('bids', e); }
+  }
+
+  async function loadMessages(){
+    try {
+      const resp = await fetchWithAuth('/api/chats/my-threads/'); /* ADJUST IF NEEDED */
+      const el = q('#messagesList');
+      if(!resp.ok){ el.innerHTML = '<div class="text-sm text-gray-500">Messages unavailable</div>'; return; }
+      const threads = await resp.json();
+      if(!threads.length){ el.innerHTML = '<div class="text-sm text-gray-500">No recent messages</div>'; return; }
+      el.innerHTML = threads.slice(0,6).map(t => `
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="font-medium">${t.other_user_name}</div>
+            <div class="text-xs text-gray-500">${t.last_message || ''}</div>
+          </div>
+          <div class="text-xs text-gray-400">${t.unread_count ? '<span class="text-xs bg-red-100 text-red-700 px-2 rounded">' + t.unread_count + '</span>' : ''}</div>
+        </div>
+      `).join('');
+    } catch(e){ console.warn('messages', e); }
+  }
+
+  async function loadNotifications(){
+    try {
+      const resp = await fetchWithAuth('/api/notifications/'); /* ADJUST IF NEEDED */
+      const el = q('#miniNotifs');
+      if(!resp.ok){ el.innerText = 'Notifications unavailable'; return; }
+      const nots = await resp.json();
+      if(!nots.length){ el.innerText = 'No notifications'; return; }
+      q('#notifCount').innerText = nots.filter(n=>!n.read).length || '';
+      q('#notifCount').classList.toggle('hidden', (nots.filter(n=>!n.read).length||0) === 0);
+      el.innerHTML = nots.slice(0,5).map(n => `<div class="py-1 text-sm"><strong>${n.title}</strong><div class="text-xs text-gray-500">${n.message}</div></div>`).join('');
+    } catch(e){ console.warn('notifs', e); }
+  }
+
+  async function loadAnalytics(){
+    try {
+      const resp = await fetchWithAuth('/api/analytics/overview/'); /* ADJUST IF NEEDED */
+      if(!resp.ok) return;
+      const d = await resp.json();
+      q('#analyticsGross').innerText = formatCurrency(d.gross || 0);
+      q('#analyticsNet').innerText = formatCurrency(d.net || 0);
+      q('#analyticsJobs').innerText = d.jobs_count || 0;
+      q('#statEarnings').innerText = formatCurrency(d.earnings_last_30 || d.earnings_total || 0);
+      q('#statActive').innerText = d.active || 0;
+      // small sparkline placeholders already present
+    } catch(e){ console.warn('analytics', e); }
+  }
+
+  async function loadReviews(){
+    try {
+      const resp = await fetchWithAuth('/api/reviews/my/'); /* ADJUST IF NEEDED */
+      if(!resp.ok) return;
+      const d = await resp.json();
+      q('#recentReviews').innerHTML = (d.items||[]).slice(0,3).map(r => `<div class="py-2"><strong>${r.author_name}</strong><div class="text-xs text-gray-500">${r.comment}</div></div>`).join('') || '<div class="text-sm text-gray-500">No reviews yet</div>';
+    } catch(e){ console.warn('reviews', e); }
+  }
+
+  async function loadReferrals(){
+    try {
+      const resp = await fetchWithAuth('/api/referrals/my-commissions/'); /* ADJUST IF NEEDED */
+      if(!resp.ok) return;
+      const d = await resp.json();
+      q('#referralSummary').innerText = `Earned: ${formatCurrency(d.total || 0)} • Pending: ${formatCurrency(d.pending || 0)}`;
+    } catch(e){ console.warn('referrals', e); }
+  }
+
+  async function loadLevel(){
+    try {
+      const resp = await fetchWithAuth('/api/levels/my/'); /* ADJUST IF NEEDED */
+      if(!resp.ok) return;
+      const lvl = await resp.json();
+      q('#levelInfo').innerText = `${lvl.name || '—'} • ${lvl.description || ''}`;
+      const pct = Math.min(100, lvl.progress || 0);
+      q('#levelBar').style.width = pct + '%';
+    } catch(e){ console.warn('level', e); }
+  }
+
+  /* ---------------------------
+     Actions
+     --------------------------- */
+  function openJob(id){
+    // open job detail page (integrate with your routing)
+    window.location.href = `/frontend/pages/jobs_detail.html?project=${id}`;
+  }
+
+  async function placeQuickBid(jobId){
+    // show minimal prompt — for production, open a proper modal
+    const amount = prompt('Enter your bid amount:');
+    if(!amount) return;
+    try {
+      const resp = await fetchWithAuth('/api/marketplace/bids/', { /* ADJUST IF NEEDED */
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({ project: jobId, amount, message: 'Bid placed via dashboard' })
+      });
+      if(resp.ok){ alert('Bid placed'); loadBids(); } else { const err = await resp.json().catch(()=>({})); alert('Failed to place bid: ' + (err.detail || JSON.stringify(err))); }
+    } catch(e){ console.error(e); alert('Error placing bid'); }
+  }
+
+  /* KYC upload */
+  document.getElementById('btnKyc').addEventListener('click', ()=>showModal('kycModal'));
+  document.getElementById('kycCancel').addEventListener('click', ()=>hideModal('kycModal'));
+  document.getElementById('kycForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const fd = new FormData(e.target);
+    try {
+      const resp = await fetchWithAuth('/api/verification/upload/', { method:'POST', body: fd }); /* ADJUST IF NEEDED */
+      if(resp.ok){ alert('KYC submitted'); hideModal('kycModal'); loadNotifications(); }
+      else { const err = await resp.json().catch(()=>({})); alert('Upload failed: ' + (err.detail || JSON.stringify(err))); }
+    } catch(e){ console.error(e); alert('Upload failed'); }
+  });
+
+  /* Wallet actions placeholders */
+  q('#addFunds').addEventListener('click', ()=>alert('Open payment provider flow (implement server-side checkout).'));
+  q('#withdraw').addEventListener('click', ()=>alert('Open withdraw flow (implement backend endpoint).'));
+
+  /* search handlers */
+  document.getElementById('globalSearchForm').addEventListener('submit', (e) => { e.preventDefault(); q('#jobSearch').value = q('#globalSearch').value; loadJobs(); });
+  q('#jobSearch').addEventListener('keyup', debounce(()=> loadJobs(), 500));
+  q('#jobCategory').addEventListener('change', ()=> loadJobs());
+  q('#jobType').addEventListener('change', ()=> loadJobs());
+  q('#jobBudget').addEventListener('change', ()=> loadJobs());
+  q('#jobDelivery').addEventListener('change', ()=> loadJobs());
+  q('#refreshJobs').addEventListener('click', ()=> loadJobs());
+
+  /* copy referral link */
+  q('#copyReferral').addEventListener('click', async ()=> {
+    try {
+      const r = await fetchWithAuth('/api/referrals/my-code/'); /* ADJUST IF NEEDED */
+      if(!r.ok) { alert('Unable to get referral link'); return; }
+      const data = await r.json();
+      const link = data.invite_link || data.code || (location.origin + '/?ref=' + (data.code || ''));
+      navigator.clipboard.writeText(link);
+      alert('Referral link copied to clipboard');
+    } catch(e){ console.warn(e); alert('Could not copy referral'); }
+  });
+
+  /* logout */
+  q('#logoutBtn').addEventListener('click', ()=> { TokenService.clear(); window.location='/frontend/pages/login.html'; });
+
+  /* messages open */
+  q('#openMessages').addEventListener('click', ()=> { window.location='/frontend/pages/chat.html'; });
+
+  /* notifications btn */
+  q('#notifBtn').addEventListener('click', ()=> { window.location='/frontend/pages/notifications.html'; });
+
+  /* copy debounce util */
+  function debounce(fn, wait){ let t; return function(){ clearTimeout(t); t = setTimeout(()=> fn.apply(this, arguments), wait); }; }
+
+  /* wire basic UI events after load */
+  function wireUI(){
+    // any additional bindings if needed
+  }
+
+  /* ---------------------------
+     Start everything
+     --------------------------- */
+  (function(){ initFreelancerDashboard(); })();
+
+  </script>
+</body>
+</html>
