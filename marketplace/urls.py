@@ -1,5 +1,6 @@
 from django.urls import path
 from . import api_views as views
+from .api_views import PortfolioListCreateView
 
 
 urlpatterns = [
@@ -12,4 +13,5 @@ urlpatterns = [
     path("contracts/<uuid:pk>/", views.ContractDetailView.as_view(), name="contract-detail"),
     path("milestones/create/", views.MilestoneCreateView.as_view(), name="milestone-create"),
     path("milestones/<uuid:milestone_id>/approve/", views.MilestoneApproveView.as_view(), name="milestone-approve"),
+    path("portfolio/", PortfolioListCreateView.as_view(), name="portfolio-list-create"),
 ]

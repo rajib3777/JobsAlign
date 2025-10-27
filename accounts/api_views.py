@@ -82,6 +82,11 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         # used get_object_or_404 just to make use of it logically
         return get_object_or_404(User, pk=self.request.user.pk)
 
+    def put(self, request, *args, **kwargs):
+        
+        kwargs['partial'] = True
+        return self.update(request, *args, **kwargs)
+
 
 # ✅ User List View (Admin only)
 class UserListView(generics.ListAPIView):

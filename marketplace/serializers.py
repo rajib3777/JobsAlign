@@ -1,6 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth import get_user_model
 from .models import Project, ProjectAttachment, Bid, Contract, Milestone, Skill, ProjectActivityLog
+from .models import Portfolio
 
 User = get_user_model()
 
@@ -96,3 +97,12 @@ class ContractSerializer(serializers.ModelSerializer):
         model = Contract
         fields = "__all__"
         read_only_fields = ("id","buyer","freelancer","started_at","escrow_reference")
+
+
+
+
+class PortfolioSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Portfolio
+        fields = "__all__"
+        read_only_fields = ["user", "created_at"]

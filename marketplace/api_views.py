@@ -13,6 +13,11 @@ from .permissions import IsOwnerOrReadOnly, IsProjectOwner, IsFreelancer
 from . import utils
 from payments.utils import initiate_escrow_payment
 from rest_framework.permissions import IsAuthenticated
+from .models import Portfolio
+from .serializers import PortfolioSerializer
+from rest_framework.parsers import MultiPartParser, FormParser
+from rest_framework.response import Response
+from rest_framework import status
 
 
 class ProjectCreateView(APIView):
@@ -150,3 +155,20 @@ class ContractDetailView(generics.RetrieveAPIView):
 
     def get_queryset(self):
         return Contract.objects.filter(buyer=self.request.user) | Contract.objects.filter(freelancer=self.request.user)
+
+
+class PortfolioListCreateView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = [MultiPartParser, FormParser]
+
+    def get(self, request):
+        portfolios = Portfolio.objects.filter(user=request.user)
+        serializer = PortfolioSerializer(portfolios, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = PortfolioSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save(user=request.user)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
