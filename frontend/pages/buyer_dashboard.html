@@ -1,0 +1,109 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Buyer Dashboard — JobsAlign</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 min-h-screen text-gray-800">
+  <nav class="bg-white shadow sticky top-0 z-40">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <img src="{% static 'images/logo.jpeg' %}" alt="logo" class="w-10 h-10 rounded-full">
+        <div><h1 class="text-lg font-semibold">JobsAlign</h1><p class="text-xs text-gray-500">Buyer Dashboard</p></div>
+      </div>
+      <div class="flex items-center gap-4">
+        <button id="notifBtn" class="p-2 rounded hover:bg-gray-100">🔔 <span id="notifCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs px-2 rounded-full">0</span></button>
+        <button id="logoutBtn" class="px-3 py-1 rounded bg-red-100 text-red-700">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto p-4 grid grid-cols-1 md:grid-cols-4 gap-6">
+    <aside class="md:col-span-1 bg-white rounded-lg shadow p-4 sticky top-20">
+      <div id="pf-card" class="text-center"></div>
+      <nav class="mt-4 text-sm space-y-2">
+        <a href="#myjobs" class="block px-3 py-2 rounded hover:bg-gray-50">My Jobs</a>
+        <a href="#postjob" class="block px-3 py-2 rounded hover:bg-gray-50">Post a Job</a>
+        <a href="#orders" class="block px-3 py-2 rounded hover:bg-gray-50">Orders</a>
+        <a href="/frontend/pages/profile.html" class="block px-3 py-2 rounded hover:bg-gray-50">Profile</a>
+      </nav>
+    </aside>
+
+    <main class="md:col-span-3 space-y-6">
+      <section id="myjobs" class="bg-white rounded-lg shadow p-4">
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-semibold">My Jobs</h2>
+          <button id="postJobBtn" class="px-3 py-1 bg-blue-600 text-white rounded">Post Job</button>
+        </div>
+        <div id="jobsList" class="mt-3"></div>
+      </section>
+
+      <section id="orders" class="bg-white rounded-lg shadow p-4">
+        <h3 class="font-semibold mb-3">Orders & Contracts</h3>
+        <div id="ordersList"></div>
+      </section>
+
+      <section id="payments" class="bg-white rounded-lg shadow p-4 grid md:grid-cols-3 gap-3">
+        <div id="walletCard"></div>
+        <div id="invoices" class="col-span-2"></div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+  /* Inline auth + fetchWithAuth identical to freelancer page */
+  const TokenService = {
+    getAccess() { return localStorage.getItem('access_token'); },
+    getRefresh() { return localStorage.getItem('refresh_token'); },
+    setTokens({ access, refresh }) { if (access) localStorage.setItem('access_token', access); if (refresh) localStorage.setItem('refresh_token', refresh); },
+    setUser(u){ if(u){ localStorage.setItem('user', JSON.stringify(u)); if(u.user_type) localStorage.setItem('user_type', u.user_type);} },
+    getUser(){ try{return JSON.parse(localStorage.getItem('user')||'null')}catch{return null} },
+    clear(){ localStorage.removeItem('access_token'); localStorage.removeItem('refresh_token'); localStorage.removeItem('user'); localStorage.removeItem('user_type'); }
+  };
+  async function refreshAccessToken(){ const r=TokenService.getRefresh(); if(!r) throw new Error('No refresh'); const resp=await fetch('/api/accounts/token/refresh/',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({refresh:r})}); if(!resp.ok){TokenService.clear();throw new Error('Refresh failed')} const d=await resp.json(); TokenService.setTokens({access:d.access,refresh:r}); return d.access; }
+  async function fetchWithAuth(url,opts={}){ opts.headers = opts.headers||{}; let a=TokenService.getAccess(); if(a) opts.headers['Authorization']='Bearer '+a; let resp=await fetch(url,opts); if(resp.status===401){ try{ const na = await refreshAccessToken(); opts.headers['Authorization']='Bearer '+na; resp = await fetch(url,opts); } catch(e){ TokenService.clear(); window.location.href='/frontend/pages/login.html'; throw e; } } return resp; }
+
+  async function initBuyer(){
+    let pResp = await fetchWithAuth('/api/accounts/profile/');
+    if(!pResp.ok){ TokenService.clear(); window.location.href='/frontend/pages/login.html'; return; }
+    const user = await pResp.json(); TokenService.setUser(user);
+    if(user.user_type !== 'buyer'){ if(user.user_type==='freelancer') window.location.href='/frontend/pages/freelancer_dashboard.html'; if(user.user_type==='referrer') window.location.href='/frontend/pages/referrer_dashboard.html'; return; }
+
+    // Sidebar
+    document.getElementById('pf-card').innerHTML = `
+      <img src="${user.profile_image||'/frontend/images/default-avatar.png'}" class="w-20 h-20 rounded-full mx-auto">
+      <h3 class="mt-2 font-semibold">${user.full_name || user.username}</h3>
+      <p class="text-xs text-gray-500">${user.email}</p>
+      <p class="mt-2">${user.is_verified ? '<span class="text-green-600">Verified</span>' : '<span class="text-yellow-600">Unverified</span>'}</p>
+      ${user.is_verified ? '' : '<button id="reqVerifyBtn" class="mt-3 px-3 py-1 bg-blue-600 text-white rounded">Request Verification</button>'}
+    `;
+    if(!user.is_verified) document.getElementById('reqVerifyBtn').addEventListener('click', async ()=>{ const r=await fetchWithAuth('/api/verification/request/',{method:'POST'}); alert(r.ok ? 'Requested' : 'Failed'); });
+
+    // Buyer jobs list
+    const jResp = await fetchWithAuth('/api/marketplace/my-posted-jobs/'); // ADJUST IF NEEDED
+    if(jResp.ok){ const jobs = await jResp.json(); document.getElementById('jobsList').innerHTML = jobs.length ? jobs.map(j=>`<div class="p-3 border rounded mb-2"><h4 class="font-semibold">${j.title}</h4><p class="text-sm text-gray-600">${j.short_description||''}</p></div>`).join('') : '<p class="text-gray-500">No jobs posted yet.</p>'; }
+
+    // Orders / contracts
+    const oResp = await fetchWithAuth('/api/marketplace/my-orders/');
+    if(oResp.ok){ const orders = await oResp.json(); document.getElementById('ordersList').innerHTML = orders.length ? orders.map(o=>`<div class="p-3 border rounded mb-2">${o.title} — ${o.status}</div>`).join('') : '<p class="text-gray-500">No orders</p>'; }
+
+    // Wallet & invoices
+    const wResp = await fetchWithAuth('/api/payments/wallet/');
+    if(wResp.ok){ const w=await wResp.json(); document.getElementById('walletCard').innerHTML = `<div class="p-3"><h4 class="font-semibold">Wallet</h4><div class="text-2xl font-bold mt-2">${w.balance ?? 0}</div></div>`; }
+    const invResp = await fetchWithAuth('/api/subscriptions/invoices/');
+    if(invResp.ok){ const inv = await invResp.json(); document.getElementById('invoices').innerHTML = inv.slice(0,5).map(i=>`<div class="p-2 border-b">${i.description} — ${i.amount}</div>`).join(''); }
+
+    // notifications
+    const nResp = await fetchWithAuth('/api/notifications/');
+    if(nResp.ok){ const nots = await nResp.json(); const cnt = nots.filter(n=>!n.read).length || nots.length; if(cnt){ const el = document.getElementById('notifCount'); el.textContent=cnt; el.classList.remove('hidden'); } }
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{ TokenService.clear(); window.location.href='/frontend/pages/login.html'; });
+  }
+
+  (function(){ initBuyer().catch(e=>{ console.error(e); TokenService.clear(); window.location.href='/frontend/pages/login.html'; }); })();
+  </script>
+
+</body>
+</html>

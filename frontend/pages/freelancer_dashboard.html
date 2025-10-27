@@ -1,0 +1,690 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Freelancer Dashboard · JobsAlign</title>
+
+  <!-- Tailwind CDN (fast dev) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* small polish beyond tailwind */
+    .glass { background: rgba(255,255,255,0.06); backdrop-filter: blur(6px); }
+    .dash-card { transition: transform .18s, box-shadow .18s; }
+    .dash-card:hover { transform: translateY(-6px); box-shadow: 0 10px 30px rgba(2,6,23,0.12); }
+    /* Make long tables scrollable nicely */
+    .table-scroll { max-height: 340px; overflow:auto; }
+  </style>
+</head>
+<body class="bg-gray-50 text-gray-800">
+
+  <!-- TOP NAV -->
+  <header class="fixed w-full z-40 bg-white/90 backdrop-blur-sm border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 md:px-6 py-3 flex items-center justify-between">
+      <div class="flex items-center gap-4">
+        <!-- logo only (no extra text) -->
+        <a href="/" class="block">
+          <div class="w-12 h-12 rounded-full bg-white p-1 flex items-center justify-center shadow">
+            <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign" class="object-contain w-full h-full rounded-full">
+          </div>
+        </a>
+        <nav class="hidden md:flex items-center gap-4 text-sm text-gray-600">
+          <a href="#overview" class="hover:text-primary">Overview</a>
+          <a href="#projects" class="hover:text-primary">Projects</a>
+          <a href="#wallet" class="hover:text-primary">Wallet</a>
+          <a href="#portfolio" class="hover:text-primary">Portfolio</a>
+        </nav>
+      </div>
+
+      <div class="flex items-center gap-3">
+        <div id="notifBtn" class="relative">
+          <button class="p-2 rounded-md hover:bg-gray-100">
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5 text-gray-600" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2a6 6 0 00-6 6v3.586l-.707.707A1 1 0 004 14h12a1 1 0 00.707-1.707L16 11.586V8a6 6 0 00-6-6zM9 18a2 2 0 104 0H9z"/></svg>
+          </button>
+          <span id="notifCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 rounded-full">0</span>
+        </div>
+
+        <div id="profileMenu" class="relative">
+          <button id="profileBtn" class="flex items-center gap-2 p-1 rounded-md hover:bg-gray-100">
+            <img id="miniAvatar" src="{% static 'images/default-avatar.png' %}" alt="avatar" class="w-9 h-9 rounded-full object-cover border">
+            <span id="miniName" class="hidden md:inline text-sm font-medium">You</span>
+            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+
+          <!-- profile dropdown -->
+          <div id="profileDropdown" class="hidden absolute right-0 mt-2 w-44 bg-white rounded-lg shadow-lg ring-1 ring-black/5">
+            <a href="/frontend/pages/freelancer_profile.html" class="block px-4 py-2 text-sm hover:bg-gray-50">View Profile</a>
+            <a id="editProfileBtn" href="#" class="block px-4 py-2 text-sm hover:bg-gray-50">Edit Profile</a>
+            <a id="logoutBtn" href="#" class="block px-4 py-2 text-sm text-red-600 hover:bg-gray-50">Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="pt-20 max-w-7xl mx-auto px-4 md:px-6 pb-28">
+
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+      <!-- SIDEBAR -->
+      <aside class="lg:col-span-3 sticky top-24 self-start">
+        <div class="p-4 rounded-xl glass border border-white/6">
+          <div id="profileCard" class="flex items-center gap-4">
+            <img id="profilePhoto" src="{% static 'images/avatar.png' %}" alt="avatar" class="w-20 h-20 rounded-full object-cover border">
+            <div>
+              <h3 id="displayName" class="text-lg font-semibold">—</h3>
+              <p id="displayRole" class="text-sm text-gray-400">Freelancer</p>
+              <div class="mt-2 flex gap-2">
+                <a id="profileViewBtn" href="/frontend/pages/freelancer_profile.html" class="text-sm px-3 py-1 bg-white/10 rounded-md border">Profile</a>
+                <button id="verifyCTA" class="text-sm px-3 py-1 bg-yellow-100 text-yellow-800 rounded-md hidden">Verify</button>
+              </div>
+            </div>
+          </div>
+
+          <hr class="my-4">
+
+          <div class="space-y-3 text-sm">
+            <a href="#overview" class="block p-2 rounded-md hover:bg-white/5">Overview</a>
+            <a href="#projects" class="block p-2 rounded-md hover:bg-white/5">My Projects</a>
+            <a href="#bids" class="block p-2 rounded-md hover:bg-white/5">My Bids</a>
+            <a href="#portfolio" class="block p-2 rounded-md hover:bg-white/5">Portfolio</a>
+            <a href="#wallet" class="block p-2 rounded-md hover:bg-white/5">Wallet & Transactions</a>
+            <a href="#analytics" class="block p-2 rounded-md hover:bg-white/5">Analytics</a>
+            <a href="#referrals" class="block p-2 rounded-md hover:bg-white/5">Referrals</a>
+            <a href="#support" class="block p-2 rounded-md hover:bg-white/5">Support</a>
+            <a href="#settings" class="block p-2 rounded-md hover:bg-white/5">Account Settings</a>
+          </div>
+        </div>
+      </aside>
+
+      <!-- CONTENT -->
+      <section class="lg:col-span-9 space-y-6">
+
+        <!-- OVERVIEW -->
+        <section id="overview" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="dash-card p-4 rounded-xl bg-white border">
+            <div class="flex items-center justify-between">
+              <div>
+                <h4 class="text-sm text-gray-500">Total Earnings</h4>
+                <div id="totalEarnings" class="text-2xl font-bold mt-2">—</div>
+                <div id="completedProjects" class="text-sm text-gray-400">Completed: —</div>
+              </div>
+              <div class="text-primary text-3xl">
+                <!-- small earnings icon -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="w-8 h-8" viewBox="0 0 24 24" fill="currentColor"><path d="M12 1L3 5v6c0 5.523 3.582 10.74 9 12 5.418-1.26 9-6.477 9-12V5l-9-4z"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div class="dash-card p-4 rounded-xl bg-white border">
+            <h4 class="text-sm text-gray-500">Active Projects</h4>
+            <div id="activeProjectsList" class="mt-3 text-sm text-gray-700">—</div>
+          </div>
+
+          <div class="dash-card p-4 rounded-xl bg-white border">
+            <h4 class="text-sm text-gray-500">Wallet Balance</h4>
+            <div id="walletBalance" class="text-2xl font-bold mt-2">—</div>
+            <div class="mt-3 flex gap-2">
+              <button id="depositBtn" class="px-3 py-1 bg-green-600 text-white rounded">Deposit</button>
+              <button id="withdrawBtn" class="px-3 py-1 bg-white border rounded">Withdraw</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- PROJECTS / SEARCH -->
+        <section id="projects" class="p-4 rounded-xl bg-white border">
+          <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold">Project Marketplace</h3>
+            <div class="flex items-center gap-2">
+              <input id="projectSearch" type="search" placeholder="Search by title, skill, budget..." class="px-3 py-2 border rounded-md w-72">
+              <button id="searchBtn" class="px-4 py-2 bg-blue-600 text-white rounded-md">Search</button>
+            </div>
+          </div>
+
+          <div id="projectsMessages" class="text-sm text-gray-500 mb-3"></div>
+
+          <div class="grid grid-cols-1 gap-3">
+            <div id="projectsList" class="space-y-3 table-scroll"></div>
+          </div>
+        </section>
+
+        <!-- BIDS & PORTFOLIO -->
+        <section id="bids" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="p-4 rounded-xl bg-white border">
+            <h4 class="font-semibold mb-3">Your Bids</h4>
+            <div id="bidsList" class="text-sm text-gray-600 table-scroll">Loading bids...</div>
+          </div>
+
+          <div id="portfolio" class="p-4 rounded-xl bg-white border">
+            <h4 class="font-semibold mb-3">Portfolio</h4>
+            <div id="portfolioList" class="text-sm text-gray-600 table-scroll">No items yet</div>
+            <div class="mt-3">
+              <label class="block text-sm mb-1">Add portfolio file</label>
+              <input id="portfolioFile" type="file" class="text-sm">
+              <button id="uploadPortfolioBtn" class="mt-2 px-3 py-2 bg-blue-600 text-white rounded">Upload</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- MESSAGES & NOTIFICATIONS -->
+        <section id="messages" class="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-4 rounded-xl bg-white border md:col-span-2">
+            <h4 class="font-semibold mb-3">Messages & Threads</h4>
+            <div id="threadsList" class="text-sm text-gray-700 table-scroll">Loading…</div>
+          </div>
+
+          <div class="p-4 rounded-xl bg-white border">
+            <h4 class="font-semibold mb-3">Notifications</h4>
+            <div id="notifList" class="text-sm text-gray-700 table-scroll">Loading…</div>
+            <div class="mt-3 flex gap-2">
+              <button id="markAllReadBtn" class="px-3 py-1 bg-white border rounded">Mark read</button>
+              <button id="clearNotifBtn" class="px-3 py-1 bg-red-50 text-red-600 rounded">Archive</button>
+            </div>
+          </div>
+        </section>
+
+        <!-- ANALYTICS / QUICK ACTIONS -->
+        <section id="analytics" class="p-4 rounded-xl bg-white border">
+          <div class="flex items-start justify-between">
+            <div>
+              <h4 class="font-semibold">Analytics & Quick Actions</h4>
+              <p class="text-sm text-gray-500">Snapshot of your performance</p>
+            </div>
+
+            <div class="flex gap-2">
+              <button id="createProjectBtn" class="px-3 py-2 bg-primary text-white rounded">Create Project</button>
+              <button id="goToPaymentsBtn" class="px-3 py-2 bg-white border rounded">Payments</button>
+            </div>
+          </div>
+
+          <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="p-3 border rounded text-center">
+              <div class="text-sm text-gray-500">Avg Bid / Win</div>
+              <div id="avgBid" class="text-lg font-bold">—</div>
+            </div>
+            <div class="p-3 border rounded text-center">
+              <div class="text-sm text-gray-500">On-time delivery</div>
+              <div id="onTime" class="text-lg font-bold">—</div>
+            </div>
+            <div class="p-3 border rounded text-center">
+              <div class="text-sm text-gray-500">Trust score</div>
+              <div id="trustScore" class="text-lg font-bold">—</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- REFERRAL & SUPPORT -->
+        <section id="referrals" class="p-4 rounded-xl bg-white border grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h4 class="font-semibold">Your Referral Code</h4>
+            <div id="referralCodeBox" class="mt-3 p-3 border rounded text-sm">Loading…</div>
+            <div class="mt-3 flex gap-2">
+              <button id="copyRefBtn" class="px-3 py-1 bg-white border rounded">Copy</button>
+              <button id="viewCommsBtn" class="px-3 py-1 bg-blue-600 text-white rounded">View Commissions</button>
+            </div>
+          </div>
+
+          <div>
+            <h4 class="font-semibold">Support</h4>
+            <p class="text-sm text-gray-500 mt-2">Open a support ticket or check replies</p>
+            <div class="mt-3">
+              <a href="{% url 'support-ticket-create' %}" class="px-3 py-2 bg-white border rounded">Create Ticket</a>
+            </div>
+          </div>
+        </section>
+
+      </section>
+
+    </div>
+
+    <!-- FOOTER -->
+    <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-10 py-10">
+      <div class="max-w-7xl mx-auto px-6 grid md:grid-cols-4 gap-8 text-sm">
+        <div>
+          <div class="flex items-center mb-3">
+            <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-28 h-auto object-contain">
+          </div>
+          <p class="text-gray-600 leading-relaxed">Empowering freelancers, clients, and businesses to collaborate, innovate, and succeed — all in one place.</p>
+        </div>
+
+        <div>
+          <h4 class="text-lg font-semibold mb-3 text-secondary">Platform</h4>
+          <ul class="space-y-2 text-gray-600">
+            <li><a href="#projects" class="hover:text-primary">Marketplace</a></li>
+            <li><a href="#jobs" class="hover:text-primary">Job Listings</a></li>
+            <li><a href="#messages" class="hover:text-primary">Chats</a></li>
+            <li><a href="#notifications" class="hover:text-primary">Notifications</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-lg font-semibold mb-3 text-secondary">Resources</h4>
+          <ul class="space-y-2 text-gray-600">
+            <li><a href="#analytics" class="hover:text-primary">Analytics</a></li>
+            <li><a href="#support" class="hover:text-primary">Support</a></li>
+            <li><a href="#verification" class="hover:text-primary">Verification</a></li>
+          </ul>
+        </div>
+
+        <div>
+          <h4 class="text-lg font-semibold mb-3 text-secondary">About</h4>
+          <ul class="space-y-2 text-gray-600">
+            <li><a href="#about" class="hover:text-primary">About Us</a></li>
+            <li><a href="#team" class="hover:text-primary">Our Team</a></li>
+            <li><a href="#terms" class="hover:text-primary">Terms & Conditions</a></li>
+            <li><a href="#privacy" class="hover:text-primary">Privacy Policy</a></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="border-t border-gray-200 mt-10 pt-6 pb-8 text-center text-gray-500 text-sm">
+        <p>&copy; 2025 <span class="font-semibold text-primary">JobsAlign</span>. All rights reserved.</p>
+        <p class="mt-2 text-blue-500">
+          Developed by
+          <a href="https://somadhansoft.com/" class="hover:underline font-semibold text-blue-600" target="_blank" rel="noopener noreferrer">SomadhanSoft</a>
+        </p>
+      </div>
+    </footer>
+
+  </main>
+
+  <!-- ====== SCRIPT: Dashboard logic & API mapping ====== -->
+  <script>
+    (function(){
+      // Helpers
+      const apiGet = async (path, opts={}) => {
+        const headers = opts.headers || {};
+        const token = localStorage.getItem('access_token');
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        try {
+          const r = await fetch(path, { method: 'GET', headers });
+          return { ok: r.ok, status: r.status, json: await safeJson(r) };
+        } catch(e){
+          console.error('fetch error', path, e);
+          return { ok:false, status:0, json: { detail: 'Network error' } };
+        }
+      };
+
+      const apiPost = async (path, body={}, opts={}) => {
+        const headers = { 'Content-Type':'application/json', ...(opts.headers||{}) };
+        const token = localStorage.getItem('access_token');
+        if (token) headers['Authorization'] = 'Bearer ' + token;
+        try {
+          const r = await fetch(path, { method: 'POST', headers, body: JSON.stringify(body) });
+          return { ok: r.ok, status: r.status, json: await safeJson(r) };
+        } catch(e){
+          console.error('post error', path, e);
+          return { ok:false, status:0, json: { detail: 'Network error' } };
+        }
+      };
+
+      async function safeJson(response){
+        try { return await response.json(); } catch(e) { return {}; }
+      }
+
+      // DOM refs
+      const displayName = document.getElementById('displayName');
+      const displayRole = document.getElementById('displayRole');
+      const profilePhoto = document.getElementById('profilePhoto');
+      const miniAvatar = document.getElementById('miniAvatar');
+      const openProfileBtn = document.getElementById('profileViewBtn');
+      const walletBalance = document.getElementById('walletBalance');
+      const totalEarnings = document.getElementById('totalEarnings');
+      const completedProjects = document.getElementById('completedProjects');
+      const projectsList = document.getElementById('projectsList');
+      const projectsMessages = document.getElementById('projectsMessages');
+      const bidsList = document.getElementById('bidsList');
+      const notifList = document.getElementById('notifList');
+      const notifCount = document.getElementById('notifCount');
+      const referralCodeBox = document.getElementById('referralCodeBox');
+      const portfolioList = document.getElementById('portfolioList');
+
+      const showMessage = (el, text, type='info') => {
+        el.innerHTML = text;
+        // type later for color
+      };
+
+      // Profile loader
+      async function loadProfile(){
+        const res = await apiGet('/api/accounts/profile/');
+        if (res.ok){
+          const u = res.json;
+          // fields from accounts.models: full_name, user_type, profile_photo, total_earnings, completed_orders, rating, is_verified, wallet
+          displayName.textContent = u.full_name || u.username || u.email || 'You';
+          displayRole.textContent = (u.user_type || 'freelancer').charAt(0).toUpperCase() + (u.user_type || 'Freelancer').slice(1);
+          miniName.textContent = u.full_name || u.email;
+          if (u.profile_photo) {
+            profilePhoto.src = u.profile_photo;
+            miniAvatar.src = u.profile_photo;
+          } else {
+            profilePhoto.src = "{% static 'images/default-avatar.png' %}";
+            miniAvatar.src = "{% static 'images/default-avatar.png' %}";
+          }
+          // earnings / projects
+          totalEarnings.textContent = (u.total_earnings !== undefined) ? (u.total_earnings) : '0';
+          completedProjects.textContent = 'Completed: ' + (u.completed_orders || 0);
+
+          // verification CTA
+          if (!u.is_verified){
+            document.getElementById('verifyCTA').classList.remove('hidden');
+            document.getElementById('verifyCTA').addEventListener('click', () => {
+              window.location.href = '/api/verification/request/create/';
+            });
+          } else {
+            document.getElementById('verifyCTA').classList.add('hidden');
+          }
+
+          // Save user_type locally if not present
+          if (u.user_type) localStorage.setItem('user_type', u.user_type);
+
+        } else {
+          console.warn('Profile fetch failed', res.status, res.json);
+          // no token? redirect
+          if (res.status === 401) {
+            // not logged in
+            // window.location.href = '/api/accounts/login-page/';
+            showMessage(displayName, 'Please login to continue');
+          }
+        }
+      }
+
+      // Wallet loader
+      async function loadWallet(){
+        const r = await apiGet('/api/payments/wallet/');
+        if (r.ok && r.json){
+          walletBalance.textContent = (r.json.balance || '0') + ' ' + (r.json.currency || '');
+        } else {
+          walletBalance.textContent = '—';
+        }
+      }
+
+      // Notifications loader
+      async function loadNotifs(){
+        const r = await apiGet('/api/notifications/');
+        if (r.ok && Array.isArray(r.json)){
+          notifList.innerHTML = '';
+          let unread = 0;
+          r.json.forEach(n=>{
+            const div = document.createElement('div');
+            div.className = 'py-2 border-b';
+            div.innerHTML = `<div class="flex justify-between"><div class="text-sm">${n.title || n.verb || 'Notification'}</div><div class="text-xs text-gray-400">${new Date(n.created_at || n.created_at).toLocaleString()}</div></div><div class="text-xs text-gray-500 mt-1">${n.message || ''}</div>`;
+            notifList.appendChild(div);
+            if (!n.read) unread++;
+          });
+          if (unread>0){
+            notifCount.textContent = unread;
+            notifCount.classList.remove('hidden');
+          } else {
+            notifCount.classList.add('hidden');
+          }
+        } else {
+          notifList.innerHTML = '<div class="text-sm text-gray-500">No notifications</div>';
+        }
+      }
+
+      // Referrals
+      async function loadReferral(){
+        const r = await apiGet('/api/referrals/me/code/');
+        if (r.ok && r.json){
+          referralCodeBox.innerHTML = `<div class="font-medium text-lg">${r.json.code || '—'}</div><div class="text-xs text-gray-500 mt-1">Total signups: ${r.json.total_signups||0}</div>`;
+        } else {
+          referralCodeBox.innerHTML = '<div class="text-sm text-gray-500">No referral code</div>';
+        }
+      }
+
+      // Categories (for search filters)
+      async function loadCategories(){
+        const r = await apiGet('/api/categories/');
+        if (r.ok && Array.isArray(r.json)){
+          // not showing category UI, but can be used for filtering
+          console.log('categories', r.json);
+        }
+      }
+
+      // Projects fetcher (marketplace). Many projects endpoints might be POST-only; attempt GET, fallback gracefully.
+      async function fetchProjects(q=''){
+        projectsMessages.textContent = 'Loading projects…';
+        projectsList.innerHTML = '';
+        // Try GET
+        let r = await apiGet('/api/marketplace/projects/?q=' + encodeURIComponent(q));
+        if (r.ok && Array.isArray(r.json)){
+          renderProjects(r.json);
+          projectsMessages.textContent = '';
+          return;
+        }
+        // If 405 or not list, try a POST search (some APIs expect POST)
+        r = await apiPost('/api/marketplace/projects/search/', { q });
+        if (r.ok && Array.isArray(r.json)){
+          renderProjects(r.json);
+          projectsMessages.textContent = '';
+          return;
+        }
+        // fallback: try jobs/ or projects/list/
+        r = await apiGet('/api/marketplace/jobs/?q=' + encodeURIComponent(q));
+        if (r.ok && Array.isArray(r.json)){
+          renderProjects(r.json);
+          projectsMessages.textContent = '';
+          return;
+        }
+
+        // Nothing available: show help text
+        projectsMessages.textContent = 'Marketplace listing endpoint not available (server returned ' + (r.status || 'error') + '). If you have an alternate endpoint for project listings (e.g. /api/marketplace/jobs/ or /api/marketplace/list/), update the dashboard mapping.';
+        projectsList.innerHTML = '<div class="text-sm text-gray-500">No projects available</div>';
+      }
+
+      function renderProjects(list){
+        if (!list || list.length === 0){
+          projectsList.innerHTML = '<div class="text-sm text-gray-500">No projects found</div>';
+          return;
+        }
+        projectsList.innerHTML = '';
+        list.forEach(p=>{
+          const el = document.createElement('div');
+          el.className = 'p-3 border rounded dash-card flex items-start justify-between gap-4';
+          const skills = (p.skills||[]).slice(0,4).map(s=>`<span class="text-xs px-2 py-1 bg-gray-100 rounded">${s.name||s}</span>`).join(' ');
+          el.innerHTML = `<div class="flex-1">
+              <div class="flex items-start justify-between gap-4">
+                <div>
+                  <h4 class="font-semibold">${p.title || p.name || 'Untitled'}</h4>
+                  <p class="text-xs text-gray-500 mt-1">${(p.description||'').slice(0,140)}</p>
+                </div>
+                <div class="text-right">
+                  <div class="text-sm font-semibold">${p.currency || p.currency_code || 'BDT'} ${p.budget_min || p.budget || ''}${p.budget_max ? ' - ' + p.budget_max : ''}</div>
+                  <div class="text-xs text-gray-400">${p.status || ''}</div>
+                </div>
+              </div>
+              <div class="mt-3 flex gap-2">${skills}</div>
+            </div>
+            <div class="flex flex-col gap-2 items-end">
+              <button class="px-3 py-2 bg-white border rounded bidBtn" data-id="${p.id}">Bid</button>
+              <button class="px-3 py-2 bg-blue-600 text-white rounded viewBtn" data-id="${p.id}">View</button>
+            </div>`;
+          projectsList.appendChild(el);
+        });
+
+        // attach handlers
+        document.querySelectorAll('.bidBtn').forEach(btn=>{
+          btn.addEventListener('click', (e)=>{
+            const id = e.currentTarget.dataset.id;
+            openBidModal(id);
+          });
+        });
+        document.querySelectorAll('.viewBtn').forEach(btn=>{
+          btn.addEventListener('click', (e)=>{
+            const id = e.currentTarget.dataset.id;
+            window.location.href = '/frontend/pages/jobs_detail.html?project=' + id;
+          });
+        });
+      }
+
+      // Bids loader
+      async function loadBids(){
+        const r = await apiGet('/api/marketplace/bids/');
+        if (r.ok && Array.isArray(r.json)){
+          bidsList.innerHTML = '';
+          r.json.forEach(b=>{
+            const d = document.createElement('div');
+            d.className = 'py-2 border-b';
+            d.innerHTML = `<div class="flex justify-between"><div>${b.project_title || (b.project && b.project.title) || 'Project'}</div><div class="text-sm text-gray-500">${b.amount} ${b.currency || ''}</div></div><div class="text-xs text-gray-500 mt-1">${b.status || ''}</div>`;
+            bidsList.appendChild(d);
+          });
+        } else {
+          bidsList.innerHTML = '<div class="text-sm text-gray-500">No bids yet or endpoint missing</div>';
+        }
+      }
+
+      // Threads/messages loader (chats)
+      async function loadThreads(){
+        const r = await apiGet('/api/chats/my-threads/');
+        if (r.ok && Array.isArray(r.json)){
+          const box = document.getElementById('threadsList'); box.innerHTML = '';
+          r.json.forEach(t=>{
+            const d = document.createElement('div');
+            d.className = 'py-2 border-b flex items-start gap-3';
+            d.innerHTML = `<img src="${t.other_avatar|| '{% static 'images/logo.jpeg' %}' }" class="w-10 h-10 rounded-full object-cover"><div><div class="text-sm font-medium">${t.other_name}</div><div class="text-xs text-gray-500">${t.last_message || ''}</div></div>`;
+            box.appendChild(d);
+          });
+        } else {
+          document.getElementById('threadsList').innerHTML = '<div class="text-sm text-gray-500">No threads or endpoint missing</div>';
+        }
+      }
+
+      // Portfolio upload
+      document.getElementById('uploadPortfolioBtn').addEventListener('click', async ()=>{
+        const f = document.getElementById('portfolioFile').files[0];
+        if (!f){ alert('Choose a file'); return; }
+        const form = new FormData(); form.append('file', f);
+        const token = localStorage.getItem('access_token');
+        const headers = token ? { 'Authorization': 'Bearer ' + token } : {};
+        try {
+          const resp = await fetch('/api/marketplace/portfolio/', { method:'POST', headers, body: form });
+          const j = await safeJson(resp);
+          if (resp.ok) {
+            alert('Uploaded');
+            loadPortfolio();
+          } else {
+            alert('Upload failed: ' + (j.detail || JSON.stringify(j)));
+          }
+        } catch(e){ alert('Upload error'); }
+      });
+
+      async function loadPortfolio(){
+        const r = await apiGet('/api/marketplace/portfolio/');
+        if (r.ok && Array.isArray(r.json)){
+          portfolioList.innerHTML = '';
+          r.json.forEach(p=>{
+            const div = document.createElement('div');
+            div.className = 'py-2 border-b';
+            div.innerHTML = `<div class="font-medium">${p.title || p.name || 'Portfolio item'}</div><div class="text-xs text-gray-500">${p.description||''}</div>`;
+            portfolioList.appendChild(div);
+          });
+        } else {
+          portfolioList.innerHTML = '<div class="text-sm text-gray-500">No portfolio</div>';
+        }
+      }
+
+      // Bid modal (simple prompt)
+      function openBidModal(projectId){
+        const amount = prompt('Enter your bid amount (numbers only):');
+        const cover = prompt('Short cover letter (optional):');
+        if (!amount) return;
+        postBid(projectId, amount, cover);
+      }
+
+      async function postBid(projectId, amount, cover){
+        const r = await apiPost('/api/marketplace/bids/', { project: projectId, amount, cover_letter: cover });
+        if (r.ok){
+          alert('Bid placed');
+          loadBids();
+        } else {
+          alert('Bid failed: ' + (r.json.detail||JSON.stringify(r.json)));
+        }
+      }
+
+      // Quick actions: deposit / withdraw (open payments page)
+      document.getElementById('depositBtn').addEventListener('click', ()=> {
+        window.location.href = '/api/payments/initiate/'; // or payments UI
+      });
+      document.getElementById('withdrawBtn').addEventListener('click', ()=> {
+        window.location.href = '/frontend/pages/wallet.html';
+      });
+      document.getElementById('createProjectBtn').addEventListener('click', ()=> {
+        window.location.href = '/frontend/pages/create_project.html';
+      });
+      document.getElementById('goToPaymentsBtn').addEventListener('click', ()=> {
+        window.location.href = '/frontend/pages/wallet.html';
+      });
+
+      // Project search
+      document.getElementById('searchBtn').addEventListener('click', () => {
+        const q = document.getElementById('projectSearch').value || '';
+        fetchProjects(q);
+      });
+
+      // Notifications actions
+      document.getElementById('markAllReadBtn').addEventListener('click', async ()=>{
+        // collect ids
+        const r = await apiPost('/api/notifications/read/', { ids: [] });
+        if (r.ok) loadNotifs();
+      });
+      document.getElementById('clearNotifBtn').addEventListener('click', async ()=>{
+        const r = await apiPost('/api/notifications/archive/', { ids: [] });
+        if (r.ok) loadNotifs();
+      });
+
+      // Logout
+      document.getElementById('logoutBtn').addEventListener('click', async (e)=>{
+        e.preventDefault();
+        // call logout endpoint (if exists) or just clear tokens
+        try {
+          const r = await apiPost('/api/accounts/logout/', {});
+          // ignore response code
+        } catch(e){}
+        localStorage.removeItem('access_token');
+        localStorage.removeItem('refresh_token');
+        window.location.href = '/'; // home
+      });
+
+      // small profile dropdown toggle
+      const profileBtn = document.getElementById('profileBtn');
+      profileBtn && profileBtn.addEventListener('click', ()=>{
+        document.getElementById('profileDropdown').classList.toggle('hidden');
+      });
+
+      // copy referral
+      document.getElementById('copyRefBtn').addEventListener('click', ()=>{
+        const txt = referralCodeBox.innerText.trim();
+        navigator.clipboard?.writeText(txt).then(()=> alert('Copied'));
+      });
+
+      // init loader
+      async function init(){
+        // load essentials in parallel
+        await Promise.allSettled([ loadProfile(), loadWallet(), loadNotifs(), loadReferral(), loadCategories(), loadPortfolio() ]);
+        // load lists
+        fetchProjects('');
+        loadBids();
+        loadThreads();
+
+        // if user type not freelancer, show hint
+        const userType = localStorage.getItem('user_type') || (document.getElementById('displayRole')?.innerText || 'freelancer');
+        if (userType && userType.toLowerCase() !== 'freelancer') {
+          // show a banner that user can switch to buyer/referrer dashboards
+          console.log('Role is', userType);
+        }
+      }
+
+      // run
+      init();
+
+      //Expose for debugging
+      window.JA = { loadProfile, loadWallet, fetchProjects, loadBids, loadNotifs, loadReferral };
+
+    })();
+  </script>
+
+</body>
+</html>

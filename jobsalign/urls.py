@@ -20,5 +20,7 @@ urlpatterns = [
     path("api/support/", include("support.urls")),
     path("api/referrals/", include("referrals.urls")),
     path('', TemplateView.as_view(template_name='index.html'), name='home'),
-
+    path('frontend/pages/login.html', TemplateView.as_view(template_name="pages/login.html")),
+    path('frontend/pages/freelancer_dashboard.html', TemplateView.as_view(template_name="pages/freelancer_dashboard.html")),
+    path('frontend/pages/freelancer_profile.html', TemplateView.as_view(template_name="pages/freelancer_profile.html")),
 ]
