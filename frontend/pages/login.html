@@ -109,19 +109,18 @@
         msg.className = "text-green-400 text-center";
         msg.textContent = "✅ Login successful! Redirecting...";
 
-        // 4️⃣ Role-based redirect
+        // 4️⃣ Role-based redirect (🔗 corrected for Django URL pattern)
         setTimeout(() => {
-          if (role === "freelancer") {
-            window.location.href = "/frontend/pages/freelancer_dashboard.html";
-          } else if (role === "buyer") {
-            window.location.href = "/frontend/pages/buyer_dashboard.html";
-          } else if (role === "referrer") {
-            window.location.href = "/frontend/pages/referrer_dashboard.html";
-          } else {
-            window.location.href = "/";
-          }
-        }, 1000);
-
+        if (role === "freelancer") {
+          window.location.href = "/frontend/pages/freelancer_dashboard.html";
+        } else if (role === "buyer") {
+          window.location.href = "/frontend/pages/buyer_dashboard.html";
+        } else if (role === "referrer") {
+          window.location.href = "/frontend/pages/referrer_dashboard.html";
+        } else {
+          window.location.href = "/";
+        }
+      }, 1000);
       } catch (err) {
         console.error("Login error:", err);
         msg.className = "text-red-400 text-center";

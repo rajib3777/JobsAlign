@@ -30,10 +30,17 @@ urlpatterns = [
     path('register/', TemplateView.as_view(template_name="register.html"), name='register_page'),
 
     # ✅ Frontend (Freelancer)
-    path('frontend/pages/freelancer_dashboard.html', TemplateView.as_view(template_name="pages/freelancer_dashboard.html")),
-    path('frontend/pages/freelancer_profile/', 
-         TemplateView.as_view(template_name="pages/freelancer_profile.html"), 
-         name='freelancer_profile'),
+    # Freelancer portal
+    path("frontend/pages/freelancer_dashboard.html", 
+     TemplateView.as_view(template_name="freelancer_dashboard.html")),
+    path("freelancer/profile/", TemplateView.as_view(template_name="pages/freelancer_profile.html"), name="freelancer_profile"),
+    path("freelancer/jobs/", TemplateView.as_view(template_name="pages/jobs.html"), name="freelancer_jobs"),
+    path("freelancer/chat/", TemplateView.as_view(template_name="pages/chat.html"), name="freelancer_chat"),
+    path("freelancer/payments/", TemplateView.as_view(template_name="pages/payments.html"), name="freelancer_payments"),
+    path("freelancer/reviews/", TemplateView.as_view(template_name="pages/reviews.html"), name="freelancer_reviews"),
+    path("freelancer/analytics/", TemplateView.as_view(template_name="pages/analytics.html"), name="freelancer_analytics"),
+    path("freelancer/verification/", TemplateView.as_view(template_name="pages/verification.html"), name="freelancer_verification"),
+    path("freelancer/support/", TemplateView.as_view(template_name="pages/support.html"), name="freelancer_support"),
 ]
 
 

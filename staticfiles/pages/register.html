@@ -1,0 +1,164 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register | JobsAlign</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="relative bg-gray-900">
+
+  <!-- Background -->
+  <div class="fixed inset-0 -z-10">
+    <img src="{% static 'images/tran3.jpg' %}" 
+         alt="Background" 
+         class="w-full h-full object-cover filter blur-xl scale-110 brightness-50">
+  </div>
+
+  <!-- Scrollable wrapper -->
+  <div class="min-h-screen flex items-center justify-center py-10 px-4">
+    <div class="w-full max-w-6xl flex flex-col md:flex-row bg-white/15 backdrop-blur-2xl 
+                shadow-2xl rounded-3xl overflow-hidden border border-white/20">
+
+      <!-- Left image -->
+      <div class="hidden md:flex md:w-1/2 items-center justify-center overflow-hidden">
+        <img src="{% static 'images/regi.jpg' %}" 
+             alt="Register illustration" 
+             class="w-full h-full object-cover object-center rounded-l-3xl">
+      </div>
+
+      <!-- Right Form -->
+      <div class="w-full md:w-1/2 flex flex-col justify-center p-8 md:p-12 text-white">
+        
+        <!-- Logo -->
+        <div class="flex justify-center mb-6">
+          <div class="w-24 h-24 rounded-full bg-white flex items-center justify-center shadow-2xl ring-4 ring-blue-400/40">
+            <img src="{% static 'images/logo.jpeg' %}" 
+                 alt="JobsAlign Logo" 
+                 class="w-16 h-16 object-contain rounded-full">
+          </div>
+        </div>
+
+        <!-- Title -->
+        <h2 class="text-3xl font-bold text-center mb-2 text-white drop-shadow-lg">Create Your Account</h2>
+        <p class="text-gray-300 text-center mb-8">Join the JobsAlign community and start your journey</p>
+
+        <!-- Form -->
+        <form id="registerForm" class="space-y-5 max-w-md mx-auto w-full">
+
+          <div>
+            <label class="block text-gray-200 mb-1">Full Name</label>
+            <input id="full_name" type="text" placeholder="Your full name"
+                   class="w-full px-4 py-2 border border-gray-400 rounded-lg bg-white/10 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-gray-200 mb-1">Email</label>
+            <input id="email" type="email" placeholder="Your email address"
+                   class="w-full px-4 py-2 border border-gray-400 rounded-lg bg-white/10 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-gray-200 mb-1">Username</label>
+            <input id="username" type="text" placeholder="Choose a username"
+                   class="w-full px-4 py-2 border border-gray-400 rounded-lg bg-white/10 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+          </div>
+
+          <div>
+            <label class="block text-gray-200 mb-2">Register as</label>
+            <div class="flex flex-wrap gap-4">
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="user_type" value="freelancer" class="accent-blue-500">
+                <span>Freelancer</span>
+              </label>
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="user_type" value="buyer" class="accent-blue-500">
+                <span>Buyer</span>
+              </label>
+              <label class="flex items-center space-x-2">
+                <input type="radio" name="user_type" value="referrer" class="accent-blue-500">
+                <span>Referrer</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-gray-200 mb-1">Password</label>
+              <input id="password" type="password" placeholder="Create password"
+                     class="w-full px-4 py-2 border border-gray-400 rounded-lg bg-white/10 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+            </div>
+            <div>
+              <label class="block text-gray-200 mb-1">Confirm Password</label>
+              <input id="password2" type="password" placeholder="Re-enter password"
+                     class="w-full px-4 py-2 border border-gray-400 rounded-lg bg-white/10 text-white placeholder-gray-300 focus:ring-2 focus:ring-blue-400 focus:outline-none">
+            </div>
+          </div>
+
+          <button type="submit"
+                  class="w-full py-3 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 
+                         text-white font-semibold rounded-lg transition transform hover:scale-[1.02] shadow-lg">
+            Create Account
+          </button>
+        </form>
+
+        <p id="message" class="mt-4 text-center text-sm"></p>
+
+        <p class="mt-6 text-center text-gray-300 text-sm">
+          Already have an account?
+          <a href="{% url 'login_page' %}" class="text-blue-400 font-semibold hover:underline">Login</a>
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Backend Integration -->
+  <script>
+    document.getElementById("registerForm").addEventListener("submit", async function(e){
+      e.preventDefault();
+
+      const user_type = document.querySelector('input[name="user_type"]:checked');
+      if(!user_type){
+        alert("Please select user type.");
+        return;
+      }
+
+      const data = {
+        full_name: document.getElementById("full_name").value,
+        email: document.getElementById("email").value,
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value,
+        password2: document.getElementById("password2").value,
+        user_type: user_type.value
+      };
+
+      const messageBox = document.getElementById("message");
+      messageBox.textContent = "⏳ Registering...";
+      messageBox.className = "text-yellow-300 text-center";
+
+      try {
+        const response = await fetch("/api/accounts/register/", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(data)
+        });
+
+        const result = await response.json();
+
+        if (response.ok) {
+          messageBox.className = "text-green-400 text-center";
+          messageBox.textContent = "✅ Registration successful! Please check your email to verify.";
+          document.getElementById("registerForm").reset();
+        } else {
+          messageBox.className = "text-red-400 text-center";
+          messageBox.textContent = result.detail || Object.values(result).join(", ");
+        }
+      } catch (error) {
+        messageBox.className = "text-red-400 text-center";
+        messageBox.textContent = "⚠️ Server error. Try again later.";
+      }
+    });
+  </script>
+</body>
+</html>

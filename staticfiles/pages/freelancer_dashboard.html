@@ -1,0 +1,591 @@
+<!-- frontend/pages/freelancer_dashboard_v3.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Freelancer Dashboard • JobsAlign</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+
+  <style>
+    /* small visual polish */
+    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(6px); }
+    .shadow-soft { box-shadow: 0 8px 30px rgba(12,18,30,0.06); }
+    .card { transition: transform .12s ease, box-shadow .12s; }
+    .card:hover { transform: translateY(-6px); box-shadow: 0 14px 40px rgba(12,18,30,0.08); }
+    .truncate-multiline { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+  </style>
+</head>
+<body class="bg-gradient-to-b from-gray-50 to-white text-gray-800">
+
+  <!-- NAVBAR -->
+  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+      <!-- ✅ Left: Full logo -->
+      <div class="flex items-center gap-4">
+        <a href="/">
+          <img id="navLogo" src="/static/images/logo.jpeg" 
+              class="h-12 w-auto object-contain" 
+              alt="JobsAlign Logo">
+        </a>
+
+        <!-- ✅ Nav links (Dashboard removed) -->
+        <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
+          <a id="navProfileLink" 
+            href="/frontend/pages/freelancer_profile/" 
+            class="text-slate-600 hover:text-blue-600">Profile</a>
+        </nav>
+      </div>
+
+      <!-- ✅ Right: Search + Profile -->
+      <div class="flex items-center gap-4">
+        <!-- Search bar -->
+        <div class="hidden md:flex items-center border rounded px-3 py-1 bg-white">
+          <i class="fa fa-search text-gray-400 mr-2"></i>
+          <input id="searchInputNav" 
+                type="text" 
+                placeholder="Search jobs..." 
+                class="px-1 py-1 outline-none text-sm w-48 bg-transparent"/>
+          <button id="searchBtn" 
+                  class="ml-2 px-3 py-1 bg-blue-600 text-white text-sm rounded">
+            Search
+          </button>
+        </div>
+
+        <!-- Notifications -->
+        <button id="notifOpen" class="p-2 rounded hover:bg-gray-100" title="Notifications">
+          <i class="fa-regular fa-bell text-gray-700"></i>
+        </button>
+
+        <!-- Profile dropdown / name -->
+        <div class="flex items-center gap-2 cursor-pointer" 
+            onclick="window.location.href='/frontend/pages/freelancer_profile/';">
+          <img id="avatarSmall" 
+              src="/static/images/default-avatar.png" 
+              class="w-9 h-9 rounded-full object-cover border" 
+              alt="avatar"/>
+          <div class="hidden md:block text-sm">
+            <div id="navName" class="font-medium">You</div>
+            <div id="navRole" class="text-xs text-gray-500">Freelancer</div>
+          </div>
+        </div>
+
+        <button id="logoutBtn" 
+                class="ml-2 text-sm text-red-600 hidden md:inline">
+          Logout
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- HERO / SUMMARY -->
+  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
+    <div class="relative bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl overflow-hidden shadow-soft">
+      <div class="absolute inset-0 opacity-30" style="background-image: linear-gradient(120deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));"></div>
+      <div class="relative p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
+        <div class="flex items-center gap-6">
+          <img id="heroProfile" src="/static/images/default-avatar.png" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg" alt="profile"/>
+          <div class="text-white">
+            <h2 id="heroName" class="text-2xl font-bold">Freelancer</h2>
+            <p id="heroTagline" class="text-sm opacity-90 mt-1">Tagline goes here</p>
+            <div class="mt-3 flex items-center gap-3 text-sm">
+              <div class="flex items-center gap-2">
+                <i class="fa fa-star text-yellow-400"></i><span id="heroRating" class="font-semibold">0.0</span>
+              </div>
+              <div class="text-sm opacity-90">• <span id="heroLevel">Level</span></div>
+              <div class="text-sm opacity-90">• <span id="heroLocation">Location</span></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="ml-auto flex gap-3">
+          <button id="editProfileBtn" class="px-4 py-2 bg-white/90 text-blue-700 rounded shadow-sm hover:bg-white">Edit Profile</button>
+          <button id="createGigBtn" class="px-4 py-2 bg-yellow-500 text-white rounded shadow-sm hover:bg-yellow-600">Create Gig</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN GRID -->
+  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+    <!-- LEFT: MAIN CONTENT -->
+    <section class="lg:col-span-8 space-y-6">
+
+      <!-- Cards: Earnings / Projects / New Messages -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div class="card bg-white p-5 rounded-xl border">
+          <div class="text-sm text-gray-500">Total Earnings</div>
+          <div id="cardEarnings" class="text-2xl font-bold mt-2">—</div>
+          <div class="text-xs text-gray-400 mt-2">This month</div>
+        </div>
+
+        <div class="card bg-white p-5 rounded-xl border">
+          <div class="text-sm text-gray-500">Active Projects</div>
+          <div id="cardActive" class="text-2xl font-bold mt-2">—</div>
+          <div class="text-xs text-gray-400 mt-2">Ongoing jobs</div>
+        </div>
+
+        <div class="card bg-white p-5 rounded-xl border">
+          <div class="text-sm text-gray-500">Unread Messages</div>
+          <div id="cardMessages" class="text-2xl font-bold mt-2">—</div>
+          <div class="text-xs text-gray-400 mt-2">Inbox</div>
+        </div>
+      </div>
+
+      <!-- Projects / Marketplace -->
+      <div class="bg-white p-6 rounded-xl border shadow-soft">
+        <div class="flex items-center justify-between">
+          <h3 class="text-lg font-semibold">Marketplace</h3>
+          <div class="flex items-center gap-3">
+            <input id="searchInput" class="border px-3 py-2 rounded w-72" placeholder="Search projects by title, skill..." />
+            <button id="searchBtn" class="px-3 py-2 bg-blue-600 text-white rounded">Search</button>
+          </div>
+        </div>
+
+        <div id="projectsGrid" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- dynamic projects -->
+        </div>
+
+        <div class="mt-4 text-sm text-gray-500">If marketplace endpoints are missing you will see a helpful message here.</div>
+      </div>
+
+      <!-- Activity / Notifications -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="bg-white p-6 rounded-xl border shadow-soft">
+          <h4 class="font-semibold">Messages</h4>
+          <div id="threadsList" class="mt-3 space-y-3 max-h-56 overflow-auto"></div>
+        </div>
+
+        <div class="bg-white p-6 rounded-xl border shadow-soft">
+          <h4 class="font-semibold">Notifications</h4>
+          <div id="notifList" class="mt-3 space-y-3 max-h-56 overflow-auto"></div>
+        </div>
+      </div>
+
+      <!-- Analytics charts placeholder (simple cards) -->
+      <div class="bg-white p-6 rounded-xl border shadow-soft">
+        <h4 class="font-semibold">Analytics Overview</h4>
+        <div id="analyticsArea" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div class="p-3 rounded-lg bg-gradient-to-br from-white to-slate-50 border">
+            <div class="text-xs text-gray-500">Revenue (30d)</div>
+            <div id="analyticsRevenue" class="text-xl font-bold mt-2">—</div>
+          </div>
+          <div class="p-3 rounded-lg bg-gradient-to-br from-white to-slate-50 border">
+            <div class="text-xs text-gray-500">Completed</div>
+            <div id="analyticsCompleted" class="text-xl font-bold mt-2">—</div>
+          </div>
+          <div class="p-3 rounded-lg bg-gradient-to-br from-white to-slate-50 border">
+            <div class="text-xs text-gray-500">Avg Response</div>
+            <div id="analyticsResponse" class="text-xl font-bold mt-2">—</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RIGHT: SIDEBAR -->
+    <aside class="lg:col-span-4 space-y-6">
+
+      <!-- Profile card -->
+      <div class="bg-white p-5 rounded-xl border shadow-soft">
+        <div class="flex items-center gap-4">
+          <img id="sidebarAvatar" src="/static/images/default-avatar.png" class="w-16 h-16 rounded-full object-cover border"/>
+          <div>
+            <div id="sidebarName" class="font-semibold">You</div>
+            <div id="sidebarRole" class="text-sm text-gray-500">Freelancer</div>
+            <div class="mt-2 text-sm text-gray-500">Rating: <span id="sidebarRating">—</span></div>
+          </div>
+        </div>
+
+        <div class="mt-4 space-y-2 text-sm">
+          <div>Wallet: <span id="sidebarWallet" class="font-semibold">—</span></div>
+          <div>Referrals: <span id="sidebarReferrals">—</span></div>
+          <div>Verification: <span id="sidebarKyc">—</span></div>
+        </div>
+
+        <div class="mt-4 flex gap-2">
+          <a href="/frontend/pages/freelancer_profile.html" class="flex-1 text-center px-3 py-2 bg-blue-600 text-white rounded">View Profile</a>
+          <button id="quickEdit" class="flex-1 px-3 py-2 border rounded">Edit</button>
+        </div>
+      </div>
+
+      <!-- Quick actions -->
+      <div class="bg-white p-5 rounded-xl border shadow-soft">
+        <h5 class="font-semibold">Quick Actions</h5>
+        <div class="mt-3 grid grid-cols-2 gap-2">
+          <button id="actionCreateGig" class="p-2 bg-gradient-to-br from-yellow-400 to-yellow-500 text-black rounded shadow">Create Gig</button>
+          <button id="actionPortfolio" class="p-2 bg-gradient-to-br from-green-400 to-green-500 text-white rounded">Portfolio</button>
+          <button id="actionWallet" class="p-2 border rounded">Wallet</button>
+          <button id="actionKyc" class="p-2 border rounded">KYC</button>
+        </div>
+      </div>
+
+      <!-- Recent portfolio preview -->
+      <div class="bg-white p-5 rounded-xl border shadow-soft">
+        <h5 class="font-semibold">Portfolio Preview</h5>
+        <div id="portfolioPreview" class="mt-3 grid grid-cols-1 gap-3"></div>
+      </div>
+    </aside>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="text-center text-sm text-gray-500 py-8">
+    <div class="max-w-7xl mx-auto">© 2025 <strong class="text-blue-600">JobsAlign</strong>. All rights reserved. Developed by SomadhanSoft.</div>
+  </footer>
+
+  <!-- EDIT PROFILE SLIDEOVER (re-used) -->
+  <div id="editSlide" class="fixed inset-0 hidden z-50">
+    <div class="absolute inset-0 bg-black/40"></div>
+    <div class="absolute right-0 top-0 h-full w-full sm:w-[520px] bg-white shadow-xl p-6 overflow-auto">
+      <div class="flex items-center justify-between">
+        <h3 class="text-lg font-semibold">Edit Profile</h3>
+        <button id="closeEdit" class="text-gray-500">✕</button>
+      </div>
+      <form id="editForm" class="mt-4 space-y-3">
+        <input id="edit_full_name" class="w-full border px-3 py-2 rounded" placeholder="Full name" />
+        <input id="edit_tagline" class="w-full border px-3 py-2 rounded" placeholder="Tagline" />
+        <textarea id="edit_bio" class="w-full border px-3 py-2 rounded" rows="5" placeholder="Short bio"></textarea>
+        <input id="edit_website" class="w-full border px-3 py-2 rounded" placeholder="Website URL" />
+        <input id="edit_skills" class="w-full border px-3 py-2 rounded" placeholder="Comma separated skills" />
+        <div class="flex items-center gap-3">
+          <label class="flex items-center gap-2">
+            Profile photo <input id="edit_profile_photo" type="file" accept="image/*" class="hidden" />
+            <span id="editProfilePick" class="px-3 py-2 bg-gray-100 rounded cursor-pointer text-sm">Choose</span>
+          </label>
+          <label class="flex items-center gap-2">
+            Cover photo <input id="edit_cover_photo" type="file" accept="image/*" class="hidden" />
+            <span id="editCoverPick" class="px-3 py-2 bg-gray-100 rounded cursor-pointer text-sm">Choose</span>
+          </label>
+        </div>
+
+        <div class="flex justify-end gap-2">
+          <button type="button" id="cancelEditBtn" class="px-4 py-2 border rounded">Cancel</button>
+          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- SCRIPTS -->
+  <script>
+  (function(){
+    const token = localStorage.getItem('access_token');
+    if(!token){
+      // login.html is outside pages folder per your message
+      window.location.href = '/login.html';
+      return;
+    }
+
+    /* ---- Helpers ---- */
+    async function safeJson(resp){ try { return await resp.json(); } catch(e){ return null; } }
+    async function apiGet(path){
+      try {
+        const r = await fetch(path, { headers: { 'Authorization': 'Bearer ' + token } });
+        return { ok: r.ok, status: r.status, json: await safeJson(r) };
+      } catch(e){ return { ok:false, status:0, json:null }; }
+    }
+    async function apiPost(path, body, isForm=false){
+      try {
+        const opts = { method: 'POST', headers: {}, body: body };
+        if(!isForm) opts.headers['Content-Type'] = 'application/json';
+        if(token) opts.headers['Authorization'] = 'Bearer ' + token;
+        const r = await fetch(path, opts);
+        return { ok: r.ok, status: r.status, json: await safeJson(r) };
+      } catch(e){ return { ok:false, status:0, json:null }; }
+    }
+    async function apiPut(path, body, isForm=false){
+      try {
+        const opts = { method: 'PUT', headers: {}, body: body };
+        if(!isForm) opts.headers['Content-Type'] = 'application/json';
+        if(token) opts.headers['Authorization'] = 'Bearer ' + token;
+        const r = await fetch(path, opts);
+        return { ok: r.ok, status: r.status, json: await safeJson(r) };
+      } catch(e){ return { ok:false, status:0, json:null }; }
+    }
+
+    /* ---- UI Refs ---- */
+    const heroName = document.getElementById('heroName');
+    const heroTagline = document.getElementById('heroTagline');
+    const heroProfile = document.getElementById('heroProfile');
+    const heroLevel = document.getElementById('heroLevel');
+    const heroLocation = document.getElementById('heroLocation');
+    const heroRating = document.getElementById('heroRating');
+
+    const navName = document.getElementById('navName');
+    const navRole = document.getElementById('navRole');
+    const avatarSmall = document.getElementById('avatarSmall');
+
+    const sidebarName = document.getElementById('sidebarName');
+    const sidebarRole = document.getElementById('sidebarRole');
+    const sidebarWallet = document.getElementById('sidebarWallet');
+    const sidebarReferrals = document.getElementById('sidebarReferrals');
+    const sidebarKyc = document.getElementById('sidebarKyc');
+    const sidebarRating = document.getElementById('sidebarRating');
+    const sidebarAvatar = document.getElementById('sidebarAvatar');
+
+    const cardEarnings = document.getElementById('cardEarnings');
+    const cardActive = document.getElementById('cardActive');
+    const cardMessages = document.getElementById('cardMessages');
+
+    const projectsGrid = document.getElementById('projectsGrid');
+    const threadsList = document.getElementById('threadsList');
+    const notifList = document.getElementById('notifList');
+    const analyticsRevenue = document.getElementById('analyticsRevenue');
+    const analyticsCompleted = document.getElementById('analyticsCompleted');
+    const analyticsResponse = document.getElementById('analyticsResponse');
+
+    const portfolioPreview = document.getElementById('portfolioPreview');
+
+    const editSlide = document.getElementById('editSlide');
+    const editForm = document.getElementById('editForm');
+    const edit_full_name = document.getElementById('edit_full_name');
+    const edit_tagline = document.getElementById('edit_tagline');
+    const edit_bio = document.getElementById('edit_bio');
+    const edit_website = document.getElementById('edit_website');
+    const edit_skills = document.getElementById('edit_skills');
+    const edit_profile_photo = document.getElementById('edit_profile_photo');
+    const edit_cover_photo = document.getElementById('edit_cover_photo');
+
+    /* ---- Loaders & Core ---- */
+    async function loadProfile(){
+      const res = await apiGet('/api/accounts/profile/');
+      if(!res.ok || !res.json){
+        console.warn('profile fetch failed', res);
+        return;
+      }
+      const u = res.json;
+      heroName.textContent = u.full_name || u.username || u.email || 'Freelancer';
+      heroTagline.textContent = u.tagline || '—';
+      heroLevel.textContent = u.level || 'New';
+      heroLocation.textContent = [u.city,u.country].filter(Boolean).join(', ') || '—';
+      heroRating.textContent = u.rating || '0.0';
+      navName.textContent = u.full_name || u.username || 'You';
+      navRole.textContent = (u.user_type || 'freelancer').toUpperCase();
+      avatarSmall.src = u.profile_photo || '/static/images/default-avatar.png';
+      heroProfile.src = u.profile_photo || '/static/images/default-avatar.png';
+      sidebarAvatar.src = u.profile_photo || '/static/images/default-avatar.png';
+      sidebarName.textContent = u.full_name || u.email;
+      sidebarRole.textContent = (u.user_type || 'Freelancer').toUpperCase();
+      sidebarRating.textContent = u.rating || '0.0';
+
+      // stats
+      document.getElementById('heroTagline').textContent = u.tagline || '';
+      document.getElementById('sidebarKyc').textContent = u.is_identity_verified ? 'Verified' : (u.is_verified ? 'Verified (profile)' : 'Not verified');
+      // fill portfolio preview quick
+      await loadPortfolioPreview();
+
+      // notify other pages via localStorage
+      // profile completeness / percent update not shown here but you can compute...
+    }
+
+    async function loadWallet(){
+      const r = await apiGet('/api/payments/wallet/');
+      if(r.ok && r.json){
+        sidebarWallet.textContent = '$' + (r.json.balance ?? 0);
+        cardEarnings.textContent = '$' + (r.json.total_earnings ?? 0);
+      } else {
+        sidebarWallet.textContent = '—';
+      }
+    }
+
+    async function loadReferrals(){
+      const r = await apiGet('/api/referrals/me/referrals/');
+      if(r.ok && r.json){
+        // some backends return list, some return object with stats
+        if(Array.isArray(r.json)){
+          sidebarReferrals.textContent = r.json.length + ' referrals';
+        } else {
+          sidebarReferrals.textContent = (r.json.count || '—') + ' referrals';
+        }
+      } else sidebarReferrals.textContent = '—';
+    }
+
+    async function loadAnalytics(){
+      const r = await apiGet('/api/analytics/overview/');
+      if(r.ok && r.json){
+        analyticsRevenue.textContent = '$' + (r.json.revenue_30d ?? '—');
+        analyticsCompleted.textContent = (r.json.completed ?? '—');
+        analyticsResponse.textContent = (r.json.avg_response_time ?? '—');
+        cardActive.textContent = r.json.active_projects ?? 0;
+      } else {
+        analyticsRevenue.textContent = '—';
+        analyticsCompleted.textContent = '—';
+        analyticsResponse.textContent = '—';
+      }
+    }
+
+    async function loadThreads(){
+      const r = await apiGet('/api/chats/my-threads/');
+      threadsList.innerHTML = '';
+      if(r.ok && Array.isArray(r.json)){
+        r.json.forEach(t => {
+          const el = document.createElement('div');
+          el.className = 'p-3 border rounded';
+          el.innerHTML = `<div class="font-medium">${t.title || t.other_name || 'Thread'}</div><div class="text-xs text-gray-500">${t.last_message || ''}</div>`;
+          threadsList.appendChild(el);
+        });
+        cardMessages.textContent = r.json.filter(x=>!x.read).length || r.json.length;
+      } else {
+        threadsList.innerHTML = '<div class="text-sm text-gray-500">No messages</div>';
+        cardMessages.textContent = '0';
+      }
+    }
+
+    async function loadNotifs(){
+      const r = await apiGet('/api/notifications/');
+      notifList.innerHTML = '';
+      if(r.ok && Array.isArray(r.json)){
+        r.json.slice(0,10).forEach(n => {
+          const el = document.createElement('div');
+          el.className = 'p-2 border-b text-sm';
+          el.innerHTML = `<div class="font-medium">${n.title || n.verb || 'Notification'}</div><div class="text-xs text-gray-500">${n.message || n.description || ''}</div>`;
+          notifList.appendChild(el);
+        });
+      } else {
+        notifList.innerHTML = '<div class="text-sm text-gray-500">No notifications</div>';
+      }
+    }
+
+    async function loadProjects(query=''){
+      projectsGrid.innerHTML = '<div class="text-sm text-gray-500">Loading projects…</div>';
+      // try /projects/ first
+      let r = await apiGet('/api/marketplace/projects/?q=' + encodeURIComponent(query));
+      if(!r.ok){
+        // fallback: /jobs/
+        r = await apiGet('/api/marketplace/jobs/?q=' + encodeURIComponent(query));
+      }
+      projectsGrid.innerHTML = '';
+      if(r.ok && Array.isArray(r.json)){
+        r.json.forEach(p => {
+          const card = document.createElement('div');
+          card.className = 'p-4 border rounded-lg card bg-white';
+          card.innerHTML = `<div class="flex justify-between"><div><div class="font-semibold">${p.title||p.name||'Untitled'}</div><div class="text-sm text-gray-500 mt-1 truncate-multiline">${(p.description||'').slice(0,160)}</div></div><div class="text-right"><div class="font-bold">${p.currency||'BDT'} ${p.budget||p.budget_min||''}</div><div class="mt-2"><button class="px-3 py-1 border rounded bidBtn" data-id="${p.id}">Bid</button> <button class="px-3 py-1 bg-blue-600 text-white rounded viewBtn" data-id="${p.id}">View</button></div></div></div>`;
+          projectsGrid.appendChild(card);
+        });
+        // bind listeners
+        document.querySelectorAll('.viewBtn').forEach(b => b.addEventListener('click', e => {
+          const id = e.currentTarget.dataset.id;
+          // view project details page (you must have jobs_detail.html)
+          window.location.href = '/frontend/pages/jobs_detail.html?project=' + id;
+        }));
+        document.querySelectorAll('.bidBtn').forEach(b => b.addEventListener('click', async e => {
+          const id = e.currentTarget.dataset.id;
+          const amount = prompt('Your bid amount:');
+          if(!amount) return;
+          const res = await apiPost('/api/marketplace/bids/', { project: id, amount, cover_letter: '' });
+          if(res.ok) alert('Bid placed'); else alert('Bid failed: ' + (res.json?.detail || res.status));
+        }));
+      } else {
+        projectsGrid.innerHTML = '<div class="text-sm text-gray-500">Marketplace unavailable or no results. Check backend endpoints.</div>';
+      }
+    }
+
+    async function loadPortfolioPreview(){
+      const r = await apiGet('/api/marketplace/portfolio/');
+      portfolioPreview.innerHTML = '';
+      if(r.ok && Array.isArray(r.json) && r.json.length){
+        r.json.slice(0,4).forEach(item => {
+          const el = document.createElement('div');
+          el.className = 'p-2 border rounded';
+          el.innerHTML = `<div class="font-medium">${item.title||item.name||'Untitled'}</div><div class="text-xs text-gray-500">${(item.description||'').slice(0,100)}</div>`;
+          portfolioPreview.appendChild(el);
+        });
+      } else {
+        portfolioPreview.innerHTML = '<div class="text-sm text-gray-500">No portfolio items</div>';
+      }
+    }
+
+    /* ---- Uploads - handled on profile page but quick actions can redirect ---- */
+    document.getElementById('actionPortfolio').addEventListener('click', ()=> window.location.href = '/frontend/pages/freelancer_profile.html#portfolio');
+    document.getElementById('actionKyc').addEventListener('click', ()=> window.location.href = '/frontend/pages/freelancer_profile.html#kyc');
+    document.getElementById('actionWallet').addEventListener('click', ()=> window.location.href = '/frontend/pages/wallet.html');
+    document.getElementById('actionCreateGig').addEventListener('click', ()=> window.location.href = '/frontend/pages/create_gig.html');
+
+    /* ---- Edit Slide handlers ---- */
+    document.getElementById('editProfileBtn').addEventListener('click', async () => {
+      // prefill
+      const r = await apiGet('/api/accounts/profile/');
+      if(r.ok && r.json){
+        edit_full_name.value = r.json.full_name || '';
+        edit_tagline.value = r.json.tagline || '';
+        edit_bio.value = r.json.bio || '';
+        edit_website.value = r.json.website || '';
+        edit_skills.value = (r.json.skills || []).join(', ');
+      }
+      editSlide.classList.remove('hidden');
+    });
+    document.getElementById('closeEdit').addEventListener('click', ()=> editSlide.classList.add('hidden'));
+    document.getElementById('cancelEditBtn').addEventListener('click', ()=> editSlide.classList.add('hidden'));
+
+    // file pick UI niceties
+    document.getElementById('editProfilePick').addEventListener('click', ()=> edit_profile_photo.click());
+    document.getElementById('editCoverPick').addEventListener('click', ()=> edit_cover_photo.click());
+
+    // submit edit
+    editForm.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      // prepare FormData to support images
+      const form = new FormData();
+      form.append('full_name', edit_full_name.value);
+      form.append('tagline', edit_tagline.value);
+      form.append('bio', edit_bio.value);
+      form.append('website', edit_website.value || '');
+      const skills = edit_skills.value.split(',').map(s=>s.trim()).filter(Boolean);
+      form.append('skills', JSON.stringify(skills)); // backend may expect list; if not, send as CSV -> adjust accordingly
+      if(edit_profile_photo.files[0]) form.append('profile_photo', edit_profile_photo.files[0]);
+      if(edit_cover_photo.files[0]) form.append('cover_photo', edit_cover_photo.files[0]);
+
+      const res = await apiPut('/api/accounts/profile/', form, true);
+      if(res.ok){
+        alert('Profile updated');
+        // notify other pages
+        localStorage.setItem('ja_profile_updated', Date.now());
+        editSlide.classList.add('hidden');
+        await loadProfile();
+        await loadPortfolioPreview();
+      } else {
+        alert('Update failed: ' + (res.json?.detail || res.status));
+      }
+    });
+
+    /* ---- Search handler ---- */
+    document.getElementById('searchBtn').addEventListener('click', ()=> loadProjects(document.getElementById('searchInput').value || ''));
+
+    /* ---- Logout ---- */
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      // best effort: call logout endpoint then clear tokens
+      try { await apiPost('/api/accounts/logout/', {}); } catch(e){}
+      localStorage.removeItem('access_token');
+      window.location.href = '/login.html'; // login.html sits outside pages/
+    });
+
+    /* ---- storage event to sync across tabs/pages ---- */
+    window.addEventListener('storage', (ev) => {
+      if(ev.key === 'ja_profile_updated'){
+        // refresh small pieces
+        loadProfile(); loadWallet(); loadPortfolioPreview(); loadProjects();
+      }
+    });
+
+    /* ---- init load ---- */
+    async function init(){
+      await Promise.all([
+        loadProfile(),
+        loadWallet(),
+        loadReferrals(),
+        loadAnalytics(),
+        loadThreads(),
+        loadNotifs(),
+        loadProjects(''),
+        loadPortfolioPreview()
+      ]);
+    }
+    init();
+
+  })();
+  </script>
+</body>
+</html>

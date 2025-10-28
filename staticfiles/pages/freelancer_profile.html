@@ -1,0 +1,417 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Profile — JobsAlign (Freelancer)</title>
+
+  <!-- Tailwind CDN for dev (you can replace with compiled output.css later) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    /* small helpers to keep polished look */
+    .dash-card{box-shadow:0 6px 18px rgba(16,24,40,0.06);}
+    .muted{color:#6b7280;}
+    .file-preview img{max-height:160px; border-radius:8px;}
+    .btn{padding:.6rem 1rem; border-radius:.5rem; font-weight:600;}
+  </style>
+</head>
+<body class="bg-gray-50 min-h-screen">
+
+  <!-- NAV (simple) -->
+  <nav class="bg-white border-b">
+    <div class="max-w-7xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-12 h-12 rounded-full overflow-hidden bg-white flex items-center justify-center shadow">
+          <img src="{% static 'images/logo.jpeg' %}" alt="logo" class="w-full h-full object-contain">
+        </div>
+      </div>
+      <div class="flex items-center gap-3">
+        <button id="logoutBtn" class="btn bg-red-50 text-red-600 border border-red-100">Logout</button>
+      </div>
+    </div>
+  </nav>
+
+  <main class="max-w-7xl mx-auto p-6">
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+      <!-- LEFT: Profile card -->
+      <section class="col-span-1">
+        <div class="bg-white rounded-xl p-6 dash-card">
+          <div class="flex items-center gap-4">
+            <div class="w-24 h-24 rounded-full overflow-hidden bg-gray-100 flex items-center justify-center">
+              <img id="profilePhoto" src="{% static 'images/default-avatar.png' %}" alt="avatar" class="w-full h-full object-cover">
+            </div>
+            <div>
+              <h2 id="displayName" class="text-xl font-semibold">--</h2>
+              <div class="text-sm muted" id="displayRole">--</div>
+              <div class="mt-2 text-sm muted" id="verifyBadge"></div>
+            </div>
+          </div>
+
+          <div class="mt-5 space-y-3 text-sm">
+            <div><strong>Tagline:</strong> <span id="tagline" class="muted">—</span></div>
+            <div><strong>Location:</strong> <span id="location" class="muted">—</span></div>
+            <div><strong>Trust score:</strong> <span id="trust" class="muted">—</span></div>
+            <div class="mt-3">
+              <button id="editProfileBtn" class="btn bg-blue-600 text-white">Edit Profile</button>
+              <button id="startVerifyBtn" class="btn bg-yellow-50 text-yellow-700 border ml-2 hidden">Start Verification</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wallet / Earnings -->
+        <div class="bg-white rounded-xl p-6 mt-4 dash-card">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm muted">Wallet balance</div>
+              <div id="walletBalance" class="text-2xl font-bold">—</div>
+            </div>
+            <div class="text-right">
+              <div class="text-sm muted">Total earnings</div>
+              <div id="totalEarnings" class="text-lg font-semibold">—</div>
+            </div>
+          </div>
+          <div class="mt-4 flex gap-2">
+            <button id="depositBtn" class="btn bg-green-600 text-white">Deposit</button>
+            <button id="withdrawBtn" class="btn border">Withdraw</button>
+          </div>
+        </div>
+
+        <!-- Referrals -->
+        <div class="bg-white rounded-xl p-6 mt-4 dash-card">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-sm muted">Your referral code</div>
+              <div id="referralCodeBox" class="text-lg font-semibold">—</div>
+            </div>
+            <div>
+              <button id="copyRefBtn" class="btn border">Copy</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CENTER: Profile Edit & Uploads -->
+      <section class="col-span-1 lg:col-span-2">
+        <div class="bg-white rounded-xl p-6 dash-card">
+          <h3 class="text-lg font-semibold mb-4">Profile & Documents</h3>
+
+          <!-- Profile form -->
+          <form id="profileForm" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm">Full name</label>
+              <input id="full_name" type="text" class="mt-1 w-full border rounded px-3 py-2" />
+            </div>
+            <div>
+              <label class="block text-sm">Username</label>
+              <input id="username" type="text" class="mt-1 w-full border rounded px-3 py-2" />
+            </div>
+
+            <div>
+              <label class="block text-sm">Tagline</label>
+              <input id="taglineInput" type="text" class="mt-1 w-full border rounded px-3 py-2" />
+            </div>
+
+            <div>
+              <label class="block text-sm">Location (city, country)</label>
+              <input id="locationInput" type="text" class="mt-1 w-full border rounded px-3 py-2" />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-sm mb-1">Bio / Summary</label>
+              <textarea id="summary" rows="4" class="w-full border rounded px-3 py-2"></textarea>
+            </div>
+
+            <!-- profile photo + cover upload -->
+            <div>
+              <label class="block text-sm">Profile photo</label>
+              <input id="profileFile" type="file" accept="image/*" class="mt-1" />
+              <div id="profilePreview" class="file-preview mt-2"></div>
+            </div>
+            <div>
+              <label class="block text-sm">Cover photo</label>
+              <input id="coverFile" type="file" accept="image/*" class="mt-1" />
+              <div id="coverPreview" class="file-preview mt-2"></div>
+            </div>
+
+            <div class="md:col-span-2 flex items-center gap-3">
+              <button id="saveProfileBtn" type="button" class="btn bg-blue-600 text-white">Save profile</button>
+              <div id="profileMsg" class="text-sm muted"></div>
+            </div>
+          </form>
+
+          <!-- Portfolio upload -->
+          <div class="mt-6 border-t pt-4">
+            <h4 class="font-semibold mb-2">Portfolio</h4>
+            <div class="flex gap-3 items-center">
+              <input id="portfolioTitle" placeholder="Title" class="border rounded px-3 py-2" />
+              <input id="portfolioFile" type="file" class="" />
+              <button id="portfolioUploadBtn" class="btn bg-indigo-600 text-white">Upload</button>
+            </div>
+            <div id="portfolioMsg" class="mt-3 text-sm muted"></div>
+
+            <div class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-3" id="portfolioList"></div>
+          </div>
+
+          <!-- Verification (KYC) -->
+          <div class="mt-6 border-t pt-4">
+            <h4 class="font-semibold mb-2">Verification (KYC)</h4>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div>
+                <label class="block text-sm">Document type</label>
+                <select id="docType" class="mt-1 w-full border rounded px-3 py-2">
+                  <option value="nid">National ID</option>
+                  <option value="passport">Passport</option>
+                  <option value="driver_license">Driver license</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-sm">Upload document</label>
+                <input id="docFile" type="file" class="mt-1" />
+              </div>
+              <div class="flex items-end">
+                <button id="uploadDocBtn" class="btn bg-yellow-600">Send for verification</button>
+              </div>
+            </div>
+            <div id="verifyMsg" class="mt-3 text-sm muted"></div>
+          </div>
+
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script>
+  (function(){
+
+    // --- small helper API wrappers
+    async function safeJson(resp){ try{ return await resp.json(); }catch(e){ return {}; } }
+    async function apiGet(path){ try{ const r = await fetch(path, { headers: authHeaders() }); return {ok: r.ok, status: r.status, json: await safeJson(r)} }catch(e){ return {ok:false, status:0, json:{ detail:'Network error' }} } }
+    async function apiPostJson(path, obj){ try{ const r = await fetch(path, { method:'POST', headers: {...authHeaders(), 'Content-Type':'application/json'}, body: JSON.stringify(obj) }); return {ok: r.ok, status: r.status, json: await safeJson(r)} } catch(e){ return {ok:false, status:0, json:{detail:'Network error'}} } }
+    function authHeaders(){ const t = localStorage.getItem('access_token'); return t? { 'Authorization':'Bearer '+t } : {}; }
+
+    // DOM
+    const displayName = document.getElementById('displayName');
+    const displayRole = document.getElementById('displayRole');
+    const profilePhoto = document.getElementById('profilePhoto');
+    const taglineEl = document.getElementById('tagline');
+    const locationEl = document.getElementById('location');
+    const trustEl = document.getElementById('trust');
+    const walletBalance = document.getElementById('walletBalance');
+    const totalEarnings = document.getElementById('totalEarnings');
+    const referralCodeBox = document.getElementById('referralCodeBox');
+    const profileMsg = document.getElementById('profileMsg');
+    const portfolioList = document.getElementById('portfolioList');
+    const portfolioMsg = document.getElementById('portfolioMsg');
+    const verifyMsg = document.getElementById('verifyMsg');
+
+    // form inputs
+    const full_name = document.getElementById('full_name');
+    const username = document.getElementById('username');
+    const taglineInput = document.getElementById('taglineInput');
+    const locationInput = document.getElementById('locationInput');
+    const summary = document.getElementById('summary');
+    const profileFile = document.getElementById('profileFile');
+    const coverFile = document.getElementById('coverFile');
+    const profilePreview = document.getElementById('profilePreview');
+    const coverPreview = document.getElementById('coverPreview');
+    const saveProfileBtn = document.getElementById('saveProfileBtn');
+
+    // portfolio
+    const portfolioTitle = document.getElementById('portfolioTitle');
+    const portfolioFile = document.getElementById('portfolioFile');
+    const portfolioUploadBtn = document.getElementById('portfolioUploadBtn');
+
+    // verification
+    const docType = document.getElementById('docType');
+    const docFile = document.getElementById('docFile');
+    const uploadDocBtn = document.getElementById('uploadDocBtn');
+
+    // Other buttons
+    document.getElementById('logoutBtn').addEventListener('click', ()=>{
+      localStorage.removeItem('access_token');
+      localStorage.removeItem('refresh_token');
+      window.location.href = '/';
+    });
+
+    // preview handlers
+    profileFile.addEventListener('change', ()=> previewFile(profileFile, profilePreview));
+    coverFile.addEventListener('change', ()=> previewFile(coverFile, coverPreview));
+    function previewFile(inp, container){
+      container.innerHTML = '';
+      const f = inp.files && inp.files[0];
+      if (!f) return;
+      const img = document.createElement('img'); img.src = URL.createObjectURL(f); img.className = 'file-preview-image'; img.style.maxHeight='120px';
+      container.appendChild(img);
+    }
+
+    // ===== load profile
+    async function loadProfile(){
+      const r = await apiGet('/api/accounts/profile/');
+      if (!r.ok){
+        displayName.textContent = 'Please login';
+        return;
+      }
+      const u = r.json;
+      displayName.textContent = u.full_name || u.username || u.email || 'You';
+      displayRole.textContent = (u.user_type || 'freelancer').charAt(0).toUpperCase() + (u.user_type||'').slice(1);
+      taglineEl.textContent = u.tagline || '—';
+      locationEl.textContent = (u.city? u.city+', ':'') + (u.country||'—');
+      trustEl.textContent = (u.trust_score || '0.00');
+
+      // avatar
+      if (u.profile_photo) profilePhoto.src = u.profile_photo;
+      // populate form
+      full_name.value = u.full_name || '';
+      username.value = u.username || '';
+      taglineInput.value = u.tagline || '';
+      locationInput.value = (u.city? u.city+', ':'') + (u.country||'');
+      summary.value = u.summary || '';
+
+      // wallet
+      loadWallet();
+
+      // referral
+      loadReferral();
+
+      // portfolio
+      loadPortfolio();
+
+      // show verify CTA if not verified
+      const startVerifyBtn = document.getElementById('startVerifyBtn');
+      if (!u.is_verified){
+        startVerifyBtn.classList.remove('hidden');
+        startVerifyBtn.onclick = ()=> window.location.href = '/frontend/pages/verification_request.html' ;
+      } else {
+        startVerifyBtn.classList.add('hidden');
+        document.getElementById('verifyBadge').textContent = '✔️ Verified';
+      }
+    }
+
+    async function loadWallet(){
+      const r = await apiGet('/api/payments/wallet/');
+      if (r.ok) {
+        walletBalance.textContent = (r.json.balance||'0') + ' ' + (r.json.currency||'');
+        totalEarnings.textContent = (r.json.total_earned || '0');
+      } else {
+        walletBalance.textContent = '—';
+        totalEarnings.textContent = '—';
+      }
+    }
+
+    async function loadReferral(){
+      const r = await apiGet('/api/referrals/me/code/');
+      if (r.ok && r.json) referralCodeBox.textContent = (r.json.code || '—');
+    }
+
+    async function loadPortfolio(){
+      portfolioList.innerHTML = '<div class="muted">Loading…</div>';
+      // Try likely endpoints (fallbacks)
+      const tries = ['/api/marketplace/portfolio/','/api/marketplace/portfolio/list/','/api/marketplace/portfolio/me/'];
+      for (const p of tries){
+        const r = await apiGet(p);
+        if (r.ok && Array.isArray(r.json)){ renderPortfolio(r.json); return; }
+      }
+      portfolioList.innerHTML = '<div class="muted">No portfolio or endpoint missing</div>';
+    }
+
+    function renderPortfolio(items){
+      portfolioList.innerHTML = '';
+      items.forEach(it=>{
+        const card = document.createElement('div');
+        card.className = 'p-3 border rounded';
+        const img = it.file || it.url || '';
+        const title = it.title || it.name || 'Untitled';
+        card.innerHTML = `<div class="font-semibold">${title}</div><div class="text-sm muted mt-1">${(it.description||'')}</div>`;
+        if (img) card.innerHTML += `<div class="mt-2"><img src="${img}" class="w-full object-cover rounded" /></div>`;
+        portfolioList.appendChild(card);
+      });
+    }
+
+    // ===== profile save (supports file upload)
+    saveProfileBtn.addEventListener('click', async ()=>{
+      profileMsg.textContent = 'Saving…';
+      // Build FormData
+      const fd = new FormData();
+      fd.append('full_name', full_name.value || '');
+      fd.append('username', username.value || '');
+      fd.append('tagline', taglineInput.value || '');
+      fd.append('summary', summary.value || '');
+      // split location if possible
+      const loc = locationInput.value || '';
+      const parts = loc.split(',').map(s=>s.trim());
+      if (parts.length>0) fd.append('city', parts[0]);
+      if (parts.length>1) fd.append('country', parts.slice(1).join(', '));
+
+      if (profileFile.files && profileFile.files[0]) fd.append('profile_photo', profileFile.files[0]);
+      if (coverFile.files && coverFile.files[0]) fd.append('cover_photo', coverFile.files[0]);
+
+      // try primary endpoint (accounts/profile/ PUT)
+      try {
+        const r = await fetch('/api/accounts/profile/', {
+          method: 'PUT',
+          headers: authHeaders(), // do NOT set content-type — let browser set multipart
+          body: fd
+        });
+        const json = await safeJson(r);
+        if (r.ok) {
+          profileMsg.textContent = 'Profile updated ✓';
+          // refresh
+          loadProfile();
+        } else {
+          profileMsg.textContent = 'Save failed: ' + (json.detail || JSON.stringify(json));
+        }
+      } catch (err){
+        profileMsg.textContent = 'Network error while saving profile';
+      }
+    });
+
+    // ===== portfolio upload (multipart)
+    portfolioUploadBtn.addEventListener('click', async ()=>{
+      if (!portfolioFile.files[0]) { portfolioMsg.textContent = 'Choose a file first'; return; }
+      const title = portfolioTitle.value || 'Portfolio item';
+      portfolioMsg.textContent = 'Uploading…';
+      const fd = new FormData();
+      fd.append('title', title);
+      fd.append('file', portfolioFile.files[0]);
+      // try likely endpoints
+      const tries = ['/api/marketplace/portfolio/'];
+      for (const p of tries){
+        try {
+          const r = await fetch(p, { method:'POST', body: fd, headers: authHeaders() });
+          const j = await safeJson(r);
+          if (r.ok){ portfolioMsg.textContent = 'Uploaded ✓'; portfolioTitle.value=''; portfolioFile.value=''; loadPortfolio(); return; }
+        } catch(e){}
+      }
+      portfolioMsg.textContent = 'Upload failed — check backend endpoint /api/marketplace/portfolio/';
+    });
+
+    // ===== verification upload
+    uploadDocBtn.addEventListener('click', async ()=>{
+      if (!docFile.files[0]) { verifyMsg.textContent = 'Choose document first'; return; }
+      verifyMsg.textContent = 'Uploading…';
+      const fd = new FormData();
+      fd.append('document_type', docType.value);
+      fd.append('file', docFile.files[0]);
+      // try endpoint
+      try {
+        const r = await fetch('/api/verification/upload/document/', { method:'POST', body: fd, headers: authHeaders() });
+        const j = await safeJson(r);
+        if (r.ok) { verifyMsg.textContent = 'Sent for verification ✓'; return; }
+        verifyMsg.textContent = 'Upload error: ' + (j.detail || JSON.stringify(j));
+      } catch(e){
+        verifyMsg.textContent = 'Network error sending document';
+      }
+    });
+
+    // initial load
+    loadProfile();
+
+    // expose for debug
+    window.JA = { loadProfile, loadPortfolio };
+
+  })();
+  </script>
+</body>
+</html>

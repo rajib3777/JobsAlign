@@ -1,591 +1,579 @@
-<!-- frontend/pages/freelancer_dashboard_v3.html -->
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Freelancer Dashboard • JobsAlign</title>
+  <title>Freelancer Dashboard • JobsAlign (Pro+)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Tailwind CDN -->
+  <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet"/>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
 
   <style>
-    /* small visual polish */
-    .glass { background: rgba(255,255,255,0.6); backdrop-filter: blur(6px); }
-    .shadow-soft { box-shadow: 0 8px 30px rgba(12,18,30,0.06); }
-    .card { transition: transform .12s ease, box-shadow .12s; }
-    .card:hover { transform: translateY(-6px); box-shadow: 0 14px 40px rgba(12,18,30,0.08); }
-    .truncate-multiline { display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+    :root{
+      --ink:#0F172A; --muted:#64748B; --brand:#4F46E5; --accent:#22C55E; --warn:#F59E0B; --rose:#EF4444;
+      --bg:#F8FAFC; --card:#FFFFFF; --line:#E5E7EB;
+    }
+    body{background:
+      radial-gradient(900px 500px at 10% -10%, rgba(79,70,229,.10), transparent 60%),
+      radial-gradient(800px 400px at 90% 0%, rgba(34,197,94,.10), transparent 60%),
+      var(--bg);
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, Inter, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    .card{background:var(--card); border:1px solid var(--line); border-radius:1rem; box-shadow:0 10px 30px rgba(2,6,23,.06)}
+    .hover-rise{transition:transform .25s ease, box-shadow .25s ease}
+    .hover-rise:hover{transform:translateY(-4px); box-shadow:0 16px 40px rgba(2,6,23,.10)}
+    .chip{font-size:.75rem; padding:.25rem .55rem; border-radius:.5rem}
+    .chip-green{background:#DCFCE7; color:#166534}
+    .chip-amber{background:#FEF3C7; color:#92400E}
+    .chip-blue{background:#DBEAFE; color:#1E40AF}
+    .chip-gray{background:#F1F5F9; color:#0F172A}
+    .skeleton{background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 37%,#f3f4f6 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite}
+    @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem .9rem;border-radius:.7rem;font-weight:600}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-primary:hover{background:#4338CA}
+    .btn-soft{background:#EEF2FF;color:#3730A3}
+    .btn-soft:hover{background:#E0E7FF}
+    .dot{width:.5rem;height:.5rem;border-radius:9999px;display:inline-block}
   </style>
 </head>
-<body class="bg-gradient-to-b from-gray-50 to-white text-gray-800">
 
-  <!-- NAVBAR -->
-  <header class="sticky top-0 z-40 bg-white/80 backdrop-blur border-b">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-      <!-- ✅ Left: Full logo -->
-      <div class="flex items-center gap-4">
-        <a href="/">
-          <img id="navLogo" src="/static/images/logo.jpeg" 
-              class="h-12 w-auto object-contain" 
-              alt="JobsAlign Logo">
-        </a>
-
-        <!-- ✅ Nav links (Dashboard removed) -->
-        <nav class="hidden md:flex items-center gap-6 text-sm font-medium">
-          <a id="navProfileLink" 
-            href="/frontend/pages/freelancer_profile/" 
-            class="text-slate-600 hover:text-blue-600">Profile</a>
-        </nav>
-      </div>
-
-      <!-- ✅ Right: Search + Profile -->
-      <div class="flex items-center gap-4">
-        <!-- Search bar -->
-        <div class="hidden md:flex items-center border rounded px-3 py-1 bg-white">
-          <i class="fa fa-search text-gray-400 mr-2"></i>
-          <input id="searchInputNav" 
-                type="text" 
-                placeholder="Search jobs..." 
-                class="px-1 py-1 outline-none text-sm w-48 bg-transparent"/>
-          <button id="searchBtn" 
-                  class="ml-2 px-3 py-1 bg-blue-600 text-white text-sm rounded">
-            Search
-          </button>
-        </div>
+<body class="min-h-screen flex flex-col">
+  <!-- NAV -->
+  <nav class="bg-white/80 backdrop-blur sticky top-0 border-b border-gray-200 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3">
+        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
+        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Freelancer</span>
+      </a>
+      <div class="flex items-center gap-3">
+        <!-- Theme toggle (optional visual) -->
+        <button id="refreshBtn" class="w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50" title="Refresh">
+          <i class="lucide-rotate-cw"></i>
+        </button>
 
         <!-- Notifications -->
-        <button id="notifOpen" class="p-2 rounded hover:bg-gray-100" title="Notifications">
-          <i class="fa-regular fa-bell text-gray-700"></i>
-        </button>
-
-        <!-- Profile dropdown / name -->
-        <div class="flex items-center gap-2 cursor-pointer" 
-            onclick="window.location.href='/frontend/pages/freelancer_profile/';">
-          <img id="avatarSmall" 
-              src="/static/images/default-avatar.png" 
-              class="w-9 h-9 rounded-full object-cover border" 
-              alt="avatar"/>
-          <div class="hidden md:block text-sm">
-            <div id="navName" class="font-medium">You</div>
-            <div id="navRole" class="text-xs text-gray-500">Freelancer</div>
-          </div>
-        </div>
-
-        <button id="logoutBtn" 
-                class="ml-2 text-sm text-red-600 hidden md:inline">
-          Logout
-        </button>
-      </div>
-    </div>
-  </header>
-
-  <!-- HERO / SUMMARY -->
-  <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-6">
-    <div class="relative bg-gradient-to-r from-blue-600 to-cyan-500 rounded-xl overflow-hidden shadow-soft">
-      <div class="absolute inset-0 opacity-30" style="background-image: linear-gradient(120deg, rgba(255,255,255,0.03), rgba(0,0,0,0.03));"></div>
-      <div class="relative p-6 md:p-8 flex flex-col md:flex-row items-center gap-6">
-        <div class="flex items-center gap-6">
-          <img id="heroProfile" src="/static/images/default-avatar.png" class="w-28 h-28 rounded-full object-cover border-4 border-white shadow-lg" alt="profile"/>
-          <div class="text-white">
-            <h2 id="heroName" class="text-2xl font-bold">Freelancer</h2>
-            <p id="heroTagline" class="text-sm opacity-90 mt-1">Tagline goes here</p>
-            <div class="mt-3 flex items-center gap-3 text-sm">
-              <div class="flex items-center gap-2">
-                <i class="fa fa-star text-yellow-400"></i><span id="heroRating" class="font-semibold">0.0</span>
-              </div>
-              <div class="text-sm opacity-90">• <span id="heroLevel">Level</span></div>
-              <div class="text-sm opacity-90">• <span id="heroLocation">Location</span></div>
+        <div class="relative">
+          <button id="notifBtn" class="w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50 transition">
+            <i class="lucide-bell"></i>
+            <span id="notifCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-[1px] rounded-full">0</span>
+          </button>
+          <div id="notifDrop" class="hidden absolute right-0 mt-2 w-[28rem] card p-0 overflow-hidden">
+            <div class="px-4 py-3 border-b text-sm font-semibold">Notifications</div>
+            <ul id="notifList" class="max-h-96 overflow-auto divide-y"></ul>
+            <div class="px-4 py-2 flex gap-2">
+              <button id="markAllReadBtn" class="text-sm text-indigo-600 hover:underline">Mark all as read</button>
+              <a href="/freelancer/support/" class="text-sm text-gray-500 hover:text-gray-700 ml-auto">Need help?</a>
             </div>
           </div>
         </div>
 
-        <div class="ml-auto flex gap-3">
-          <button id="editProfileBtn" class="px-4 py-2 bg-white/90 text-blue-700 rounded shadow-sm hover:bg-white">Edit Profile</button>
-          <button id="createGigBtn" class="px-4 py-2 bg-yellow-500 text-white rounded shadow-sm hover:bg-yellow-600">Create Gig</button>
+        <!-- Wallet -->
+        <button class="btn btn-soft" id="walletBtn">
+          <i class="lucide-wallet"></i>
+          <span id="walletBalance">$0.00</span>
+        </button>
+
+        <!-- Profile -->
+        <div class="relative">
+          <button id="profileBtn" class="flex items-center gap-3">
+            <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-10 h-10 rounded-lg border border-gray-200" alt="avatar">
+            <div class="hidden sm:block text-left leading-5">
+              <div id="userName" class="text-sm font-semibold">Freelancer</div>
+              <div id="userLevelSmall" class="text-[11px] text-gray-500">Level —</div>
+            </div>
+            <i class="lucide-chevron-down text-gray-400"></i>
+          </button>
+          <div id="profileDrop" class="hidden absolute right-0 mt-2 w-56 card p-2">
+            <a href="/freelancer/profile/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-user mr-2"></i>Profile</a>
+            <a href="/freelancer/verification/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-badge-check mr-2"></i>Verification</a>
+            <a href="/freelancer/payments/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-credit-card mr-2"></i>Payments</a>
+            <a href="/freelancer/analytics/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-bar-chart-2 mr-2"></i>Analytics</a>
+            <hr class="my-1">
+            <a href="/login/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm text-red-600"><i class="lucide-log-out mr-2"></i>Logout</a>
+          </div>
         </div>
       </div>
     </div>
-  </section>
+  </nav>
 
-  <!-- MAIN GRID -->
-  <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mt-8 grid grid-cols-1 lg:grid-cols-12 gap-6">
-
-    <!-- LEFT: MAIN CONTENT -->
-    <section class="lg:col-span-8 space-y-6">
-
-      <!-- Cards: Earnings / Projects / New Messages -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        <div class="card bg-white p-5 rounded-xl border">
-          <div class="text-sm text-gray-500">Total Earnings</div>
-          <div id="cardEarnings" class="text-2xl font-bold mt-2">—</div>
-          <div class="text-xs text-gray-400 mt-2">This month</div>
-        </div>
-
-        <div class="card bg-white p-5 rounded-xl border">
-          <div class="text-sm text-gray-500">Active Projects</div>
-          <div id="cardActive" class="text-2xl font-bold mt-2">—</div>
-          <div class="text-xs text-gray-400 mt-2">Ongoing jobs</div>
-        </div>
-
-        <div class="card bg-white p-5 rounded-xl border">
-          <div class="text-sm text-gray-500">Unread Messages</div>
-          <div id="cardMessages" class="text-2xl font-bold mt-2">—</div>
-          <div class="text-xs text-gray-400 mt-2">Inbox</div>
-        </div>
+  <!-- LAYOUT -->
+  <div class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 w-full">
+    <!-- SIDEBAR -->
+    <aside class="hidden lg:block">
+      <div class="card p-4">
+        <nav class="space-y-1 text-sm">
+          <a href="/freelancer/dashboard/" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-semibold"><i class="lucide-layout-dashboard"></i> Dashboard</a>
+          <a href="/freelancer/jobs/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-briefcase"></i> My Jobs</a>
+          <a href="/freelancer/chat/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-message-square"></i> Messages</a>
+          <a href="/freelancer/reviews/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-star"></i> Reviews</a>
+          <a href="/freelancer/analytics/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-bar-chart-2"></i> Analytics</a>
+          <a href="/freelancer/verification/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-shield-check"></i> Verification</a>
+          <a href="/freelancer/support/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-life-buoy"></i> Support</a>
+        </nav>
       </div>
 
-      <!-- Projects / Marketplace -->
-      <div class="bg-white p-6 rounded-xl border shadow-soft">
-        <div class="flex items-center justify-between">
-          <h3 class="text-lg font-semibold">Marketplace</h3>
-          <div class="flex items-center gap-3">
-            <input id="searchInput" class="border px-3 py-2 rounded w-72" placeholder="Search projects by title, skill..." />
-            <button id="searchBtn" class="px-3 py-2 bg-blue-600 text-white rounded">Search</button>
-          </div>
+      <div class="card p-4 mt-6">
+        <div class="text-sm font-semibold mb-3">Quick Actions</div>
+        <div class="grid gap-2">
+          <a href="/freelancer/jobs/" class="btn btn-primary justify-center"><i class="lucide-search"></i> Browse Jobs</a>
+          <a href="/freelancer/profile/" class="btn btn-soft justify-center"><i class="lucide-pencil-line"></i> Edit Profile</a>
         </div>
-
-        <div id="projectsGrid" class="mt-4 grid grid-cols-1 md:grid-cols-2 gap-4">
-          <!-- dynamic projects -->
-        </div>
-
-        <div class="mt-4 text-sm text-gray-500">If marketplace endpoints are missing you will see a helpful message here.</div>
-      </div>
-
-      <!-- Activity / Notifications -->
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div class="bg-white p-6 rounded-xl border shadow-soft">
-          <h4 class="font-semibold">Messages</h4>
-          <div id="threadsList" class="mt-3 space-y-3 max-h-56 overflow-auto"></div>
-        </div>
-
-        <div class="bg-white p-6 rounded-xl border shadow-soft">
-          <h4 class="font-semibold">Notifications</h4>
-          <div id="notifList" class="mt-3 space-y-3 max-h-56 overflow-auto"></div>
-        </div>
-      </div>
-
-      <!-- Analytics charts placeholder (simple cards) -->
-      <div class="bg-white p-6 rounded-xl border shadow-soft">
-        <h4 class="font-semibold">Analytics Overview</h4>
-        <div id="analyticsArea" class="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-          <div class="p-3 rounded-lg bg-gradient-to-br from-white to-slate-50 border">
-            <div class="text-xs text-gray-500">Revenue (30d)</div>
-            <div id="analyticsRevenue" class="text-xl font-bold mt-2">—</div>
-          </div>
-          <div class="p-3 rounded-lg bg-gradient-to-br from-white to-slate-50 border">
-            <div class="text-xs text-gray-500">Completed</div>
-            <div id="analyticsCompleted" class="text-xl font-bold mt-2">—</div>
-          </div>
-          <div class="p-3 rounded-lg bg-gradient-to-br from-white to-slate-50 border">
-            <div class="text-xs text-gray-500">Avg Response</div>
-            <div id="analyticsResponse" class="text-xl font-bold mt-2">—</div>
-          </div>
-        </div>
-      </div>
-    </section>
-
-    <!-- RIGHT: SIDEBAR -->
-    <aside class="lg:col-span-4 space-y-6">
-
-      <!-- Profile card -->
-      <div class="bg-white p-5 rounded-xl border shadow-soft">
-        <div class="flex items-center gap-4">
-          <img id="sidebarAvatar" src="/static/images/default-avatar.png" class="w-16 h-16 rounded-full object-cover border"/>
-          <div>
-            <div id="sidebarName" class="font-semibold">You</div>
-            <div id="sidebarRole" class="text-sm text-gray-500">Freelancer</div>
-            <div class="mt-2 text-sm text-gray-500">Rating: <span id="sidebarRating">—</span></div>
-          </div>
-        </div>
-
-        <div class="mt-4 space-y-2 text-sm">
-          <div>Wallet: <span id="sidebarWallet" class="font-semibold">—</span></div>
-          <div>Referrals: <span id="sidebarReferrals">—</span></div>
-          <div>Verification: <span id="sidebarKyc">—</span></div>
-        </div>
-
-        <div class="mt-4 flex gap-2">
-          <a href="/frontend/pages/freelancer_profile.html" class="flex-1 text-center px-3 py-2 bg-blue-600 text-white rounded">View Profile</a>
-          <button id="quickEdit" class="flex-1 px-3 py-2 border rounded">Edit</button>
-        </div>
-      </div>
-
-      <!-- Quick actions -->
-      <div class="bg-white p-5 rounded-xl border shadow-soft">
-        <h5 class="font-semibold">Quick Actions</h5>
-        <div class="mt-3 grid grid-cols-2 gap-2">
-          <button id="actionCreateGig" class="p-2 bg-gradient-to-br from-yellow-400 to-yellow-500 text-black rounded shadow">Create Gig</button>
-          <button id="actionPortfolio" class="p-2 bg-gradient-to-br from-green-400 to-green-500 text-white rounded">Portfolio</button>
-          <button id="actionWallet" class="p-2 border rounded">Wallet</button>
-          <button id="actionKyc" class="p-2 border rounded">KYC</button>
-        </div>
-      </div>
-
-      <!-- Recent portfolio preview -->
-      <div class="bg-white p-5 rounded-xl border shadow-soft">
-        <h5 class="font-semibold">Portfolio Preview</h5>
-        <div id="portfolioPreview" class="mt-3 grid grid-cols-1 gap-3"></div>
       </div>
     </aside>
-  </main>
 
-  <!-- FOOTER -->
-  <footer class="text-center text-sm text-gray-500 py-8">
-    <div class="max-w-7xl mx-auto">© 2025 <strong class="text-blue-600">JobsAlign</strong>. All rights reserved. Developed by SomadhanSoft.</div>
-  </footer>
-
-  <!-- EDIT PROFILE SLIDEOVER (re-used) -->
-  <div id="editSlide" class="fixed inset-0 hidden z-50">
-    <div class="absolute inset-0 bg-black/40"></div>
-    <div class="absolute right-0 top-0 h-full w-full sm:w-[520px] bg-white shadow-xl p-6 overflow-auto">
-      <div class="flex items-center justify-between">
-        <h3 class="text-lg font-semibold">Edit Profile</h3>
-        <button id="closeEdit" class="text-gray-500">✕</button>
-      </div>
-      <form id="editForm" class="mt-4 space-y-3">
-        <input id="edit_full_name" class="w-full border px-3 py-2 rounded" placeholder="Full name" />
-        <input id="edit_tagline" class="w-full border px-3 py-2 rounded" placeholder="Tagline" />
-        <textarea id="edit_bio" class="w-full border px-3 py-2 rounded" rows="5" placeholder="Short bio"></textarea>
-        <input id="edit_website" class="w-full border px-3 py-2 rounded" placeholder="Website URL" />
-        <input id="edit_skills" class="w-full border px-3 py-2 rounded" placeholder="Comma separated skills" />
+    <!-- MAIN -->
+    <main class="space-y-8">
+      <!-- GREETING -->
+      <section class="card p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+        <div>
+          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+            Welcome back, <span id="greetName">Freelancer</span> 👋
+          </h1>
+          <p class="text-gray-500 mt-1 text-sm">Live snapshot of your performance across JobsAlign.</p>
+          <div class="mt-3 flex flex-wrap gap-2" id="skillBadges">
+            <!-- dynamic skill badges -->
+          </div>
+        </div>
         <div class="flex items-center gap-3">
-          <label class="flex items-center gap-2">
-            Profile photo <input id="edit_profile_photo" type="file" accept="image/*" class="hidden" />
-            <span id="editProfilePick" class="px-3 py-2 bg-gray-100 rounded cursor-pointer text-sm">Choose</span>
-          </label>
-          <label class="flex items-center gap-2">
-            Cover photo <input id="edit_cover_photo" type="file" accept="image/*" class="hidden" />
-            <span id="editCoverPick" class="px-3 py-2 bg-gray-100 rounded cursor-pointer text-sm">Choose</span>
-          </label>
+          <a href="/freelancer/profile/" class="btn btn-soft"><i class="lucide-user-cog"></i> Profile</a>
+          <a href="/freelancer/jobs/" class="btn btn-primary"><i class="lucide-rocket"></i> Find Work</a>
+        </div>
+      </section>
+
+      <!-- KPI GRID -->
+      <section class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div class="card p-6 hover-rise">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500 font-medium">Total Earnings</div>
+            <i class="lucide-dollar-sign text-indigo-600"></i>
+          </div>
+          <div id="totalEarnings" class="text-3xl font-bold mt-2">$0</div>
+          <div id="earningsDelta" class="text-xs text-green-600 mt-1 hidden">↑ 0% vs last month</div>
         </div>
 
-        <div class="flex justify-end gap-2">
-          <button type="button" id="cancelEditBtn" class="px-4 py-2 border rounded">Cancel</button>
-          <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+        <div class="card p-6 hover-rise">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500 font-medium">Active Contracts</div>
+            <i class="lucide-briefcase text-green-600"></i>
+          </div>
+          <div id="activeContracts" class="text-3xl font-bold mt-2">0</div>
+          <div class="text-xs text-gray-500 mt-1">Across current clients</div>
         </div>
-      </form>
-    </div>
+
+        <div class="card p-6 hover-rise">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500 font-medium">Unread Messages</div>
+            <i class="lucide-message-circle text-amber-600"></i>
+          </div>
+          <div id="unreadChats" class="text-3xl font-bold mt-2">0</div>
+          <div class="text-xs text-gray-500 mt-1">Inbox across contracts</div>
+        </div>
+
+        <div class="card p-6 hover-rise">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500 font-medium">Level</div>
+            <i class="lucide-award text-sky-600"></i>
+          </div>
+          <div id="userLevel" class="text-3xl font-bold mt-2">—</div>
+          <div id="successRate" class="text-xs text-gray-500 mt-1">Success rate —</div>
+        </div>
+      </section>
+
+      <!-- ANALYTICS ROW -->
+      <section class="grid lg:grid-cols-3 gap-6">
+        <!-- Earnings Line -->
+        <div class="card p-6 lg:col-span-2">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-lg font-semibold">Earnings Overview</h2>
+            <div class="text-xs text-gray-500">Monthly trend</div>
+          </div>
+          <canvas id="earningsChart" class="h-60"></canvas>
+        </div>
+
+        <!-- Win-rate / Distribution -->
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-lg font-semibold">Work Mix</h2>
+            <span class="text-xs text-gray-500">Last 90 days</span>
+          </div>
+          <canvas id="mixChart" class="h-60"></canvas>
+          <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <div class="flex items-center gap-2"><span class="dot" style="background:#4F46E5"></span> Fixed</div>
+            <div class="flex items-center gap-2"><span class="dot" style="background:#22C55E"></span> Hourly</div>
+            <div class="flex items-center gap-2"><span class="dot" style="background:#F59E0B"></span> Milestone</div>
+            <div class="flex items-center gap-2"><span class="dot" style="background:#06B6D4"></span> Others</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CONTRACTS + ACTIVITY -->
+      <section class="grid lg:grid-cols-3 gap-6">
+        <!-- Recent Contracts -->
+        <div class="card lg:col-span-2">
+          <div class="flex items-center justify-between p-6 pb-3">
+            <h2 class="text-lg font-semibold">Recent Contracts</h2>
+            <a href="/freelancer/jobs/" class="text-sm text-indigo-600 hover:underline">View all</a>
+          </div>
+          <div id="recentContracts" class="divide-y">
+            <!-- skeleton rows -->
+            <div class="p-5 flex items-center justify-between">
+              <div class="w-2/5 h-5 rounded skeleton"></div>
+              <div class="w-20 h-6 rounded skeleton"></div>
+            </div>
+            <div class="p-5 flex items-center justify-between">
+              <div class="w-1/3 h-5 rounded skeleton"></div>
+              <div class="w-20 h-6 rounded skeleton"></div>
+            </div>
+            <div class="p-5 flex items-center justify-between">
+              <div class="w-1/2 h-5 rounded skeleton"></div>
+              <div class="w-20 h-6 rounded skeleton"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Live Activity -->
+        <div class="card p-6">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-lg font-semibold">Live Activity</h2>
+            <span id="lastSync" class="text-xs text-gray-500">—</span>
+          </div>
+          <ul id="activityFeed" class="space-y-3">
+            <li class="flex gap-3 items-start">
+              <span class="dot" style="background:#CBD5E1"></span>
+              <div class="w-full">
+                <div class="w-3/4 h-4 skeleton rounded"></div>
+                <div class="w-1/3 h-3 skeleton rounded mt-2"></div>
+              </div>
+            </li>
+            <li class="flex gap-3 items-start">
+              <span class="dot" style="background:#CBD5E1"></span>
+              <div class="w-full">
+                <div class="w-2/3 h-4 skeleton rounded"></div>
+                <div class="w-1/4 h-3 skeleton rounded mt-2"></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
   </div>
 
-  <!-- SCRIPTS -->
+  <!-- FOOTER (your provided full footer) -->
+  <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20"> 
+    <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
+      <div>
+        <div class="flex items-center space-x-2 mb-3">
+          <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
+        </div>
+        <p class="text-gray-600 leading-relaxed">
+          Empowering freelancers, clients, and businesses to collaborate, innovate, and succeed — all in one place.
+        </p>
+        <div class="flex space-x-4 mt-4">
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Platform</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#marketplace" class="hover:text-primary">Marketplace</a></li>
+          <li><a href="#jobs" class="hover:text-primary">Job Listings</a></li>
+          <li><a href="#chats" class="hover:text-primary">Chats & Collaboration</a></li>
+          <li><a href="#notifications" class="hover:text-primary">Notifications</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Resources</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#analytics" class="hover:text-primary">Analytics Dashboard</a></li>
+          <li><a href="#support" class="hover:text-primary">Help & Support</a></li>
+          <li><a href="#disputes" class="hover:text-primary">Dispute Center</a></li>
+          <li><a href="#verification" class="hover:text-primary">Profile Verification</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">About</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#about" class="hover:text-primary">About Us</a></li>
+          <li><a href="#team" class="hover:text-primary">Our Team</a></li>
+          <li><a href="#terms" class="hover:text-primary">Terms & Conditions</a></li>
+          <li><a href="#privacy" class="hover:text-primary">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-200 mt-10 pt-6 pb-8 text-center text-gray-500 text-sm">
+      <p>&copy; 2025 <span class="font-semibold text-primary">JobsAlign</span>. All rights reserved.</p>
+      <p class="mt-2 text-blue-500">
+        Developed by 
+        <a href="https://somadhansoft.com/" class="hover:underline font-semibold text-blue-600" target="_blank" rel="noopener noreferrer">
+          SomadhanSoft
+        </a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- INLINE JS (FULL BACKEND INTEGRATION + SYNC + POLLING) -->
   <script>
-  (function(){
-    const token = localStorage.getItem('access_token');
-    if(!token){
-      // login.html is outside pages folder per your message
-      window.location.href = '/login.html';
-      return;
+    /********************
+     * CONFIG & GUARDS  *
+     ********************/
+    const API = "http://127.0.0.1:8000/api";
+    const $ = (id)=>document.getElementById(id);
+    const money=(n)=>"$"+(parseFloat(n||0)).toFixed(2);
+    const nowStr=()=>new Date().toLocaleTimeString();
+
+    function getToken(){ return localStorage.getItem("access_token"); }
+    (function authGuard(){
+      if(!getToken()) window.location.href="/login/";
+    })();
+
+    function toast(msg,type="success"){
+      const t=document.createElement("div");
+      t.className="fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white "+(type==="success"?"bg-emerald-600":"bg-rose-600");
+      t.textContent=msg; document.body.appendChild(t);
+      setTimeout(()=>t.remove(),2800);
     }
 
-    /* ---- Helpers ---- */
-    async function safeJson(resp){ try { return await resp.json(); } catch(e){ return null; } }
     async function apiGet(path){
-      try {
-        const r = await fetch(path, { headers: { 'Authorization': 'Bearer ' + token } });
-        return { ok: r.ok, status: r.status, json: await safeJson(r) };
-      } catch(e){ return { ok:false, status:0, json:null }; }
+      try{
+        const r=await fetch(API+path,{headers:{Authorization:"Bearer "+getToken()}});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("GET",path,e); return null; }
     }
-    async function apiPost(path, body, isForm=false){
-      try {
-        const opts = { method: 'POST', headers: {}, body: body };
-        if(!isForm) opts.headers['Content-Type'] = 'application/json';
-        if(token) opts.headers['Authorization'] = 'Bearer ' + token;
-        const r = await fetch(path, opts);
-        return { ok: r.ok, status: r.status, json: await safeJson(r) };
-      } catch(e){ return { ok:false, status:0, json:null }; }
-    }
-    async function apiPut(path, body, isForm=false){
-      try {
-        const opts = { method: 'PUT', headers: {}, body: body };
-        if(!isForm) opts.headers['Content-Type'] = 'application/json';
-        if(token) opts.headers['Authorization'] = 'Bearer ' + token;
-        const r = await fetch(path, opts);
-        return { ok: r.ok, status: r.status, json: await safeJson(r) };
-      } catch(e){ return { ok:false, status:0, json:null }; }
+    async function apiPost(path,body={}){
+      try{
+        const r=await fetch(API+path,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+getToken()},body:JSON.stringify(body)});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("POST",path,e); return null; }
     }
 
-    /* ---- UI Refs ---- */
-    const heroName = document.getElementById('heroName');
-    const heroTagline = document.getElementById('heroTagline');
-    const heroProfile = document.getElementById('heroProfile');
-    const heroLevel = document.getElementById('heroLevel');
-    const heroLocation = document.getElementById('heroLocation');
-    const heroRating = document.getElementById('heroRating');
-
-    const navName = document.getElementById('navName');
-    const navRole = document.getElementById('navRole');
-    const avatarSmall = document.getElementById('avatarSmall');
-
-    const sidebarName = document.getElementById('sidebarName');
-    const sidebarRole = document.getElementById('sidebarRole');
-    const sidebarWallet = document.getElementById('sidebarWallet');
-    const sidebarReferrals = document.getElementById('sidebarReferrals');
-    const sidebarKyc = document.getElementById('sidebarKyc');
-    const sidebarRating = document.getElementById('sidebarRating');
-    const sidebarAvatar = document.getElementById('sidebarAvatar');
-
-    const cardEarnings = document.getElementById('cardEarnings');
-    const cardActive = document.getElementById('cardActive');
-    const cardMessages = document.getElementById('cardMessages');
-
-    const projectsGrid = document.getElementById('projectsGrid');
-    const threadsList = document.getElementById('threadsList');
-    const notifList = document.getElementById('notifList');
-    const analyticsRevenue = document.getElementById('analyticsRevenue');
-    const analyticsCompleted = document.getElementById('analyticsCompleted');
-    const analyticsResponse = document.getElementById('analyticsResponse');
-
-    const portfolioPreview = document.getElementById('portfolioPreview');
-
-    const editSlide = document.getElementById('editSlide');
-    const editForm = document.getElementById('editForm');
-    const edit_full_name = document.getElementById('edit_full_name');
-    const edit_tagline = document.getElementById('edit_tagline');
-    const edit_bio = document.getElementById('edit_bio');
-    const edit_website = document.getElementById('edit_website');
-    const edit_skills = document.getElementById('edit_skills');
-    const edit_profile_photo = document.getElementById('edit_profile_photo');
-    const edit_cover_photo = document.getElementById('edit_cover_photo');
-
-    /* ---- Loaders & Core ---- */
+    /********************
+     * PROFILE & SYNC   *
+     ********************/
     async function loadProfile(){
-      const res = await apiGet('/api/accounts/profile/');
-      if(!res.ok || !res.json){
-        console.warn('profile fetch failed', res);
+      const me = await apiGet("/accounts/me/");
+      if(!me) return;
+      $("greetName").textContent = me.first_name || me.username || "Freelancer";
+      $("userName").textContent = me.username || "Freelancer";
+      $("userLevelSmall").textContent = me.level || "Level —";
+      if(me.avatar_url) $("avatarImg").src = me.avatar_url;
+
+      // skill badges (if provided)
+      const container=document.getElementById("skillBadges");
+      container.innerHTML="";
+      const skills = me.skills || me.tags || [];
+      (skills.slice(0,8)).forEach(s=>{
+        const span=document.createElement("span");
+        span.className="chip chip-gray";
+        span.textContent=s;
+        container.appendChild(span);
+      });
+
+      // cache for other pages + cross-tab sync
+      localStorage.setItem("profile_cache", JSON.stringify({name:me.username, level:me.level, avatar:me.avatar_url, skills}));
+    }
+    window.addEventListener("storage",(ev)=>{
+      if(ev.key==="profile_updated" && ev.newValue==="1"){
+        loadProfile();
+        setTimeout(()=>localStorage.removeItem("profile_updated"),200);
+      }
+      if(ev.key==="wallet_changed" && ev.newValue){
+        loadWalletAndKPIs();
+      }
+      if(ev.key==="contract_updated" && ev.newValue){
+        loadContracts();
+      }
+    });
+
+    /********************
+     * KPIs & ANALYTICS *
+     ********************/
+    let earningsChart, mixChart;
+
+    function drawEarningsChart(labels=[], data=[]){
+      const ctx = document.getElementById("earningsChart");
+      if(earningsChart) earningsChart.destroy();
+      earningsChart = new Chart(ctx,{
+        type:"line",
+        data:{ labels, datasets:[{label:"Earnings ($)", data, borderColor:"#4F46E5", backgroundColor:"rgba(79,70,229,.12)", tension:.35, fill:true, pointRadius:2}]},
+        options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+      });
+    }
+
+    function drawMixChart(d=[50,30,15,5]){
+      const ctx=document.getElementById("mixChart");
+      if(mixChart) mixChart.destroy();
+      mixChart=new Chart(ctx,{
+        type:"doughnut",
+        data:{ labels:["Fixed","Hourly","Milestone","Others"], datasets:[{data:d, backgroundColor:["#4F46E5","#22C55E","#F59E0B","#06B6D4"]}]},
+        options:{ plugins:{legend:{display:false}}, cutout:"62%" }
+      });
+    }
+
+    async function loadWalletAndKPIs(){
+      const wallet = await apiGet("/payments/wallet/");
+      if(wallet){ $("walletBalance").textContent = money(wallet.balance||0); }
+
+      const stats = await apiGet("/analytics/freelancer/stats/");
+      if(stats){
+        $("totalEarnings").textContent = money(stats.total_earnings||0);
+        $("activeContracts").textContent = stats.active_projects || 0;
+        $("unreadChats").textContent = stats.unread_messages || 0;
+        $("userLevel").textContent = stats.level || "—";
+        $("successRate").textContent = "Success rate " + (stats.success_rate!=null ? (stats.success_rate+"%") : "—");
+        if(typeof stats.delta_earnings_pct === "number"){
+          const d=$("earningsDelta");
+          d.classList.remove("hidden");
+          d.textContent = (stats.delta_earnings_pct>=0?"↑ ":"↓ ")+Math.abs(stats.delta_earnings_pct).toFixed(1)+"% vs last month";
+          d.className = "text-xs mt-1 "+(stats.delta_earnings_pct>=0?"text-green-600":"text-rose-600");
+        }
+        drawEarningsChart(stats.labels||[], stats.earnings||[]);
+        drawMixChart(stats.mix || [50,30,15,5]);
+      }else{
+        drawEarningsChart(["Jan","Feb","Mar"], [0,0,0]);
+        drawMixChart([50,30,15,5]);
+      }
+    }
+
+    /********************
+     * CONTRACTS & FEED *
+     ********************/
+    async function loadContracts(){
+      const list = await apiGet("/marketplace/contracts/me/");
+      const box = $("recentContracts");
+      if(!box) return;
+      if(!list || !list.length){
+        box.innerHTML = `<div class="p-6 text-sm text-gray-500">No recent contracts found.</div>`;
         return;
       }
-      const u = res.json;
-      heroName.textContent = u.full_name || u.username || u.email || 'Freelancer';
-      heroTagline.textContent = u.tagline || '—';
-      heroLevel.textContent = u.level || 'New';
-      heroLocation.textContent = [u.city,u.country].filter(Boolean).join(', ') || '—';
-      heroRating.textContent = u.rating || '0.0';
-      navName.textContent = u.full_name || u.username || 'You';
-      navRole.textContent = (u.user_type || 'freelancer').toUpperCase();
-      avatarSmall.src = u.profile_photo || '/static/images/default-avatar.png';
-      heroProfile.src = u.profile_photo || '/static/images/default-avatar.png';
-      sidebarAvatar.src = u.profile_photo || '/static/images/default-avatar.png';
-      sidebarName.textContent = u.full_name || u.email;
-      sidebarRole.textContent = (u.user_type || 'Freelancer').toUpperCase();
-      sidebarRating.textContent = u.rating || '0.0';
-
-      // stats
-      document.getElementById('heroTagline').textContent = u.tagline || '';
-      document.getElementById('sidebarKyc').textContent = u.is_identity_verified ? 'Verified' : (u.is_verified ? 'Verified (profile)' : 'Not verified');
-      // fill portfolio preview quick
-      await loadPortfolioPreview();
-
-      // notify other pages via localStorage
-      // profile completeness / percent update not shown here but you can compute...
+      box.innerHTML = list.slice(0,8).map(c=>{
+        const title = (c.project && c.project.title) ? c.project.title : (c.title || "Untitled");
+        const status = (c.status || "Pending");
+        const chipClass = status.toLowerCase().includes("active")?"chip-green": status.toLowerCase().includes("complete")?"chip-blue":"chip-amber";
+        const amount = typeof c.amount !== "undefined" ? money(c.amount) : "";
+        return `
+          <div class="p-5 flex items-center justify-between">
+            <div class="min-w-0">
+              <div class="font-medium truncate">${title}</div>
+              <div class="text-xs text-gray-500 mt-1">#${c.id || "—"} · ${c.client?.name || c.client_name || "Client"}</div>
+            </div>
+            <div class="flex items-center gap-3">
+              ${amount ? `<span class="hidden sm:inline-block text-indigo-600 font-semibold">${amount}</span>` : ""}
+              <span class="chip ${chipClass}">${status}</span>
+            </div>
+          </div>
+        `;
+      }).join("");
     }
 
-    async function loadWallet(){
-      const r = await apiGet('/api/payments/wallet/');
-      if(r.ok && r.json){
-        sidebarWallet.textContent = '$' + (r.json.balance ?? 0);
-        cardEarnings.textContent = '$' + (r.json.total_earnings ?? 0);
-      } else {
-        sidebarWallet.textContent = '—';
-      }
+    async function loadActivityFeed(){
+      // Activity feed can be synthesized from notifications if a dedicated endpoint not present
+      const feed = await apiGet("/notifications/");
+      const ul=$("activityFeed");
+      if(!feed){ ul.innerHTML='<li class="text-sm text-gray-500">No activity.</li>'; return; }
+      const items = (feed.results || feed).slice(0,8);
+      ul.innerHTML = items.map(n=>{
+        const level=(n.level||"info").toLowerCase();
+        const color = level==="success"?"#22C55E":level==="warning"?"#F59E0B":level==="critical"?"#EF4444":"#64748B";
+        const title = n.title || n.verb || "Notification";
+        const text = n.message || n.description || "";
+        return `
+          <li class="flex gap-3 items-start">
+            <span class="dot" style="background:${color}"></span>
+            <div>
+              <div class="text-sm font-medium">${title}</div>
+              <div class="text-xs text-gray-500">${text}</div>
+            </div>
+          </li>
+        `;
+      }).join("");
+      $("lastSync").textContent = "Updated " + nowStr();
     }
 
-    async function loadReferrals(){
-      const r = await apiGet('/api/referrals/me/referrals/');
-      if(r.ok && r.json){
-        // some backends return list, some return object with stats
-        if(Array.isArray(r.json)){
-          sidebarReferrals.textContent = r.json.length + ' referrals';
-        } else {
-          sidebarReferrals.textContent = (r.json.count || '—') + ' referrals';
+    /********************
+     * NOTIFICATIONS    *
+     ********************/
+    async function loadNotifications(){
+      const res = await apiGet("/notifications/");
+      const countBox = $("notifCount"), ul = $("notifList");
+      if(!res){ countBox.classList.add("hidden"); ul.innerHTML='<li class="p-4 text-sm text-gray-500">No notifications.</li>'; return; }
+
+      const items = res.results || res || [];
+      let unread = 0;
+      ul.innerHTML = items.slice(0,12).map(n=>{
+        const isUnread = (n.read===false || n.read===0 || n.is_read===false);
+        if(isUnread) unread++;
+        const level = (n.level||"info").toLowerCase();
+        const dot = level==="success"?"bg-emerald-500":level==="warning"?"bg-amber-500":level==="critical"?"bg-rose-500":"bg-indigo-500";
+        return `
+          <li class="p-3 hover:bg-gray-50 text-sm">
+            <div class="flex items-start gap-3">
+              <span class="mt-1 w-2 h-2 rounded-full ${dot}"></span>
+              <div>
+                <div class="font-medium">${n.title || n.verb || "Notification"}</div>
+                <div class="text-gray-600">${n.message || ""}</div>
+              </div>
+            </div>
+          </li>
+        `;
+      }).join("");
+
+      if(unread>0){ countBox.textContent = unread; countBox.classList.remove("hidden"); } else { countBox.classList.add("hidden"); }
+
+      $("markAllReadBtn").onclick = async ()=>{
+        const ids = items.filter(i=>i && i.id).map(i=>i.id);
+        if(ids.length){
+          await apiPost("/notifications/read/", { ids });
+          toast("All notifications marked as read");
+          countBox.classList.add("hidden");
+          loadNotifications(); // refresh
         }
-      } else sidebarReferrals.textContent = '—';
+      };
     }
 
-    async function loadAnalytics(){
-      const r = await apiGet('/api/analytics/overview/');
-      if(r.ok && r.json){
-        analyticsRevenue.textContent = '$' + (r.json.revenue_30d ?? '—');
-        analyticsCompleted.textContent = (r.json.completed ?? '—');
-        analyticsResponse.textContent = (r.json.avg_response_time ?? '—');
-        cardActive.textContent = r.json.active_projects ?? 0;
-      } else {
-        analyticsRevenue.textContent = '—';
-        analyticsCompleted.textContent = '—';
-        analyticsResponse.textContent = '—';
-      }
-    }
+    /********************
+     * UX BINDINGS      *
+     ********************/
+    (function bindDropdowns(){
+      const nb=$("notifBtn"), nd=$("notifDrop");
+      nb.addEventListener("click", ()=>{ nd.classList.toggle("hidden"); });
+      document.addEventListener("click", (e)=>{ if(!nb.contains(e.target) && !nd.contains(e.target)){ nd.classList.add("hidden"); }});
+      const pb=$("profileBtn"), pd=$("profileDrop");
+      pb.addEventListener("click", ()=>{ pd.classList.toggle("hidden"); });
+      document.addEventListener("click", (e)=>{ if(!pb.contains(e.target) && !pd.contains(e.target)){ pd.classList.add("hidden"); }});
+      $("refreshBtn").addEventListener("click", ()=>refreshAll(true));
+    })();
 
-    async function loadThreads(){
-      const r = await apiGet('/api/chats/my-threads/');
-      threadsList.innerHTML = '';
-      if(r.ok && Array.isArray(r.json)){
-        r.json.forEach(t => {
-          const el = document.createElement('div');
-          el.className = 'p-3 border rounded';
-          el.innerHTML = `<div class="font-medium">${t.title || t.other_name || 'Thread'}</div><div class="text-xs text-gray-500">${t.last_message || ''}</div>`;
-          threadsList.appendChild(el);
-        });
-        cardMessages.textContent = r.json.filter(x=>!x.read).length || r.json.length;
-      } else {
-        threadsList.innerHTML = '<div class="text-sm text-gray-500">No messages</div>';
-        cardMessages.textContent = '0';
-      }
-    }
-
-    async function loadNotifs(){
-      const r = await apiGet('/api/notifications/');
-      notifList.innerHTML = '';
-      if(r.ok && Array.isArray(r.json)){
-        r.json.slice(0,10).forEach(n => {
-          const el = document.createElement('div');
-          el.className = 'p-2 border-b text-sm';
-          el.innerHTML = `<div class="font-medium">${n.title || n.verb || 'Notification'}</div><div class="text-xs text-gray-500">${n.message || n.description || ''}</div>`;
-          notifList.appendChild(el);
-        });
-      } else {
-        notifList.innerHTML = '<div class="text-sm text-gray-500">No notifications</div>';
-      }
-    }
-
-    async function loadProjects(query=''){
-      projectsGrid.innerHTML = '<div class="text-sm text-gray-500">Loading projects…</div>';
-      // try /projects/ first
-      let r = await apiGet('/api/marketplace/projects/?q=' + encodeURIComponent(query));
-      if(!r.ok){
-        // fallback: /jobs/
-        r = await apiGet('/api/marketplace/jobs/?q=' + encodeURIComponent(query));
-      }
-      projectsGrid.innerHTML = '';
-      if(r.ok && Array.isArray(r.json)){
-        r.json.forEach(p => {
-          const card = document.createElement('div');
-          card.className = 'p-4 border rounded-lg card bg-white';
-          card.innerHTML = `<div class="flex justify-between"><div><div class="font-semibold">${p.title||p.name||'Untitled'}</div><div class="text-sm text-gray-500 mt-1 truncate-multiline">${(p.description||'').slice(0,160)}</div></div><div class="text-right"><div class="font-bold">${p.currency||'BDT'} ${p.budget||p.budget_min||''}</div><div class="mt-2"><button class="px-3 py-1 border rounded bidBtn" data-id="${p.id}">Bid</button> <button class="px-3 py-1 bg-blue-600 text-white rounded viewBtn" data-id="${p.id}">View</button></div></div></div>`;
-          projectsGrid.appendChild(card);
-        });
-        // bind listeners
-        document.querySelectorAll('.viewBtn').forEach(b => b.addEventListener('click', e => {
-          const id = e.currentTarget.dataset.id;
-          // view project details page (you must have jobs_detail.html)
-          window.location.href = '/frontend/pages/jobs_detail.html?project=' + id;
-        }));
-        document.querySelectorAll('.bidBtn').forEach(b => b.addEventListener('click', async e => {
-          const id = e.currentTarget.dataset.id;
-          const amount = prompt('Your bid amount:');
-          if(!amount) return;
-          const res = await apiPost('/api/marketplace/bids/', { project: id, amount, cover_letter: '' });
-          if(res.ok) alert('Bid placed'); else alert('Bid failed: ' + (res.json?.detail || res.status));
-        }));
-      } else {
-        projectsGrid.innerHTML = '<div class="text-sm text-gray-500">Marketplace unavailable or no results. Check backend endpoints.</div>';
-      }
-    }
-
-    async function loadPortfolioPreview(){
-      const r = await apiGet('/api/marketplace/portfolio/');
-      portfolioPreview.innerHTML = '';
-      if(r.ok && Array.isArray(r.json) && r.json.length){
-        r.json.slice(0,4).forEach(item => {
-          const el = document.createElement('div');
-          el.className = 'p-2 border rounded';
-          el.innerHTML = `<div class="font-medium">${item.title||item.name||'Untitled'}</div><div class="text-xs text-gray-500">${(item.description||'').slice(0,100)}</div>`;
-          portfolioPreview.appendChild(el);
-        });
-      } else {
-        portfolioPreview.innerHTML = '<div class="text-sm text-gray-500">No portfolio items</div>';
-      }
-    }
-
-    /* ---- Uploads - handled on profile page but quick actions can redirect ---- */
-    document.getElementById('actionPortfolio').addEventListener('click', ()=> window.location.href = '/frontend/pages/freelancer_profile.html#portfolio');
-    document.getElementById('actionKyc').addEventListener('click', ()=> window.location.href = '/frontend/pages/freelancer_profile.html#kyc');
-    document.getElementById('actionWallet').addEventListener('click', ()=> window.location.href = '/frontend/pages/wallet.html');
-    document.getElementById('actionCreateGig').addEventListener('click', ()=> window.location.href = '/frontend/pages/create_gig.html');
-
-    /* ---- Edit Slide handlers ---- */
-    document.getElementById('editProfileBtn').addEventListener('click', async () => {
-      // prefill
-      const r = await apiGet('/api/accounts/profile/');
-      if(r.ok && r.json){
-        edit_full_name.value = r.json.full_name || '';
-        edit_tagline.value = r.json.tagline || '';
-        edit_bio.value = r.json.bio || '';
-        edit_website.value = r.json.website || '';
-        edit_skills.value = (r.json.skills || []).join(', ');
-      }
-      editSlide.classList.remove('hidden');
-    });
-    document.getElementById('closeEdit').addEventListener('click', ()=> editSlide.classList.add('hidden'));
-    document.getElementById('cancelEditBtn').addEventListener('click', ()=> editSlide.classList.add('hidden'));
-
-    // file pick UI niceties
-    document.getElementById('editProfilePick').addEventListener('click', ()=> edit_profile_photo.click());
-    document.getElementById('editCoverPick').addEventListener('click', ()=> edit_cover_photo.click());
-
-    // submit edit
-    editForm.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      // prepare FormData to support images
-      const form = new FormData();
-      form.append('full_name', edit_full_name.value);
-      form.append('tagline', edit_tagline.value);
-      form.append('bio', edit_bio.value);
-      form.append('website', edit_website.value || '');
-      const skills = edit_skills.value.split(',').map(s=>s.trim()).filter(Boolean);
-      form.append('skills', JSON.stringify(skills)); // backend may expect list; if not, send as CSV -> adjust accordingly
-      if(edit_profile_photo.files[0]) form.append('profile_photo', edit_profile_photo.files[0]);
-      if(edit_cover_photo.files[0]) form.append('cover_photo', edit_cover_photo.files[0]);
-
-      const res = await apiPut('/api/accounts/profile/', form, true);
-      if(res.ok){
-        alert('Profile updated');
-        // notify other pages
-        localStorage.setItem('ja_profile_updated', Date.now());
-        editSlide.classList.add('hidden');
-        await loadProfile();
-        await loadPortfolioPreview();
-      } else {
-        alert('Update failed: ' + (res.json?.detail || res.status));
-      }
-    });
-
-    /* ---- Search handler ---- */
-    document.getElementById('searchBtn').addEventListener('click', ()=> loadProjects(document.getElementById('searchInput').value || ''));
-
-    /* ---- Logout ---- */
-    document.getElementById('logoutBtn').addEventListener('click', async () => {
-      // best effort: call logout endpoint then clear tokens
-      try { await apiPost('/api/accounts/logout/', {}); } catch(e){}
-      localStorage.removeItem('access_token');
-      window.location.href = '/login.html'; // login.html sits outside pages/
-    });
-
-    /* ---- storage event to sync across tabs/pages ---- */
-    window.addEventListener('storage', (ev) => {
-      if(ev.key === 'ja_profile_updated'){
-        // refresh small pieces
-        loadProfile(); loadWallet(); loadPortfolioPreview(); loadProjects();
-      }
-    });
-
-    /* ---- init load ---- */
-    async function init(){
+    /********************
+     * POLLING & REFRESH*
+     ********************/
+    async function refreshAll(showToast=false){
       await Promise.all([
         loadProfile(),
-        loadWallet(),
-        loadReferrals(),
-        loadAnalytics(),
-        loadThreads(),
-        loadNotifs(),
-        loadProjects(''),
-        loadPortfolioPreview()
+        loadWalletAndKPIs(),
+        loadContracts(),
+        loadNotifications(),
+        loadActivityFeed()
       ]);
+      if(showToast) toast("Dashboard refreshed");
     }
-    init();
 
-  })();
+    // initial load
+    refreshAll();
+
+    // background polling every 60s
+    setInterval(()=>refreshAll(false), 60000);
   </script>
 </body>
 </html>
