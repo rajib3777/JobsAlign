@@ -4,7 +4,7 @@
 <head>
   <meta charset="utf-8" />
   <title>Freelancer Dashboard • JobsAlign (Pro+)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
 
   <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -18,17 +18,19 @@
       --ink:#0F172A; --muted:#64748B; --brand:#4F46E5; --accent:#22C55E; --warn:#F59E0B; --rose:#EF4444;
       --bg:#F8FAFC; --card:#FFFFFF; --line:#E5E7EB;
     }
-    body{background:
-      radial-gradient(900px 500px at 10% -10%, rgba(79,70,229,.10), transparent 60%),
-      radial-gradient(800px 400px at 90% 0%, rgba(34,197,94,.10), transparent 60%),
-      var(--bg);
+    body{
+      background:
+        radial-gradient(900px 500px at 10% -10%, rgba(79,70,229,.10), transparent 60%),
+        radial-gradient(800px 400px at 90% 0%, rgba(34,197,94,.10), transparent 60%),
+        var(--bg);
       color:var(--ink);
       font-family: ui-sans-serif, system-ui, Inter, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      overflow-x:hidden; /* ✅ no horizontal scroll */
     }
     .card{background:var(--card); border:1px solid var(--line); border-radius:1rem; box-shadow:0 10px 30px rgba(2,6,23,.06)}
     .hover-rise{transition:transform .25s ease, box-shadow .25s ease}
     .hover-rise:hover{transform:translateY(-4px); box-shadow:0 16px 40px rgba(2,6,23,.10)}
-    .chip{font-size:.75rem; padding:.25rem .55rem; border-radius:.5rem}
+    .chip{font-size:.75rem; padding:.25rem .55rem; border-radius:.5rem; white-space:nowrap}
     .chip-green{background:#DCFCE7; color:#166534}
     .chip-amber{background:#FEF3C7; color:#92400E}
     .chip-blue{background:#DBEAFE; color:#1E40AF}
@@ -41,19 +43,23 @@
     .btn-soft{background:#EEF2FF;color:#3730A3}
     .btn-soft:hover{background:#E0E7FF}
     .dot{width:.5rem;height:.5rem;border-radius:9999px;display:inline-block}
+    .chart-wrap{width:100%}
+    .chart-wrap canvas{width:100% !important; max-height:260px}
+    @media (max-width:480px){
+      .chart-wrap canvas{max-height:220px}
+    }
   </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
   <!-- NAV -->
   <nav class="bg-white/80 backdrop-blur sticky top-0 border-b border-gray-200 z-50">
-    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3">
-        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <a href="/" class="flex items-center gap-3 min-w-0">
+        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-28 sm:w-32 h-auto object-contain">
         <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Freelancer</span>
       </a>
-      <div class="flex items-center gap-3">
-        <!-- Theme toggle (optional visual) -->
+      <div class="flex items-center gap-2 sm:gap-3">
         <button id="refreshBtn" class="w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50" title="Refresh">
           <i class="lucide-rotate-cw"></i>
         </button>
@@ -64,7 +70,7 @@
             <i class="lucide-bell"></i>
             <span id="notifCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-[1px] rounded-full">0</span>
           </button>
-          <div id="notifDrop" class="hidden absolute right-0 mt-2 w-[28rem] card p-0 overflow-hidden">
+          <div id="notifDrop" class="hidden absolute right-0 mt-2 w-[28rem] max-w-[92vw] card p-0 overflow-hidden">
             <div class="px-4 py-3 border-b text-sm font-semibold">Notifications</div>
             <ul id="notifList" class="max-h-96 overflow-auto divide-y"></ul>
             <div class="px-4 py-2 flex gap-2">
@@ -83,7 +89,7 @@
         <!-- Profile -->
         <div class="relative">
           <button id="profileBtn" class="flex items-center gap-3">
-            <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-10 h-10 rounded-lg border border-gray-200" alt="avatar">
+            <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-10 h-10 rounded-lg border border-gray-200 object-cover" alt="avatar">
             <div class="hidden sm:block text-left leading-5">
               <div id="userName" class="text-sm font-semibold">Freelancer</div>
               <div id="userLevelSmall" class="text-[11px] text-gray-500">Level —</div>
@@ -104,7 +110,7 @@
   </nav>
 
   <!-- LAYOUT -->
-  <div class="max-w-7xl mx-auto px-6 py-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 w-full">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 w-full">
     <!-- SIDEBAR -->
     <aside class="hidden lg:block">
       <div class="card p-4">
@@ -132,8 +138,8 @@
     <main class="space-y-8">
       <!-- GREETING -->
       <section class="card p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
-        <div>
-          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
+        <div class="min-w-0">
+          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight truncate">
             Welcome back, <span id="greetName">Freelancer</span> 👋
           </h1>
           <p class="text-gray-500 mt-1 text-sm">Live snapshot of your performance across JobsAlign.</p>
@@ -141,7 +147,7 @@
             <!-- dynamic skill badges -->
           </div>
         </div>
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-3 shrink-0">
           <a href="/freelancer/profile/" class="btn btn-soft"><i class="lucide-user-cog"></i> Profile</a>
           <a href="/freelancer/jobs/" class="btn btn-primary"><i class="lucide-rocket"></i> Find Work</a>
         </div>
@@ -186,7 +192,7 @@
         </div>
       </section>
 
-      <!-- ANALYTICS ROW -->
+      <!-- ANALYTICS ROW (Compact) -->
       <section class="grid lg:grid-cols-3 gap-6">
         <!-- Earnings Line -->
         <div class="card p-6 lg:col-span-2">
@@ -194,16 +200,20 @@
             <h2 class="text-lg font-semibold">Earnings Overview</h2>
             <div class="text-xs text-gray-500">Monthly trend</div>
           </div>
-          <canvas id="earningsChart" class="h-60"></canvas>
+          <div class="chart-wrap">
+            <canvas id="earningsChart"></canvas>
+          </div>
         </div>
 
-        <!-- Win-rate / Distribution -->
+        <!-- Work Mix -->
         <div class="card p-6">
           <div class="flex items-center justify-between mb-2">
             <h2 class="text-lg font-semibold">Work Mix</h2>
             <span class="text-xs text-gray-500">Last 90 days</span>
           </div>
-          <canvas id="mixChart" class="h-60"></canvas>
+          <div class="chart-wrap">
+            <canvas id="mixChart"></canvas>
+          </div>
           <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
             <div class="flex items-center gap-2"><span class="dot" style="background:#4F46E5"></span> Fixed</div>
             <div class="flex items-center gap-2"><span class="dot" style="background:#22C55E"></span> Hourly</div>
@@ -265,7 +275,7 @@
     </main>
   </div>
 
-  <!-- FOOTER (your provided full footer) -->
+  <!-- FOOTER (required) -->
   <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20"> 
     <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
       <div>
@@ -362,26 +372,27 @@
      * PROFILE & SYNC   *
      ********************/
     async function loadProfile(){
-      const me = await apiGet("/accounts/me/");
+      let me = await apiGet("/accounts/me/");
+      if(!me) me = await apiGet("/accounts/profile/");
       if(!me) return;
-      $("greetName").textContent = me.first_name || me.username || "Freelancer";
+
+      $("greetName").textContent = me.first_name || me.full_name || me.username || "Freelancer";
       $("userName").textContent = me.username || "Freelancer";
       $("userLevelSmall").textContent = me.level || "Level —";
-      if(me.avatar_url) $("avatarImg").src = me.avatar_url;
+      if(me.avatar_url || me.profile_photo) $("avatarImg").src = me.avatar_url || me.profile_photo;
 
-      // skill badges (if provided)
+      // skills
+      const skills = Array.isArray(me.skills)? me.skills : (typeof me.skills==="string"? me.skills.split(",").map(s=>s.trim()).filter(Boolean):[]);
       const container=document.getElementById("skillBadges");
       container.innerHTML="";
-      const skills = me.skills || me.tags || [];
-      (skills.slice(0,8)).forEach(s=>{
+      skills.slice(0,8).forEach(s=>{
         const span=document.createElement("span");
         span.className="chip chip-gray";
         span.textContent=s;
         container.appendChild(span);
       });
 
-      // cache for other pages + cross-tab sync
-      localStorage.setItem("profile_cache", JSON.stringify({name:me.username, level:me.level, avatar:me.avatar_url, skills}));
+      localStorage.setItem("profile_cache", JSON.stringify({name:me.username, level:me.level, avatar:me.avatar_url||me.profile_photo, skills}));
     }
     window.addEventListener("storage",(ev)=>{
       if(ev.key==="profile_updated" && ev.newValue==="1"){
@@ -407,7 +418,7 @@
       earningsChart = new Chart(ctx,{
         type:"line",
         data:{ labels, datasets:[{label:"Earnings ($)", data, borderColor:"#4F46E5", backgroundColor:"rgba(79,70,229,.12)", tension:.35, fill:true, pointRadius:2}]},
-        options:{ responsive:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+        options:{ responsive:true, maintainAspectRatio:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
       });
     }
 
@@ -417,7 +428,7 @@
       mixChart=new Chart(ctx,{
         type:"doughnut",
         data:{ labels:["Fixed","Hourly","Milestone","Others"], datasets:[{data:d, backgroundColor:["#4F46E5","#22C55E","#F59E0B","#06B6D4"]}]},
-        options:{ plugins:{legend:{display:false}}, cutout:"62%" }
+        options:{ plugins:{legend:{display:false}}, cutout:"62%", responsive:true, maintainAspectRatio:true }
       });
     }
 
@@ -425,7 +436,8 @@
       const wallet = await apiGet("/payments/wallet/");
       if(wallet){ $("walletBalance").textContent = money(wallet.balance||0); }
 
-      const stats = await apiGet("/analytics/freelancer/stats/");
+      let stats = await apiGet("/analytics/freelancer/stats/");
+      if(!stats) stats = await apiGet("/analytics/freelancer/summary/");
       if(stats){
         $("totalEarnings").textContent = money(stats.total_earnings||0);
         $("activeContracts").textContent = stats.active_projects || 0;
@@ -478,7 +490,6 @@
     }
 
     async function loadActivityFeed(){
-      // Activity feed can be synthesized from notifications if a dedicated endpoint not present
       const feed = await apiGet("/notifications/");
       const ul=$("activityFeed");
       if(!feed){ ul.innerHTML='<li class="text-sm text-gray-500">No activity.</li>'; return; }
@@ -537,7 +548,7 @@
           await apiPost("/notifications/read/", { ids });
           toast("All notifications marked as read");
           countBox.classList.add("hidden");
-          loadNotifications(); // refresh
+          loadNotifications();
         }
       };
     }

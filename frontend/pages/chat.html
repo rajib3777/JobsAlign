@@ -1,0 +1,298 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Messages • JobsAlign</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
+  <style>
+    :root{ --bg:#F8FAFC; --line:#E5E7EB }
+    body{ background:var(--bg); }
+    .card{background:#fff;border:1px solid var(--line);border-radius:1rem;box-shadow:0 10px 30px rgba(2,6,23,.06)}
+    .no-scrollbar::-webkit-scrollbar{display:none}
+    .no-scrollbar{scrollbar-width:none}
+    .bubble{max-width:80%; border-radius:1rem; padding:.6rem .8rem}
+    @media (max-width:640px){ .bubble{max-width:90%} }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- NAV -->
+  <nav class="bg-white/80 backdrop-blur sticky top-0 border-b border-gray-200 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <a href="/freelancer/dashboard/" class="flex items-center gap-3 min-w-0">
+        <img src="{% static 'images/logo.jpeg' %}" class="w-28 h-auto object-contain" alt="JobsAlign">
+        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Messages</span>
+      </a>
+      <div class="flex items-center gap-2">
+        <a href="/freelancer/jobs/" class="hidden xs:inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"><i class="lucide-briefcase"></i><span class="hidden sm:inline">Jobs</span></a>
+        <button id="profileMenuBtn" class="flex items-center gap-2 px-2 py-1 rounded-lg border border-gray-200 hover:bg-gray-50">
+          <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-8 h-8 rounded-md border border-gray-200" alt="">
+          <span id="userName" class="hidden sm:block text-sm font-semibold truncate max-w-[120px]">Freelancer</span>
+          <i class="lucide-chevron-down text-gray-400"></i>
+        </button>
+        <div id="profileMenu" class="hidden absolute right-4 top-14 w-56 card p-2">
+          <a href="/freelancer/dashboard/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-layout-dashboard mr-2"></i>Dashboard</a>
+          <a href="/freelancer/profile/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-user mr-2"></i>Profile</a>
+          <a href="/freelancer/payments/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-wallet mr-2"></i>Payments</a>
+          <hr class="my-1">
+          <a href="/login/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm text-rose-600"><i class="lucide-log-out mr-2"></i>Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="flex-1">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-4 grid grid-cols-1 lg:grid-cols-[330px_1fr] gap-4">
+      <!-- Threads -->
+      <aside class="card p-3 h-[70vh] sm:h-[78vh] lg:h-[82vh] overflow-hidden">
+        <div class="flex items-center gap-2 px-1 pb-2">
+          <div class="font-semibold">Chats</div>
+          <div id="unreadTotal" class="ml-auto text-xs text-gray-500">—</div>
+        </div>
+        <div class="relative">
+          <input id="threadSearch" type="text" placeholder="Search by client or job"
+                 class="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-400">
+          <i class="lucide-search absolute right-3 top-2.5 text-gray-400"></i>
+        </div>
+        <ul id="threadList" class="mt-3 overflow-y-auto no-scrollbar h-[calc(100%-84px)] divide-y">
+          <!-- skeleton -->
+          <li class="py-3">
+            <div class="w-2/3 h-4 rounded skeleton"></div>
+            <div class="w-1/3 h-3 rounded skeleton mt-2"></div>
+          </li>
+          <li class="py-3">
+            <div class="w-1/2 h-4 rounded skeleton"></div>
+            <div class="w-1/4 h-3 rounded skeleton mt-2"></div>
+          </li>
+        </ul>
+      </aside>
+
+      <!-- Messages -->
+      <section class="card h-[78vh] sm:h-[82vh] overflow-hidden flex flex-col">
+        <div class="px-3 sm:px-5 py-3 border-b flex items-center gap-3">
+          <div class="min-w-0">
+            <div id="roomTitle" class="font-semibold truncate">Select a conversation</div>
+            <div id="roomSub" class="text-xs text-gray-500 truncate">—</div>
+          </div>
+          <div id="onlineDot" class="ml-auto w-2 h-2 rounded-full bg-gray-300" title="status"></div>
+        </div>
+
+        <div id="messageArea" class="flex-1 overflow-y-auto no-scrollbar px-3 sm:px-5 py-4 space-y-3">
+          <!-- message bubbles -->
+        </div>
+
+        <div class="border-t p-2 sm:p-3">
+          <form id="sendForm" class="flex items-end gap-2">
+            <textarea id="messageInput" rows="1" placeholder="Write a message…" class="flex-1 px-3 py-2 border rounded-md max-h-40 overflow-y-auto"></textarea>
+            <label class="cursor-pointer shrink-0">
+              <input id="fileInput" type="file" class="hidden" />
+              <span class="w-10 h-10 grid place-items-center border rounded-lg hover:bg-gray-50"><i class="lucide-paperclip"></i></span>
+            </label>
+            <button class="shrink-0 px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700"><i class="lucide-send"></i></button>
+          </form>
+          <div id="typing" class="text-xs text-gray-500 mt-1 hidden">Typing…</div>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- FOOTER (required) -->
+  <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-8">
+    <div class="max-w-7xl mx-auto px-6 py-10 text-center text-sm text-gray-500">
+      &copy; 2025 <span class="font-semibold text-indigo-600">JobsAlign</span>. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script>
+    const API = "http://127.0.0.1:8000/api";
+    const ENDPOINTS = {
+      me: "/accounts/profile/",
+      threads: "/chats/threads/",
+      messages: (id)=>`/chats/threads/${id}/messages/`,
+      send: "/chats/messages/",
+      upload: "/chats/uploads/", // if you have file upload endpoint
+      presence: (id)=>`/chats/threads/${id}/presence/`
+    };
+
+    const $=(id)=>document.getElementById(id);
+    const token = localStorage.getItem("access_token");
+    if(!token) window.location.href="/login/";
+    function auth(){ return { Authorization:"Bearer "+token }; }
+    function toast(msg,type="success"){
+      const t=document.createElement("div");
+      t.className="fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white "+(type==="success"?"bg-emerald-600":"bg-rose-600");
+      t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2800);
+    }
+    function timeStr(d){ try{ return new Date(d).toLocaleString(); }catch(_){ return "" } }
+
+    async function apiGet(path){
+      try{
+        const r=await fetch(API+path,{headers: auth()});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("GET",path,e); return null;}
+    }
+    async function apiPost(path, body={}){
+      try{
+        const r=await fetch(API+path,{method:"POST", headers:{"Content-Type":"application/json", ...auth()}, body:JSON.stringify(body)});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("POST",path,e); return null;}
+    }
+    async function apiUpload(path, form){
+      try{
+        const r=await fetch(API+path,{method:"POST", headers:{...auth()}, body:form});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("UPLOAD",path,e); return null;}
+    }
+
+    let me={}, threads=[], currentThread=null, polling=null, typingTimer=null;
+
+    async function loadMe(){
+      const data = await apiGet(ENDPOINTS.me);
+      if(data){
+        $("userName").textContent = data.full_name || data.username || "Freelancer";
+        if(data.avatar_url||data.avatar) $("avatarImg").src = data.avatar_url||data.avatar;
+      }
+    }
+
+    function renderThreads(){
+      const ul=$("threadList");
+      if(!threads.length){ ul.innerHTML = `<li class="py-6 text-sm text-gray-500 text-center">No conversations yet.</li>`; return; }
+      ul.innerHTML = threads.map(t=>{
+        const unread = t.unread_count>0 ? `<span class="ml-auto inline-flex items-center justify-center text-[10px] min-w-5 h-5 px-1 bg-rose-100 text-rose-700 rounded-full">${t.unread_count}</span>` : "";
+        return `
+          <li class="py-2.5 px-1 hover:bg-gray-50 cursor-pointer" data-id="${t.id}">
+            <div class="flex items-center gap-2">
+              <img src="${t.other_avatar || '{% static "images/avatar.png" %}'}" class="w-8 h-8 rounded-md border" />
+              <div class="min-w-0">
+                <div class="text-[15px] font-medium truncate">${t.other_name || "User"}</div>
+                <div class="text-xs text-gray-500 truncate">${t.job_title || t.last_message?.content || ""}</div>
+              </div>
+              ${unread}
+            </div>
+          </li>
+        `;
+      }).join("");
+      ul.querySelectorAll("li").forEach(li=>{
+        li.onclick=()=>openThread(parseInt(li.dataset.id));
+      });
+    }
+
+    async function openThread(id){
+      currentThread = threads.find(t=>t.id===id);
+      if(!currentThread) return;
+      $("roomTitle").textContent = currentThread.other_name || "Conversation";
+      $("roomSub").textContent = currentThread.job_title || "";
+      $("messageArea").innerHTML = `<div class="w-1/2 h-4 skeleton rounded"></div><div class="w-1/3 h-4 skeleton rounded mt-2"></div>`;
+
+      await fetchMessages(id, true);
+      // Presence (optional)
+      const p = await apiGet(ENDPOINTS.presence(id));
+      $("onlineDot").className = "ml-auto w-2 h-2 rounded-full " + (p && p.online ? "bg-emerald-500":"bg-gray-300");
+
+      // polling
+      if(polling) clearInterval(polling);
+      polling = setInterval(()=>fetchMessages(id, false), 4000);
+    }
+
+    async function fetchThreads(){
+      const data = await apiGet(ENDPOINTS.threads);
+      threads = (data?.results||data||[]).map(t=>({
+        id: t.id,
+        other_name: t.other_name || t.client?.name || t.freelancer?.name,
+        other_avatar: t.other_avatar || t.client?.avatar || t.freelancer?.avatar,
+        job_title: t.project?.title || t.job?.title,
+        last_message: t.last_message,
+        unread_count: t.unread_count || 0
+      }));
+      const totalUnread = threads.reduce((s,t)=>s+(t.unread_count||0),0);
+      $("unreadTotal").textContent = totalUnread>0 ? `${totalUnread} unread` : "All caught up";
+      renderThreads();
+    }
+
+    function renderMessages(list, reset){
+      const box=$("messageArea");
+      if(reset) box.innerHTML="";
+      if(!list.length){ if(reset) box.innerHTML=`<div class="text-sm text-gray-500">Say hi to start the conversation.</div>`; return; }
+      list.forEach(m=>{
+        const mine = m.sender?.is_me || (m.sender_id===me.id) || m.is_mine;
+        const side = mine ? "justify-end" : "justify-start";
+        const wrap = document.createElement("div");
+        wrap.className = "flex "+side;
+        const bg = mine ? "bg-indigo-600 text-white" : "bg-gray-100 text-gray-800";
+        const at = timeStr(m.created||m.created_at);
+        wrap.innerHTML = `
+          <div class="bubble ${bg}">
+            <div class="whitespace-pre-wrap break-words text-[15px]">${m.content || ""}</div>
+            ${m.file_url ? `<a href="${m.file_url}" class="underline text-xs mt-1 inline-block">Attachment</a>`:""}
+            <div class="text-[11px] opacity-70 mt-1">${at}</div>
+          </div>
+        `;
+        box.appendChild(wrap);
+      });
+      box.scrollTop = box.scrollHeight;
+    }
+
+    async function fetchMessages(threadId, reset){
+      const data = await apiGet(ENDPOINTS.messages(threadId));
+      const msgs = data?.results || data || [];
+      renderMessages(msgs, reset);
+    }
+
+    $("sendForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const text = $("messageInput").value.trim();
+      if(!currentThread || (!text && !$("fileInput").files.length)) return;
+
+      // text
+      if(text){
+        const res = await apiPost(ENDPOINTS.send, { thread: currentThread.id, content: text });
+        if(res){ $("messageInput").value=""; await fetchMessages(currentThread.id,false); }
+        else toast("Failed to send","error");
+      }
+
+      // file (optional)
+      if($("fileInput").files.length){
+        const fd=new FormData(); fd.append("thread", currentThread.id); fd.append("file", $("fileInput").files[0]);
+        const up = await apiUpload(ENDPOINTS.upload, fd);
+        if(up){ $("fileInput").value=""; await fetchMessages(currentThread.id,false); }
+        else toast("File upload failed","error");
+      }
+    });
+
+    // typing indicator (soft)
+    $("messageInput").addEventListener("input", ()=>{
+      $("typing").classList.remove("hidden");
+      clearTimeout(typingTimer);
+      typingTimer=setTimeout(()=>$("typing").classList.add("hidden"), 1200);
+    });
+
+    // search threads
+    $("threadSearch").addEventListener("input", (e)=>{
+      const q=e.target.value.toLowerCase();
+      const filtered = threads.filter(t=> (t.other_name||"").toLowerCase().includes(q) || (t.job_title||"").toLowerCase().includes(q));
+      const old = threads; threads = filtered; renderThreads(); threads = old; // render filtered
+    });
+
+    // menu
+    (function bindMenu(){
+      const btn=$("profileMenuBtn"), menu=$("profileMenu");
+      btn.addEventListener("click", ()=>menu.classList.toggle("hidden"));
+      document.addEventListener("click",(e)=>{ if(!btn.contains(e.target) && !menu.contains(e.target)) menu.classList.add("hidden"); });
+    })();
+
+    (async function init(){
+      const meData = await apiGet(ENDPOINTS.me); me = meData || {};
+      await fetchThreads();
+      // open first thread automatically on large screens
+      if(threads.length && window.innerWidth>=1024){ openThread(threads[0].id); }
+    })();
+  </script>
+</body>
+</html>

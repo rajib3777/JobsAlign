@@ -3,242 +3,728 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Freelancer Profile • JobsAlign</title>
+  <title>Freelancer Profile • JobsAlign (Pro+)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+  <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
   <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
+  <!-- Chart.js (mini chart) -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
-    :root {
-      --indigo: #4f46e5;
-      --emerald: #10b981;
-      --rose: #ef4444;
-      --amber: #f59e0b;
-      --cyan: #06b6d4;
-      --violet: #7c3aed;
-      --gray-bg: #f8fafc;
+    :root{
+      --ink:#0F172A; --muted:#64748B; --brand:#4F46E5; --emerald:#10B981; --amber:#F59E0B; --rose:#EF4444; --cyan:#06B6D4; --violet:#7C3AED;
+      --bg:#F8FAFC; --card:#FFFFFF; --line:#E5E7EB;
     }
-    body {
-      background: linear-gradient(145deg, #eef2ff 0%, #fdfdfd 60%, #f0fdf4 100%);
-      font-family: "Inter", system-ui, sans-serif;
+    html,body{height:100%}
+    body{
+      background:
+        radial-gradient(900px 500px at 10% -10%, rgba(79,70,229,.08), transparent 60%),
+        radial-gradient(800px 400px at 90% 0, rgba(34,197,94,.08), transparent 60%),
+        var(--bg);
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, Inter, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      overflow-x:hidden; /* ✅ kill any horizontal scroll on all devices */
     }
-    .card {
-      background: white;
-      border-radius: 1rem;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.06);
-      transition: all 0.3s ease;
-    }
-    .card:hover {
-      transform: translateY(-3px);
-      box-shadow: 0 15px 40px rgba(0, 0, 0, 0.08);
-    }
-    .gradient-btn {
-      background: linear-gradient(90deg, var(--indigo), var(--emerald));
-      color: white;
-    }
-    .gradient-btn:hover {
-      background: linear-gradient(90deg, var(--violet), var(--cyan));
+    .card{background:var(--card); border:1px solid var(--line); border-radius:1rem; box-shadow:0 10px 30px rgba(2,6,23,.06)}
+    .hover-rise{transition:transform .25s ease, box-shadow .25s ease}
+    .hover-rise:hover{transform:translateY(-3px); box-shadow:0 16px 38px rgba(2,6,23,.10)}
+    .badge{font-size:.75rem; padding:.25rem .55rem; border-radius:.5rem; white-space:nowrap}
+    .badge-indigo{background:#EEF2FF; color:#3730A3}
+    .badge-emerald{background:#ECFDF5; color:#065F46}
+    .badge-amber{background:#FEF3C7; color:#92400E}
+    .badge-cyan{background:#ECFEFF; color:#155E75}
+    .badge-rose{background:#FFE4E6; color:#9F1239}
+    .skeleton{background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 37%,#f3f4f6 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite}
+    @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem .95rem;border-radius:.7rem;font-weight:600}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-primary:hover{background:#4338CA}
+    .btn-soft{background:#EEF2FF;color:#3730A3}
+    .btn-soft:hover{background:#E0E7FF}
+    .btn-emerald{background:var(--emerald); color:#fff}
+    .btn-emerald:hover{filter:brightness(.95)}
+    .btn-rose{background:var(--rose); color:#fff}
+    .btn-rose:hover{filter:brightness(.95)}
+    .pill{border:1px dashed #CBD5E1; border-radius:.75rem}
+    .text-ellipsis{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
+    .grid-safe{min-width:0}
+    .avatar-xl{width:7.25rem; height:7.25rem}
+    .chart-wrap{width:100%}
+    .chart-wrap canvas{width:100% !important; max-height:220px}
+    @media (max-width:480px){
+      .avatar-xl{width:6rem; height:6rem}
+      .chart-wrap canvas{max-height:200px}
     }
   </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
+
   <!-- NAV -->
-  <nav class="bg-white/80 backdrop-blur border-b border-gray-200 sticky top-0 z-50">
-    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
-      <a href="/freelancer/dashboard/" class="flex items-center gap-3">
-        <img src="{% static 'images/logo.jpeg' %}" class="w-28" alt="JobsAlign">
-        <h1 class="font-bold text-lg text-indigo-600">Freelancer Profile</h1>
+  <nav class="bg-white/90 backdrop-blur sticky top-0 border-b border-gray-200 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <a href="/freelancer/dashboard/" class="flex items-center gap-3 min-w-0">
+        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-28 sm:w-32 h-auto object-contain">
+        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Freelancer • Profile</span>
       </a>
-      <a href="/login/" class="text-sm text-rose-500 hover:text-rose-700 flex items-center gap-1">
-        <i class="lucide-log-out"></i> Logout
-      </a>
+      <div class="flex items-center gap-2 sm:gap-3">
+        <a href="/freelancer/dashboard/" class="btn btn-soft"><i class="lucide-layout-dashboard"></i><span class="hidden xs:inline">Dashboard</span></a>
+        <a href="/login/" class="btn btn-rose"><i class="lucide-log-out"></i><span class="hidden xs:inline">Logout</span></a>
+      </div>
     </div>
   </nav>
 
   <!-- CONTENT -->
-  <main class="flex-1 max-w-7xl mx-auto px-6 py-10 space-y-8">
+  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 grid-safe">
 
-    <!-- HEADER -->
-    <section class="card p-6 flex flex-col lg:flex-row items-center lg:items-start gap-6">
-      <div class="relative">
-        <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-32 h-32 rounded-full border-4 border-indigo-500 shadow-md object-cover" />
-        <label for="avatarUpload" class="absolute bottom-0 right-0 bg-indigo-600 p-2 rounded-full cursor-pointer hover:bg-indigo-700">
-          <i class="lucide-camera text-white"></i>
-        </label>
-        <input id="avatarUpload" type="file" accept="image/*" class="hidden" />
-      </div>
-      <div class="flex-1 text-center lg:text-left">
-        <h2 id="freelancerName" class="text-2xl font-bold text-gray-900">Loading...</h2>
-        <p id="freelancerBio" class="text-gray-600 mt-2 text-sm">—</p>
-        <div class="mt-3 flex flex-wrap justify-center lg:justify-start gap-2">
-          <span id="freelancerLevel" class="px-3 py-1 bg-indigo-50 text-indigo-700 rounded-full text-sm"></span>
-          <span id="verificationBadge" class="px-3 py-1 bg-amber-50 text-amber-700 rounded-full text-sm"></span>
-          <span id="subscriptionPlan" class="px-3 py-1 bg-emerald-50 text-emerald-700 rounded-full text-sm"></span>
+    <!-- HEADER: Avatar + Basic -->
+    <section class="card p-5 sm:p-6 hover-rise">
+      <div class="flex flex-col lg:flex-row gap-6 lg:items-center">
+        <!-- Avatar -->
+        <div class="relative self-center lg:self-start">
+          <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="avatar-xl rounded-full border-4 border-indigo-500 shadow-md object-cover" alt="avatar">
+          <label for="avatarUpload" title="Upload new photo" class="absolute -right-1 bottom-0 bg-indigo-600 p-2 rounded-full cursor-pointer hover:bg-indigo-700 shadow">
+            <i class="lucide-camera text-white text-[18px]"></i>
+          </label>
+          <input id="avatarUpload" type="file" accept="image/*" class="hidden" />
         </div>
-      </div>
-      <button id="saveProfileBtn" class="gradient-btn px-5 py-2.5 rounded-lg font-semibold shadow">Save Profile</button>
-    </section>
 
-    <!-- BASIC INFO -->
-    <section class="grid md:grid-cols-2 gap-6">
-      <div class="card p-6">
-        <h3 class="font-semibold text-lg mb-4 text-indigo-700">Personal Info</h3>
-        <div class="space-y-3">
-          <div>
-            <label class="text-sm font-medium text-gray-700">Full Name</label>
-            <input id="fullName" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter full name">
+        <!-- Basic Info -->
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 flex-wrap">
+            <h1 id="freelancerName" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-ellipsis">Loading...</h1>
+            <span id="freelancerLevel" class="badge badge-indigo">Level —</span>
+            <span id="verificationBadge" class="badge badge-amber">Verification —</span>
+            <span id="subscriptionPlan" class="badge badge-emerald">Plan —</span>
           </div>
-          <div>
-            <label class="text-sm font-medium text-gray-700">Email (readonly)</label>
-            <input id="email" type="text" class="w-full border border-gray-200 bg-gray-100 rounded-md px-3 py-2" readonly>
+          <p id="freelancerBio" class="text-gray-600 mt-2 text-sm sm:text-[15px]">—</p>
+
+          <div class="mt-3 flex flex-wrap gap-2" id="skillBadges">
+            <!-- dynamic skill badges -->
           </div>
-          <div>
-            <label class="text-sm font-medium text-gray-700">Location</label>
-            <input id="location" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Your location">
+
+          <div class="mt-4 flex flex-wrap gap-2">
+            <a href="/freelancer/jobs/" class="btn btn-primary"><i class="lucide-rocket"></i> Find Work</a>
+            <button id="saveProfileBtn" class="btn btn-emerald"><i class="lucide-save"></i> Save Profile</button>
           </div>
         </div>
-      </div>
 
-      <div class="card p-6">
-        <h3 class="font-semibold text-lg mb-4 text-emerald-700">Professional Info</h3>
-        <div class="space-y-3">
-          <div>
-            <label class="text-sm font-medium text-gray-700">Hourly Rate ($)</label>
-            <input id="hourlyRate" type="number" min="0" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g. 25">
+        <!-- Quick Metrics -->
+        <div class="grid grid-cols-3 lg:grid-cols-1 gap-3 w-full lg:w-auto">
+          <div class="p-4 rounded-xl pill bg-white">
+            <div class="text-[11px] text-gray-500">Avg Rating</div>
+            <div id="ratingScore" class="text-xl font-bold">—</div>
           </div>
-          <div>
-            <label class="text-sm font-medium text-gray-700">Skills (comma-separated)</label>
-            <textarea id="skills" class="w-full border border-gray-300 rounded-md px-3 py-2" rows="2"></textarea>
+          <div class="p-4 rounded-xl pill bg-white">
+            <div class="text-[11px] text-gray-500">Projects</div>
+            <div id="projectsCount" class="text-xl font-bold">—</div>
           </div>
-          <div>
-            <label class="text-sm font-medium text-gray-700">Bio</label>
-            <textarea id="bio" class="w-full border border-gray-300 rounded-md px-3 py-2" rows="3"></textarea>
+          <div class="p-4 rounded-xl pill bg-white">
+            <div class="text-[11px] text-gray-500">Earnings</div>
+            <div id="totalEarnings" class="text-xl font-bold">—</div>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- STATS -->
-    <section class="grid lg:grid-cols-3 gap-6">
-      <div class="card p-6">
-        <h3 class="text-lg font-semibold mb-3 text-violet-700">Performance</h3>
-        <p id="ratingScore" class="text-4xl font-bold text-gray-900">—</p>
-        <p class="text-sm text-gray-500">Average Rating</p>
-      </div>
-      <div class="card p-6">
-        <h3 class="text-lg font-semibold mb-3 text-cyan-700">Projects Completed</h3>
-        <p id="projectsCount" class="text-4xl font-bold text-gray-900">—</p>
-        <p class="text-sm text-gray-500">Total successful projects</p>
-      </div>
-      <div class="card p-6">
-        <h3 class="text-lg font-semibold mb-3 text-amber-700">Earnings</h3>
-        <p id="totalEarnings" class="text-4xl font-bold text-gray-900">—</p>
-        <p class="text-sm text-gray-500">Lifetime earnings</p>
-      </div>
-    </section>
+    <!-- TABS -->
+    <section class="mt-6">
+      <div class="card p-4 sm:p-6">
+        <!-- Tab Header -->
+        <div class="flex items-center gap-2 sm:gap-4 border-b border-gray-200 pb-2 overflow-x-auto no-scrollbar">
+          <button data-tab="overview" class="tab-btn px-3 py-2 rounded-lg text-sm font-semibold bg-indigo-50 text-indigo-700">Overview</button>
+          <button data-tab="edit" class="tab-btn px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">Edit Profile</button>
+          <button data-tab="verify" class="tab-btn px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">Verification & Portfolio</button>
+        </div>
 
-    <!-- CHARTS -->
-    <section class="card p-6">
-      <h3 class="text-lg font-semibold mb-3 text-indigo-700">Monthly Performance</h3>
-      <canvas id="profileChart" height="100"></canvas>
+        <!-- Tab Bodies -->
+        <div class="mt-6 space-y-6">
+
+          <!-- OVERVIEW -->
+          <div id="tab-overview" class="tab-body grid lg:grid-cols-3 gap-6">
+            <!-- About -->
+            <div class="card p-5 sm:p-6 lg:col-span-2">
+              <h3 class="text-base sm:text-lg font-semibold mb-4">About</h3>
+              <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                <div>
+                  <dt class="text-gray-500">Full Name</dt>
+                  <dd id="ovFullName" class="font-medium text-ellipsis">—</dd>
+                </div>
+                <div>
+                  <dt class="text-gray-500">Email</dt>
+                  <dd id="ovEmail" class="font-medium text-ellipsis">—</dd>
+                </div>
+                <div>
+                  <dt class="text-gray-500">Location</dt>
+                  <dd id="ovLocation" class="font-medium text-ellipsis">—</dd>
+                </div>
+                <div>
+                  <dt class="text-gray-500">Hourly Rate</dt>
+                  <dd id="ovRate" class="font-medium">—</dd>
+                </div>
+                <div class="sm:col-span-2">
+                  <dt class="text-gray-500">Bio</dt>
+                  <dd id="ovBio" class="font-medium break-words">—</dd>
+                </div>
+              </dl>
+            </div>
+
+            <!-- Mini Performance -->
+            <div class="card p-5 sm:p-6">
+              <div class="flex items-center justify-between mb-2">
+                <h3 class="text-base sm:text-lg font-semibold">Last 6 Months</h3>
+                <span class="text-xs text-gray-500">Earnings</span>
+              </div>
+              <div class="chart-wrap"><canvas id="miniEarnChart"></canvas></div>
+            </div>
+          </div>
+
+          <!-- EDIT PROFILE -->
+          <div id="tab-edit" class="tab-body hidden grid lg:grid-cols-3 gap-6">
+            <!-- Personal -->
+            <div class="card p-5 sm:p-6 lg:col-span-2">
+              <h3 class="text-base sm:text-lg font-semibold mb-4">Personal & Professional</h3>
+              <div class="grid sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="text-sm text-gray-600">Full Name</label>
+                  <input id="fullName" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter full name">
+                </div>
+                <div>
+                  <label class="text-sm text-gray-600">Email (readonly)</label>
+                  <input id="email" type="text" class="w-full border border-gray-200 bg-gray-100 rounded-md px-3 py-2" readonly>
+                </div>
+                <div>
+                  <label class="text-sm text-gray-600">Location</label>
+                  <input id="location" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Your location">
+                </div>
+                <div>
+                  <label class="text-sm text-gray-600">Hourly Rate ($)</label>
+                  <input id="hourlyRate" type="number" min="0" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g. 25">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="text-sm text-gray-600">Skills (comma-separated)</label>
+                  <input id="skills" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="React, Django, Tailwind, ..." />
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="text-sm text-gray-600">Bio</label>
+                  <textarea id="bio" class="w-full border border-gray-300 rounded-md px-3 py-2" rows="4" placeholder="Write a short introduction..."></textarea>
+                </div>
+              </div>
+
+              <div class="mt-5 flex gap-2">
+                <button id="saveBtn" class="btn btn-emerald"><i class="lucide-save"></i> Save Changes</button>
+                <button id="resetBtn" class="btn btn-soft"><i class="lucide-rotate-ccw"></i> Reset</button>
+              </div>
+            </div>
+
+            <!-- Avatar & Cover -->
+            <div class="card p-5 sm:p-6">
+              <h3 class="text-base sm:text-lg font-semibold mb-4">Profile Media</h3>
+              <div class="space-y-4">
+                <div class="p-4 border rounded-xl">
+                  <div class="text-sm mb-2 text-gray-700 font-medium">Profile Photo</div>
+                  <input id="avatarFile" type="file" accept="image/*" class="block w-full text-sm" />
+                  <button id="uploadAvatarBtn" class="btn btn-primary mt-3 w-full justify-center"><i class="lucide-upload"></i> Upload Avatar</button>
+                </div>
+                <div class="p-4 border rounded-xl">
+                  <div class="text-sm mb-2 text-gray-700 font-medium">Cover Photo (optional)</div>
+                  <input id="coverFile" type="file" accept="image/*" class="block w-full text-sm" />
+                  <button id="uploadCoverBtn" class="btn btn-soft mt-3 w-full justify-center"><i class="lucide-image-plus"></i> Upload Cover</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- VERIFY & PORTFOLIO -->
+          <div id="tab-verify" class="tab-body hidden">
+            <div class="grid lg:grid-cols-3 gap-6">
+              <!-- Verification -->
+              <div class="card p-5 sm:p-6">
+                <h3 class="text-base sm:text-lg font-semibold mb-4">Verification</h3>
+                <div class="space-y-3 text-sm">
+                  <div class="flex items-center justify-between">
+                    <span>Email</span>
+                    <span id="emailVerifyPill" class="badge badge-indigo">—</span>
+                  </div>
+                  <div class="flex items-center justify-between">
+                    <span>Identity (KYC)</span>
+                    <span id="kycVerifyPill" class="badge badge-amber">—</span>
+                  </div>
+                </div>
+
+                <div class="mt-5">
+                  <label class="text-sm text-gray-700">Upload KYC Document</label>
+                  <input id="kycFile" type="file" accept="image/*,.pdf" class="block w-full text-sm mt-1" />
+                  <button id="uploadKycBtn" class="btn btn-primary mt-3 w-full justify-center"><i class="lucide-id-card"></i> Upload KYC</button>
+                </div>
+              </div>
+
+              <!-- Portfolio Upload -->
+              <div class="card p-5 sm:p-6 lg:col-span-2">
+                <div class="flex items-center justify-between">
+                  <h3 class="text-base sm:text-lg font-semibold">Portfolio</h3>
+                  <span id="pfCount" class="text-xs text-gray-500">0 items</span>
+                </div>
+
+                <div class="mt-4 grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="text-sm text-gray-600">Title</label>
+                    <input id="pfTitle" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Project title">
+                  </div>
+                  <div>
+                    <label class="text-sm text-gray-600">URL (optional)</label>
+                    <input id="pfUrl" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="https://...">
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="text-sm text-gray-600">Description</label>
+                    <textarea id="pfDesc" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="What did you build?"></textarea>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="text-sm text-gray-600">Attachment (image/pdf/zip)</label>
+                    <input id="pfFile" type="file" accept="image/*,.pdf,.zip" class="block w-full text-sm" />
+                  </div>
+                </div>
+
+                <div class="mt-4 flex gap-2">
+                  <button id="addPortfolioBtn" class="btn btn-emerald"><i class="lucide-plus"></i> Add to Portfolio</button>
+                  <button id="reloadPortfolioBtn" class="btn btn-soft"><i class="lucide-rotate-cw"></i> Reload</button>
+                </div>
+
+                <!-- Portfolio list -->
+                <div id="portfolioList" class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                  <!-- skeletons -->
+                  <div class="h-28 rounded-xl skeleton"></div>
+                  <div class="h-28 rounded-xl skeleton"></div>
+                  <div class="h-28 rounded-xl skeleton"></div>
+                </div>
+
+                <!-- Graceful note if endpoint missing -->
+                <div id="portfolioEmptyNote" class="hidden mt-4 text-sm text-gray-500">
+                  Portfolio endpoint not found. If your backend doesn’t expose <code>/api/portfolio/</code>, this section is hidden gracefully.
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div><!--/tab bodies-->
+      </div>
     </section>
   </main>
 
-  <!-- FOOTER -->
-  <footer class="bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20 py-8 text-center text-sm">
-    © 2025 <b class="text-indigo-600">JobsAlign</b>. Empowering freelancers worldwide.
+  <!-- FOOTER (required) -->
+  <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20"> 
+    <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
+      <div>
+        <div class="flex items-center space-x-2 mb-3">
+          <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
+        </div>
+        <p class="text-gray-600 leading-relaxed">
+          Empowering freelancers, clients, and businesses to collaborate, innovate, and succeed — all in one place.
+        </p>
+        <div class="flex space-x-4 mt-4">
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Platform</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#marketplace" class="hover:text-primary">Marketplace</a></li>
+          <li><a href="#jobs" class="hover:text-primary">Job Listings</a></li>
+          <li><a href="#chats" class="hover:text-primary">Chats & Collaboration</a></li>
+          <li><a href="#notifications" class="hover:text-primary">Notifications</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Resources</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#analytics" class="hover:text-primary">Analytics Dashboard</a></li>
+          <li><a href="#support" class="hover:text-primary">Help & Support</a></li>
+          <li><a href="#disputes" class="hover:text-primary">Dispute Center</a></li>
+          <li><a href="#verification" class="hover:text-primary">Profile Verification</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">About</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#about" class="hover:text-primary">About Us</a></li>
+          <li><a href="#team" class="hover:text-primary">Our Team</a></li>
+          <li><a href="#terms" class="hover:text-primary">Terms & Conditions</a></li>
+          <li><a href="#privacy" class="hover:text-primary">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-200 mt-10 pt-6 pb-8 text-center text-gray-500 text-sm">
+      <p>&copy; 2025 <span class="font-semibold text-primary">JobsAlign</span>. All rights reserved.</p>
+      <p class="mt-2 text-blue-500">
+        Developed by 
+        <a href="https://somadhansoft.com/" class="hover:underline font-semibold text-blue-600" target="_blank" rel="noopener noreferrer">
+          SomadhanSoft
+        </a>
+      </p>
+    </div>
   </footer>
 
   <!-- JS -->
   <script>
+    /********************
+     * CONFIG & HELPERS *
+     ********************/
     const API = "http://127.0.0.1:8000/api";
-    const token = localStorage.getItem("access_token");
-    if(!token) window.location.href="/login/";
-
     const $ = (id)=>document.getElementById(id);
-    const money=(n)=>"$"+(parseFloat(n||0)).toFixed(2);
+    const token = localStorage.getItem("access_token");
+    if(!token) window.location.href = "/login/";
 
-    async function apiGet(path){
-      const res = await fetch(API+path, { headers:{Authorization:"Bearer "+token}});
-      return await res.json();
+    const money = (n)=> "$"+(parseFloat(n||0)).toFixed(2);
+    const compact = (n)=> (n>=1000 ? (n/1000).toFixed(1)+'k' : n);
+
+    function toast(msg, type="success"){
+      const t=document.createElement("div");
+      t.className="fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white "+(type==="success"?"bg-emerald-600":"bg-rose-600");
+      t.textContent=msg; document.body.appendChild(t);
+      setTimeout(()=>t.remove(),2800);
     }
-    async function apiPost(path,body){
-      const res = await fetch(API+path, {
-        method:"POST",
-        headers:{"Content-Type":"application/json", Authorization:"Bearer "+token},
-        body:JSON.stringify(body)
+
+    async function getJson(path, extra={}){
+      try{
+        const r = await fetch(API+path, { headers:{ Authorization:"Bearer "+token, ...extra.headers }});
+        if(!r.ok) throw {status:r.status};
+        return await r.json();
+      }catch(e){ return {__error:true, status:e.status||0}; }
+    }
+
+    async function postJson(path, body, isForm=false){
+      try{
+        const opts = { method:"POST", headers:{ Authorization:"Bearer "+token }, body: isForm? body : JSON.stringify(body) };
+        if(!isForm) opts.headers["Content-Type"]="application/json";
+        const r = await fetch(API+path, opts);
+        if(!r.ok) throw {status:r.status};
+        return await r.json();
+      }catch(e){ return {__error:true, status:e.status||0}; }
+    }
+
+    async function putJson(path, body, isForm=false){
+      try{
+        const opts = { method:"PUT", headers:{ Authorization:"Bearer "+token }, body: isForm? body : JSON.stringify(body) };
+        if(!isForm) opts.headers["Content-Type"]="application/json";
+        const r = await fetch(API+path, opts);
+        if(!r.ok) throw {status:r.status};
+        return await r.json();
+      }catch(e){ return {__error:true, status:e.status||0}; }
+    }
+
+    /********************
+     * TABS
+     ********************/
+    (function tabs(){
+      const btns = document.querySelectorAll(".tab-btn");
+      const bodies = {
+        overview: $("tab-overview"),
+        edit: $("tab-edit"),
+        verify: $("tab-verify"),
+      };
+      btns.forEach(b=>{
+        b.addEventListener("click", ()=>{
+          btns.forEach(x=>x.classList.remove("bg-indigo-50","text-indigo-700"));
+          b.classList.add("bg-indigo-50","text-indigo-700");
+          const tab = b.getAttribute("data-tab");
+          Object.keys(bodies).forEach(k=>{
+            if(k===tab) bodies[k].classList.remove("hidden");
+            else bodies[k].classList.add("hidden");
+          });
+          window.scrollTo({top:0, behavior:"smooth"});
+        });
       });
-      return await res.json();
+    })();
+
+    /********************
+     * PROFILE LOAD & UI
+     ********************/
+    let profileCache = null;
+    let miniChart=null;
+
+    async function fetchProfile(){
+      // Primary: /accounts/me/ (তোমার আগের 404 অনুযায়ী fallback রাখা হয়েছে)
+      let me = await getJson("/accounts/me/");
+      if(me.__error) me = await getJson("/accounts/profile/");
+      if(me.__error) { toast("Failed to load profile", "error"); return null; }
+      return me;
     }
 
-    async function loadProfile(){
-      const me = await apiGet("/accounts/me/");
-      $("freelancerName").textContent = me.full_name || me.username;
-      $("fullName").value = me.full_name || "";
+    function renderBadges(me){
+      $("freelancerLevel").textContent = me.level ? `Level ${me.level}` : "Level —";
+      const verified = (me.is_verified===true || me.email_verified===true);
+      $("verificationBadge").textContent = verified ? "✅ Email Verified" : "⏳ Email Not Verified";
+      $("subscriptionPlan").textContent = me.plan_name || me.subscription_plan || "Free Plan";
+    }
+
+    function renderBasics(me){
+      const name = me.full_name || me.first_name || me.username || "Freelancer";
+      $("freelancerName").textContent = name;
+      $("freelancerBio").textContent = me.bio || "No bio added yet.";
+      if(me.avatar_url || me.profile_photo) $("avatarImg").src = me.avatar_url || me.profile_photo;
+
+      const skills = Array.isArray(me.skills) ? me.skills : (typeof me.skills==="string" ? me.skills.split(",").map(s=>s.trim()).filter(Boolean) : []);
+      const wrap = $("skillBadges"); wrap.innerHTML="";
+      skills.slice(0,12).forEach(s=>{
+        const el = document.createElement("span");
+        el.className = "badge badge-cyan";
+        el.textContent = s;
+        wrap.appendChild(el);
+      });
+
+      $("ovFullName").textContent = name;
+      $("ovEmail").textContent = me.email || "—";
+      $("ovLocation").textContent = me.location || "—";
+      $("ovRate").textContent = me.hourly_rate ? "$"+me.hourly_rate : "—";
+      $("ovBio").textContent = me.bio || "—";
+
+      $("fullName").value = me.full_name || me.first_name || me.username || "";
       $("email").value = me.email || "";
-      $("bio").value = me.bio || "";
-      $("freelancerBio").textContent = me.bio || "No bio added.";
-      $("skills").value = me.skills?.join(", ") || "";
       $("location").value = me.location || "";
       $("hourlyRate").value = me.hourly_rate || "";
-      if(me.avatar_url) $("avatarImg").src = me.avatar_url;
+      $("bio").value = me.bio || "";
+      $("skills").value = skills.join(", ");
 
-      // Badge info
-      const level = await apiGet("/levels/current/");
-      $("freelancerLevel").textContent = level?.name ? `Level ${level.name}` : "Level —";
-
-      const verify = await apiGet("/verification/status/");
-      $("verificationBadge").textContent = verify?.verified ? "✅ Verified" : "⏳ Not Verified";
-
-      const sub = await apiGet("/subscriptions/current/");
-      $("subscriptionPlan").textContent = sub?.plan_name ? sub.plan_name : "Free Plan";
-
-      const stats = await apiGet("/analytics/freelancer/summary/");
-      $("ratingScore").textContent = stats?.rating_avg?.toFixed(1) || "—";
-      $("projectsCount").textContent = stats?.projects_completed || 0;
-      $("totalEarnings").textContent = money(stats?.total_earnings || 0);
-
-      drawChart(stats?.months || [], stats?.earnings || []);
+      profileCache = me;
+      localStorage.setItem("profile_cache", JSON.stringify({name, level: me.level, avatar: me.avatar_url || me.profile_photo, skills}));
     }
 
-    async function updateProfile(){
+    function drawMiniChart(labels=[], data=[]){
+      const ctx = $("miniEarnChart");
+      if(miniChart) miniChart.destroy();
+      const L = labels.length ? labels : ["Jan","Feb","Mar","Apr","May","Jun"];
+      const D = data.length ? data : [0,0,0,0,0,0];
+      miniChart = new Chart(ctx,{
+        type:"bar",
+        data:{ labels:L, datasets:[{ label:"Earnings ($)", data:D, backgroundColor:["#4f46e5","#10b981","#f59e0b","#06b6d4","#ef4444","#7c3aed"], borderRadius:8 }]},
+        options:{ plugins:{legend:{display:false}}, responsive:true, maintainAspectRatio:true, scales:{ y:{ beginAtZero:true, ticks:{ callback:(v)=>'$'+v }} } }
+      });
+    }
+
+    async function loadRatings(){
+      const r = await getJson("/reviews/freelancer/");
+      if(!r.__error){
+        const avg = typeof r.rating_avg === "number" ? r.rating_avg.toFixed(1) : (r.avg || r.average || "—");
+        $("ratingScore").textContent = avg || "—";
+        $("projectsCount").textContent = compact(r.projects_completed || r.total_reviews || r.count || 0);
+        $("totalEarnings").textContent = r.total_earnings ? money(r.total_earnings) : (profileCache?.total_earnings ? money(profileCache.total_earnings) : "—");
+        drawMiniChart(r.labels || [], r.earnings || []);
+      }else{
+        $("ratingScore").textContent = profileCache?.rating || "—";
+        $("projectsCount").textContent = compact(profileCache?.projects || 0);
+        $("totalEarnings").textContent = profileCache?.total_earnings ? money(profileCache.total_earnings) : "—";
+        drawMiniChart([], []);
+      }
+    }
+
+    async function loadVerification(){
+      const v = await getJson("/verification/status/");
+      if(!v.__error){
+        $("verificationBadge").textContent = v.verified ? "✅ Email Verified" : "⏳ Email Not Verified";
+        $("emailVerifyPill").textContent = v.verified ? "Verified" : "Pending";
+        $("emailVerifyPill").className = "badge "+(v.verified? "badge-emerald":"badge-amber");
+        $("kycVerifyPill").textContent = v.kyc_verified ? "KYC Verified" : "KYC Pending";
+        $("kycVerifyPill").className = "badge "+(v.kyc_verified? "badge-emerald":"badge-amber");
+      }else{
+        const me = profileCache || {};
+        const emailOK = (me.is_verified===true || me.email_verified===true);
+        const kycOK = (me.is_identity_verified===true || me.kyc_verified===true);
+        $("verificationBadge").textContent = emailOK ? "✅ Email Verified" : "⏳ Email Not Verified";
+        $("emailVerifyPill").textContent = emailOK ? "Verified" : "Pending";
+        $("emailVerifyPill").className = "badge "+(emailOK? "badge-emerald":"badge-amber");
+        $("kycVerifyPill").textContent = kycOK ? "KYC Verified" : "KYC Pending";
+        $("kycVerifyPill").className = "badge "+(kycOK? "badge-emerald":"badge-amber");
+      }
+    }
+
+    /********************
+     * SAVE & UPLOAD
+     ********************/
+    async function saveProfile(){
       const payload = {
-        full_name: $("fullName").value,
-        bio: $("bio").value,
-        location: $("location").value,
-        hourly_rate: $("hourlyRate").value,
-        skills: $("skills").value.split(",").map(s=>s.trim())
+        full_name: $("fullName").value.trim(),
+        bio: $("bio").value.trim(),
+        location: $("location").value.trim(),
+        hourly_rate: $("hourlyRate").value ? parseFloat($("hourlyRate").value) : null,
+        skills: $("skills").value.split(",").map(s=>s.trim()).filter(Boolean)
       };
-      const res = await apiPost("/accounts/update/", payload);
-      localStorage.setItem("profile_updated", "1");
-      alert("✅ Profile updated successfully!");
+      let res = await putJson("/accounts/me/", payload);
+      if(res.__error) res = await putJson("/accounts/profile/", payload);
+      if(res.__error){
+        toast("Failed to save profile", "error");
+      }else{
+        toast("Profile updated");
+        localStorage.setItem("profile_updated","1");
+        await init();
+      }
     }
 
     async function uploadAvatar(file){
+      if(!file){ toast("Select an image first","error"); return; }
       const form = new FormData();
       form.append("avatar", file);
-      await fetch(API+"/accounts/upload-avatar/", {
-        method:"POST", headers:{Authorization:"Bearer "+token}, body:form
-      });
-      localStorage.setItem("profile_updated", "1");
-      loadProfile();
+      let r = await postJson("/accounts/upload-avatar/", form, true);
+      if(r.__error){
+        const form2 = new FormData();
+        form2.append("profile_photo", file); // fallback field name
+        r = await putJson("/accounts/profile/", form2, true);
+      }
+      if(r.__error){
+        toast("Avatar upload failed","error");
+      }else{
+        toast("Avatar updated");
+        localStorage.setItem("profile_updated","1");
+        if(r.avatar_url || r.profile_photo) $("avatarImg").src = r.avatar_url || r.profile_photo;
+        else {$("avatarImg").src = $("avatarImg").src + "?v="+Date.now();}
+      }
     }
 
-    function drawChart(labels, data){
-      const ctx = $("profileChart");
-      new Chart(ctx,{
-        type:"bar",
-        data:{labels,datasets:[{label:"Earnings ($)",data,backgroundColor:["#4f46e5","#10b981","#f59e0b","#06b6d4","#ef4444","#7c3aed"],borderRadius:8}]},
-        options:{plugins:{legend:{display:false}},scales:{y:{beginAtZero:true}}}
-      });
+    async function uploadCover(file){
+      if(!file){ toast("Select a cover image first","error"); return; }
+      const form = new FormData();
+      form.append("cover_photo", file);
+      let r = await putJson("/accounts/me/", form, true);
+      if(r.__error) r = await putJson("/accounts/profile/", form, true);
+      if(r.__error) toast("Cover upload failed","error");
+      else { toast("Cover updated"); localStorage.setItem("profile_updated","1"); }
     }
 
-    $("saveProfileBtn").onclick=updateProfile;
-    $("avatarUpload").onchange=(e)=>uploadAvatar(e.target.files[0]);
+    async function uploadKyc(file){
+      if(!file){ toast("Select a document first","error"); return; }
+      const form = new FormData();
+      form.append("identity_document", file);
+      const r = await postJson("/accounts/kyc/upload/", form, true);
+      if(r.__error) toast("KYC upload failed","error");
+      else { toast("KYC uploaded (pending verification)"); await loadVerification(); }
+    }
 
-    loadProfile();
+    /********************
+     * PORTFOLIO
+     ********************/
+    let portfolioEnabled = true;
+
+    async function loadPortfolio(){
+      const listWrap = $("portfolioList");
+      const note = $("portfolioEmptyNote");
+      const counter = $("pfCount");
+
+      const r = await getJson("/portfolio/");
+      if(r.__error){
+        portfolioEnabled = false;
+        listWrap.innerHTML = "";
+        note.classList.remove("hidden");
+        counter.textContent = "0 items";
+        return;
+      }
+
+      note.classList.add("hidden");
+      const items = Array.isArray(r) ? r : (r.results || []);
+      counter.textContent = (items.length||0)+" items";
+
+      if(!items.length){
+        listWrap.innerHTML = `<div class="col-span-full p-6 text-sm text-gray-500 border rounded-xl bg-white">No portfolio items yet.</div>`;
+        return;
+      }
+
+      listWrap.innerHTML = items.map(it=>{
+        const title = it.title || it.name || "Untitled";
+        const desc = it.description || "";
+        const url  = it.url || it.link || it.file_url || "";
+        const img  = it.image || it.thumbnail || "";
+        return `
+          <article class="p-4 border rounded-xl bg-white hover-rise">
+            <div class="flex items-start gap-3">
+              <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
+                ${img ? `<img src="${img}" class="w-full h-full object-cover">` : `<i class="lucide-image text-gray-400"></i>`}
+              </div>
+              <div class="min-w-0">
+                <h4 class="font-semibold text-ellipsis">${title}</h4>
+                <p class="text-xs text-gray-600 mt-1 break-words">${desc}</p>
+                ${url ? `<a href="${url}" target="_blank" class="text-xs text-indigo-600 mt-2 inline-flex items-center gap-1">Open <i class="lucide-external-link"></i></a>`:""}
+              </div>
+            </div>
+          </article>
+        `;
+      }).join("");
+    }
+
+    async function addPortfolio(){
+      if(!portfolioEnabled){ toast("Portfolio endpoint not found","error"); return; }
+      const title = $("pfTitle").value.trim();
+      const desc  = $("pfDesc").value.trim();
+      const link  = $("pfUrl").value.trim();
+      const file  = $("pfFile").files[0] || null;
+
+      if(!title && !file){ toast("Add title or attach a file","error"); return; }
+
+      const form = new FormData();
+      if(title) form.append("title", title);
+      if(desc)  form.append("description", desc);
+      if(link)  form.append("url", link);
+      if(file)  form.append("file", file);
+
+      const r = await postJson("/portfolio/", form, true);
+      if(r.__error){ toast("Failed to add portfolio","error"); }
+      else{
+        toast("Portfolio item added");
+        $("pfTitle").value = ""; $("pfDesc").value = ""; $("pfUrl").value = ""; $("pfFile").value = "";
+        loadPortfolio();
+      }
+    }
+
+    /********************
+     * EVENT BINDINGS
+     ********************/
+    $("saveProfileBtn").addEventListener("click", saveProfile);
+    $("saveBtn").addEventListener("click", saveProfile);
+    $("resetBtn").addEventListener("click", async()=> init());
+
+    $("avatarUpload").addEventListener("change", (e)=> uploadAvatar(e.target.files[0]));
+    $("uploadAvatarBtn").addEventListener("click", ()=> {
+      const f = $("avatarFile").files[0]; uploadAvatar(f);
+    });
+
+    $("uploadCoverBtn").addEventListener("click", ()=> {
+      const f = $("coverFile").files[0]; uploadCover(f);
+    });
+
+    $("uploadKycBtn").addEventListener("click", ()=> {
+      const f = $("kycFile").files[0]; uploadKyc(f);
+    });
+
+    $("addPortfolioBtn").addEventListener("click", addPortfolio);
+    $("reloadPortfolioBtn").addEventListener("click", loadPortfolio);
+
+    /********************
+     * INIT
+     ********************/
+    async function init(){
+      const me = await fetchProfile();
+      if(!me) return;
+      renderBasics(me);
+      renderBadges(me);
+      await Promise.all([
+        loadRatings(),
+        loadVerification(),
+        loadPortfolio()
+      ]);
+    }
+
+    // cross-tab sync
+    window.addEventListener("storage",(ev)=>{
+      if(ev.key==="profile_updated" && ev.newValue==="1"){
+        init();
+        setTimeout(()=>localStorage.removeItem("profile_updated"),200);
+      }
+    });
+
+    init();
   </script>
 </body>
 </html>

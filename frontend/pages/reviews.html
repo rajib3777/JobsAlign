@@ -1,0 +1,698 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Reviews & Ratings • JobsAlign (Freelancer)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Lucide Icons -->
+  <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --ink:#0F172A; --muted:#64748B; --brand:#4F46E5; --accent:#22C55E;
+      --rose:#EF4444; --amber:#F59E0B; --sky:#06B6D4; --bg:#F8FAFC; --card:#FFFFFF; --line:#E5E7EB;
+    }
+    body{
+      background:
+        radial-gradient(800px 420px at 90% -10%, rgba(79,70,229,.08), transparent 60%),
+        radial-gradient(850px 420px at 0% 0%, rgba(34,197,94,.06), transparent 60%),
+        var(--bg);
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, Inter, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    .card{background:var(--card); border:1px solid var(--line); border-radius:1rem; box-shadow:0 12px 34px rgba(2,6,23,.06)}
+    .hover-rise{transition:transform .25s ease, box-shadow .25s ease}
+    .hover-rise:hover{transform:translateY(-3px); box-shadow:0 16px 40px rgba(2,6,23,.10)}
+    .chip{font-size:.72rem; padding:.22rem .5rem; border-radius:.5rem}
+    .chip-green{background:#DCFCE7;color:#166534}
+    .chip-amber{background:#FEF3C7;color:#92400E}
+    .chip-blue{background:#DBEAFE;color:#1E40AF}
+    .chip-gray{background:#F1F5F9;color:#0F172A}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem .9rem;border-radius:.7rem;font-weight:600}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-primary:hover{background:#4338CA}
+    .btn-soft{background:#EEF2FF;color:#3730A3}
+    .btn-soft:hover{background:#E0E7FF}
+    .dot{width:.5rem;height:.5rem;border-radius:9999px;display:inline-block}
+    .rate .star{cursor:pointer; font-size:1.15rem}
+    .rate .star.active{color:#F59E0B}
+    .no-scrollbar::-webkit-scrollbar{display:none}
+    .badge{padding:.18rem .5rem;border-radius:.5rem;font-size:.72rem}
+    .drawer{
+      position: fixed; left:0; right:0; bottom:-100%; background:#fff; border-top-left-radius:1rem; border-top-right-radius:1rem;
+      box-shadow:0 -12px 40px rgba(2,6,23,.15); transition: bottom .3s ease;
+    }
+    .drawer.open{ bottom:0; }
+    @media (min-width: 1024px){
+      .drawer{ position: fixed; right:2rem; left:auto; width:28rem; bottom:auto; top:5.5rem; border-radius:1rem; }
+      .drawer.open{ bottom:auto; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+  <!-- NAV -->
+  <nav class="bg-white/80 backdrop-blur sticky top-0 border-b border-gray-200 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <a href="/freelancer/dashboard/" class="flex items-center gap-3">
+        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-28 sm:w-32 h-auto object-contain">
+        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Freelancer</span>
+      </a>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Notifications -->
+        <div class="relative">
+          <button id="notifBtn" class="w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50">
+            <i class="lucide-bell"></i>
+            <span id="notifCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-[1px] rounded-full">0</span>
+          </button>
+          <div id="notifDrop" class="hidden absolute right-0 mt-2 w-[22rem] sm:w-[26rem] card p-0 overflow-hidden">
+            <div class="px-4 py-3 border-b text-sm font-semibold">Notifications</div>
+            <ul id="notifList" class="max-h-80 overflow-auto divide-y no-scrollbar"></ul>
+            <div class="px-4 py-2 flex gap-2">
+              <button id="markAllReadBtn" class="text-sm text-indigo-600 hover:underline">Mark all as read</button>
+              <a href="/freelancer/support/" class="text-sm text-gray-500 hover:text-gray-700 ml-auto">Need help?</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wallet -->
+        <span class="hidden xs:inline-block text-sm text-gray-500">Balance</span>
+        <button class="btn btn-soft" id="walletBtn">
+          <i class="lucide-wallet"></i>
+          <span id="walletBalance">$0.00</span>
+        </button>
+
+        <!-- Profile -->
+        <div class="relative">
+          <button id="profileBtn" class="flex items-center gap-2 sm:gap-3">
+            <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-gray-200 object-cover" alt="avatar">
+            <div class="hidden sm:block text-left leading-5">
+              <div id="userName" class="text-sm font-semibold truncate max-w-[10rem]">Freelancer</div>
+              <div id="userLevelSmall" class="text-[11px] text-gray-500">Level —</div>
+            </div>
+            <i class="lucide-chevron-down text-gray-400"></i>
+          </button>
+          <div id="profileDrop" class="hidden absolute right-0 mt-2 w-56 card p-2">
+            <a href="/freelancer/profile/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-user mr-2"></i>Profile</a>
+            <a href="/freelancer/verification/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-badge-check mr-2"></i>Verification</a>
+            <a href="/freelancer/payments/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-credit-card mr-2"></i>Payments</a>
+            <a href="/freelancer/analytics/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-bar-chart-2 mr-2"></i>Analytics</a>
+            <hr class="my-1">
+            <a href="/login/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm text-red-600"><i class="lucide-log-out mr-2"></i>Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- LAYOUT -->
+  <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
+    <!-- SIDEBAR -->
+    <aside class="hidden lg:block">
+      <div class="card p-4">
+        <nav class="space-y-1 text-sm">
+          <a href="/freelancer/dashboard/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-layout-dashboard"></i> Dashboard</a>
+          <a href="/freelancer/jobs/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-briefcase"></i> My Jobs</a>
+          <a href="/freelancer/chat/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-message-square"></i> Messages</a>
+          <a href="/freelancer/reviews/" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-semibold"><i class="lucide-star"></i> Reviews</a>
+          <a href="/freelancer/analytics/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-bar-chart-2"></i> Analytics</a>
+          <a href="/freelancer/verification/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-shield-check"></i> Verification</a>
+          <a href="/freelancer/support/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-life-buoy"></i> Support</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="space-y-6">
+      <!-- HEADER -->
+      <section class="card p-5 sm:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 hover-rise">
+        <div>
+          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Reviews & Ratings</h1>
+          <p class="text-gray-500 mt-1 text-sm">Your public feedback from clients. Reply, manage, and highlight best work.</p>
+          <div class="flex flex-wrap gap-2 mt-3" id="skillBadges"></div>
+        </div>
+        <div class="flex flex-wrap items-center gap-2 sm:gap-3">
+          <div class="text-center sm:text-right">
+            <div class="text-3xl font-extrabold" id="avgRating">—</div>
+            <div class="text-xs text-gray-500">Average Rating</div>
+          </div>
+          <div class="w-px h-10 bg-gray-200 hidden sm:block"></div>
+          <div class="text-center sm:text-right">
+            <div class="text-3xl font-extrabold" id="totalReviews">0</div>
+            <div class="text-xs text-gray-500">Total Reviews</div>
+          </div>
+          <button id="newReviewBtn" class="btn btn-primary ml-1"><i class="lucide-plus"></i> Add Review</button>
+        </div>
+      </section>
+
+      <!-- FILTERS -->
+      <section class="card p-4 sm:p-5">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-3">
+          <div class="flex items-center gap-2">
+            <label class="text-sm text-gray-600">Sort:</label>
+            <select id="sortSelect" class="border rounded-md px-3 py-2 text-sm">
+              <option value="-created_at">Newest</option>
+              <option value="created_at">Oldest</option>
+              <option value="-rating">Highest Rated</option>
+              <option value="rating">Lowest Rated</option>
+            </select>
+          </div>
+          <div class="flex items-center gap-2">
+            <label class="text-sm text-gray-600">Min Stars:</label>
+            <select id="minStarSelect" class="border rounded-md px-3 py-2 text-sm">
+              <option value="0">Any</option>
+              <option value="5">5★</option>
+              <option value="4">4★+</option>
+              <option value="3">3★+</option>
+              <option value="2">2★+</option>
+            </select>
+          </div>
+          <div class="flex-1"></div>
+          <div class="relative w-full sm:w-64">
+            <input id="q" type="text" placeholder="Search comments…" class="w-full border rounded-md pl-9 pr-3 py-2 text-sm" />
+            <i class="lucide-search absolute left-2.5 top-2.5 text-gray-400"></i>
+          </div>
+        </div>
+      </section>
+
+      <!-- REVIEWS LIST -->
+      <section class="card p-0 overflow-hidden">
+        <div class="px-5 py-3 border-b text-sm text-gray-500 flex items-center justify-between">
+          <span id="listCaption">Showing latest reviews</span>
+          <span id="lastSync" class="text-xs">—</span>
+        </div>
+
+        <ul id="reviewsList" class="divide-y">
+          <!-- dynamic rows -->
+          <li class="p-5">
+            <div class="h-5 w-1/2 rounded bg-gray-100 animate-pulse"></div>
+            <div class="h-4 w-1/3 rounded bg-gray-100 animate-pulse mt-2"></div>
+          </li>
+          <li class="p-5">
+            <div class="h-5 w-2/5 rounded bg-gray-100 animate-pulse"></div>
+            <div class="h-4 w-1/3 rounded bg-gray-100 animate-pulse mt-2"></div>
+          </li>
+        </ul>
+
+        <!-- Pagination (client-side) -->
+        <div class="px-5 py-3 border-t flex items-center justify-between text-sm">
+          <button id="prevBtn" class="px-3 py-1.5 rounded-md border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Prev</button>
+          <div id="pageInfo" class="text-gray-500">Page 1</div>
+          <button id="nextBtn" class="px-3 py-1.5 rounded-md border hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed">Next</button>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ADD/EDIT REVIEW DRAWER -->
+  <div id="reviewDrawer" class="drawer z-50">
+    <div class="p-4 sm:p-5 border-b flex items-center justify-between">
+      <div class="font-semibold" id="drawerTitle">New Review</div>
+      <button id="drawerClose" class="w-9 h-9 grid place-items-center rounded-lg border hover:bg-gray-50"><i class="lucide-x"></i></button>
+    </div>
+    <div class="p-4 sm:p-5 space-y-4">
+      <div>
+        <label class="text-sm font-medium text-gray-700">Review Target (User ID)</label>
+        <input id="targetUserId" type="text" class="w-full border rounded-md px-3 py-2 text-sm" placeholder="Client/User UUID" />
+        <p class="text-xs text-gray-500 mt-1">Tip: নিজের প্রোফাইল নিজের জন্য রিভিউ দেবে না। ক্লায়েন্টকে review দিলে এখানে ক্লায়েন্টের user id দিতে হবে।</p>
+      </div>
+
+      <div>
+        <label class="text-sm font-medium text-gray-700">Rating</label>
+        <div id="ratingStars" class="rate flex items-center gap-1 mt-1" aria-label="rating">
+          <i class="lucide-star star" data-val="1"></i>
+          <i class="lucide-star star" data-val="2"></i>
+          <i class="lucide-star star" data-val="3"></i>
+          <i class="lucide-star star" data-val="4"></i>
+          <i class="lucide-star star" data-val="5"></i>
+        </div>
+      </div>
+
+      <div>
+        <label class="text-sm font-medium text-gray-700">Comment</label>
+        <textarea id="comment" rows="4" class="w-full border rounded-md px-3 py-2 text-sm" placeholder="Share your experience"></textarea>
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-2">
+        <button id="deleteBtn" class="hidden px-3 py-2 text-sm rounded-md border text-rose-600 hover:bg-rose-50"><i class="lucide-trash-2"></i> Delete</button>
+        <button id="saveBtn" class="btn btn-primary"><i class="lucide-save"></i> Save</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER (exactly as you provided) -->
+  <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20"> 
+    <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
+      <div>
+        <div class="flex items-center space-x-2 mb-3">
+          <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
+        </div>
+        <p class="text-gray-600 leading-relaxed">
+          Empowering freelancers, clients, and businesses to collaborate, innovate, and succeed — all in one place.
+        </p>
+        <div class="flex space-x-4 mt-4">
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Platform</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#marketplace" class="hover:text-primary">Marketplace</a></li>
+          <li><a href="#jobs" class="hover:text-primary">Job Listings</a></li>
+          <li><a href="#chats" class="hover:text-primary">Chats & Collaboration</a></li>
+          <li><a href="#notifications" class="hover:text-primary">Notifications</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Resources</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#analytics" class="hover:text-primary">Analytics Dashboard</a></li>
+          <li><a href="#support" class="hover:text-primary">Help & Support</a></li>
+          <li><a href="#disputes" class="hover:text-primary">Dispute Center</a></li>
+          <li><a href="#verification" class="hover:text-primary">Profile Verification</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">About</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#about" class="hover:text-primary">About Us</a></li>
+          <li><a href="#team" class="hover:text-primary">Our Team</a></li>
+          <li><a href="#terms" class="hover:text-primary">Terms & Conditions</a></li>
+          <li><a href="#privacy" class="hover:text-primary">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-200 mt-10 pt-6 pb-8 text-center text-gray-500 text-sm">
+      <p>&copy; 2025 <span class="font-semibold text-primary">JobsAlign</span>. All rights reserved.</p>
+      <p class="mt-2 text-blue-500">
+        Developed by 
+        <a href="https://somadhansoft.com/" class="hover:underline font-semibold text-blue-600" target="_blank" rel="noopener noreferrer">
+          SomadhanSoft
+        </a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- INLINE JS -->
+  <script>
+    /***************
+     * CONFIG
+     ***************/
+    const API = "http://127.0.0.1:8000/api";
+    const getToken = () => localStorage.getItem("access_token");
+    if(!getToken()) window.location.href="/login/";
+
+    // qs helpers
+    const $ = (sel)=> document.querySelector(sel);
+    const $$ = (sel)=> Array.from(document.querySelectorAll(sel));
+    const money=(n)=>"$"+(parseFloat(n||0)).toFixed(2);
+    const nowStr=()=> new Date().toLocaleTimeString();
+
+    // small toast
+    function toast(msg, type="success"){
+      const t=document.createElement("div");
+      t.className="fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white "+(type==="success"?"bg-emerald-600":"bg-rose-600");
+      t.textContent=msg; document.body.appendChild(t);
+      setTimeout(()=>t.remove(),2800);
+    }
+
+    // api helpers
+    async function apiGet(path){
+      try{
+        const r = await fetch(API+path,{headers:{Authorization:"Bearer "+getToken()}});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("GET",path,e); return null; }
+    }
+    async function apiPost(path, body={}){
+      try{
+        const r = await fetch(API+path,{
+          method:"POST",
+          headers:{"Content-Type":"application/json", Authorization:"Bearer "+getToken()},
+          body:JSON.stringify(body)
+        });
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("POST",path,e); return null; }
+    }
+    async function apiPatch(path, body={}){
+      try{
+        const r = await fetch(API+path,{
+          method:"PATCH",
+          headers:{"Content-Type":"application/json", Authorization:"Bearer "+getToken()},
+          body:JSON.stringify(body)
+        });
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("PATCH",path,e); return null; }
+    }
+    async function apiDelete(path){
+      try{
+        const r = await fetch(API+path,{method:"DELETE", headers:{Authorization:"Bearer "+getToken()}});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return true;
+      }catch(e){ console.warn("DELETE",path,e); return false; }
+    }
+
+    /***************
+     * STATE
+     ***************/
+    let ME = null;        // current user profile
+    let REVIEWS = [];     // fetched reviews (for ME)
+    let page=1, perPage=6, sort="-created_at", minStar=0, q="";
+    let editingId=null;   // if editing an existing review
+    let selectedStars=0;  // drawer star rating
+
+    /***************
+     * PROFILE + HEADER SYNC
+     ***************/
+    async function loadProfile(){
+      // accounts profile endpoint
+      ME = await apiGet("/accounts/profile/"); // :contentReference[oaicite:7]{index=7}
+      if(!ME) return;
+      const name = ME.full_name || ME.username || "Freelancer";
+      $("#userName").textContent = name;
+      $("#userLevelSmall").textContent = (ME.level || "Level —");
+      if(ME.profile_photo) $("#avatarImg").src = ME.profile_photo;
+
+      // skills -> header badges
+      const skillWrap = $("#skillBadges");
+      skillWrap.innerHTML="";
+      const skills = (ME.skills || ME.tags || []);
+      skills.slice(0,12).forEach(s=>{
+        const span=document.createElement("span");
+        span.className="badge bg-indigo-50 text-indigo-700";
+        span.textContent=s;
+        skillWrap.appendChild(span);
+      });
+
+      localStorage.setItem("profile_cache", JSON.stringify({id:ME.id, name, level:ME.level, avatar:ME.profile_photo, skills}));
+    }
+
+    // Notifications + wallet (header)
+    async function loadHeaderWidgets(){
+      const wallet = await apiGet("/payments/wallet/"); // :contentReference[oaicite:8]{index=8}
+      if(wallet) $("#walletBalance").textContent = money(wallet.balance||0);
+
+      const res = await apiGet("/notifications/"); // :contentReference[oaicite:9]{index=9}
+      const countBox = $("#notifCount"), ul = $("#notifList");
+      if(!res){ countBox.classList.add("hidden"); ul.innerHTML='<li class="p-4 text-sm text-gray-500">No notifications.</li>'; return; }
+      const items = res.results || res;
+      let unread=0;
+      ul.innerHTML = items.slice(0,10).map(n=>{
+        const isUnread = (n.read===false || n.is_read===false);
+        if(isUnread) unread++;
+        const level=(n.level||"info").toLowerCase();
+        const dot = level==="success"?"bg-emerald-500":level==="warning"?"bg-amber-500":level==="critical"?"bg-rose-500":"bg-indigo-500";
+        return `
+          <li class="p-3 hover:bg-gray-50 text-sm">
+            <div class="flex items-start gap-3">
+              <span class="mt-1 w-2 h-2 rounded-full ${dot}"></span>
+              <div>
+                <div class="font-medium">${n.title || n.verb || "Notification"}</div>
+                <div class="text-gray-600">${n.message || ""}</div>
+              </div>
+            </div>
+          </li>
+        `;
+      }).join("");
+      if(unread>0){ countBox.textContent = unread; countBox.classList.remove("hidden"); } else { countBox.classList.add("hidden"); }
+
+      $("#markAllReadBtn").onclick = async ()=>{
+        const ids = (items||[]).filter(i=>i && i.id).map(i=>i.id);
+        if(ids.length){ await apiPost("/notifications/read/", { ids }); toast("All notifications marked read"); countBox.classList.add("hidden"); }
+      };
+    }
+
+    // dropdown binds
+    (function bindDropdowns(){
+      const nb=$("#notifBtn"), nd=$("#notifDrop");
+      nb.addEventListener("click", ()=> nd.classList.toggle("hidden"));
+      document.addEventListener("click", (e)=>{ if(!nb.contains(e.target) && !nd.contains(e.target)) nd.classList.add("hidden"); });
+
+      const pb=$("#profileBtn"), pd=$("#profileDrop");
+      pb.addEventListener("click", ()=> pd.classList.toggle("hidden"));
+      document.addEventListener("click", (e)=>{ if(!pb.contains(e.target) && !pd.contains(e.target)) pd.classList.add("hidden"); });
+    })();
+
+    /***************
+     * REVIEWS CRUD
+     ***************/
+    function starsHTML(val){
+      const s = Math.max(0, Math.min(5, Number(val||0)));
+      let html="";
+      for(let i=1;i<=5;i++){
+        html += `<i class="lucide-star ${i<=s?'text-amber-400':'text-gray-300'}"></i>`;
+      }
+      return html;
+    }
+
+    function buildReviewPayload(){
+      // NOTE: যদি backend এ field নাম ভিন্ন হয়, এখানে map করো
+      const payload = {
+        // ধরলাম: target_user / rating / comment
+        target_user: $("#targetUserId").value.trim(),
+        rating: selectedStars,
+        comment: $("#comment").value.trim()
+      };
+      return payload;
+    }
+
+    function applyFilters(rows){
+      let filtered = rows.slice();
+      if(minStar>0) filtered = filtered.filter(r => Number(r.rating||0) >= minStar);
+      if(q) filtered = filtered.filter(r => (r.comment||"").toLowerCase().includes(q.toLowerCase()));
+      // sort
+      const key = sort.replace("-","");
+      const asc = !sort.startsWith("-");
+      filtered.sort((a,b)=>{
+        const A = a[key]; const B = b[key];
+        if(A==null && B!=null) return asc? -1 : 1;
+        if(A!=null && B==null) return asc? 1 : -1;
+        if(A==null && B==null) return 0;
+        if(A<B) return asc? -1 : 1;
+        if(A>B) return asc? 1 : -1;
+        return 0;
+      });
+      return filtered;
+    }
+
+    function paginate(rows){
+      const start = (page-1)*perPage;
+      return rows.slice(start, start+perPage);
+    }
+
+    function renderStats(rows){
+      const count = rows.length;
+      const avg = count? (rows.reduce((s,r)=> s+Number(r.rating||0), 0)/count): 0;
+      $("#avgRating").textContent = avg? avg.toFixed(1) : "—";
+      $("#totalReviews").textContent = count;
+    }
+
+    function renderList(){
+      const list = $("#reviewsList");
+      if(!REVIEWS || !REVIEWS.length){
+        list.innerHTML = `<li class="p-6 text-sm text-gray-500">No reviews yet.</li>`;
+        $("#pageInfo").textContent = "Page 1";
+        $("#lastSync").textContent = "Updated "+nowStr();
+        renderStats([]);
+        return;
+      }
+      const filtered = applyFilters(REVIEWS);
+      renderStats(filtered);
+
+      const paged = paginate(filtered);
+      list.innerHTML = paged.map(r=>{
+        const author = r.author?.full_name || r.author_name || "Someone";
+        const dt = r.created_at ? new Date(r.created_at).toLocaleString() : "";
+        const canEdit = (r.author?.id && ME && r.author.id===ME.id); // নিজের দেয়া রিভিউ হলে edit
+        const myReply = (r.replies||[]).find(x => x.author && ME && x.author.id===ME.id);
+        return `
+          <li class="p-5">
+            <div class="flex items-start gap-3">
+              <img src="${r.author?.profile_photo || '{% static 'images/avatar.png' %}'}" class="w-10 h-10 rounded-lg border object-cover" alt="">
+              <div class="min-w-0 flex-1">
+                <div class="flex flex-wrap items-center gap-2">
+                  <div class="font-semibold">${author}</div>
+                  <div class="flex items-center gap-1">${starsHTML(r.rating)}</div>
+                  <span class="text-xs text-gray-500">${dt}</span>
+                  ${r.project_title ? `<span class="chip chip-gray">Project: ${r.project_title}</span>` : ``}
+                </div>
+                <p class="mt-2 text-gray-700 whitespace-pre-line break-words">${r.comment || ""}</p>
+
+                ${ (r.replies && r.replies.length) ? `
+                  <div class="mt-3 pl-4 border-l">
+                    ${(r.replies||[]).map(rep=>{
+                      const rn = rep.author?.full_name || rep.author_name || "Reply";
+                      const rt = rep.created_at ? new Date(rep.created_at).toLocaleString() : "";
+                      return `
+                        <div class="mb-2">
+                          <div class="text-sm text-gray-600"><b>${rn}</b> • <span class="text-xs">${rt}</span></div>
+                          <div class="text-gray-700">${rep.text || rep.comment || ""}</div>
+                        </div>
+                      `;
+                    }).join("")}
+                  </div>
+                `: ``}
+
+                <div class="mt-3 flex flex-wrap gap-2 text-sm">
+                  <button class="px-3 py-1.5 rounded-md border hover:bg-gray-50" data-act="reply" data-id="${r.id}"><i class="lucide-reply mr-1"></i> Reply</button>
+                  ${canEdit ? `<button class="px-3 py-1.5 rounded-md border hover:bg-gray-50" data-act="edit" data-id="${r.id}"><i class="lucide-edit-3 mr-1"></i> Edit</button>` : ``}
+                  ${canEdit ? `<button class="px-3 py-1.5 rounded-md border hover:bg-rose-50 text-rose-600" data-act="delete" data-id="${r.id}"><i class="lucide-trash-2 mr-1"></i> Delete</button>` : ``}
+                </div>
+              </div>
+            </div>
+          </li>
+        `;
+      }).join("");
+
+      $("#pageInfo").textContent = `Page ${page}`;
+      $("#lastSync").textContent = "Updated "+nowStr();
+
+      // bind row actions
+      $("#reviewsList").querySelectorAll("[data-act]").forEach(btn=>{
+        btn.addEventListener("click", onRowAction);
+      });
+    }
+
+    function onRowAction(e){
+      const id = e.currentTarget.getAttribute("data-id");
+      const act = e.currentTarget.getAttribute("data-act");
+      const r = REVIEWS.find(x=> String(x.id)===String(id));
+      if(!r) return;
+
+      if(act==="reply"){
+        // quick prompt -> POST /reviews/<id>/reply/
+        const text = prompt("Write your reply:");
+        if(text && text.trim()) postReply(id, text.trim());
+      }else if(act==="edit"){
+        openDrawer("Edit Review");
+        editingId = id;
+        $("#targetUserId").value = r.target_user || r.to_user || "";
+        setStars(Number(r.rating||0));
+        $("#comment").value = r.comment || "";
+        $("#deleteBtn").classList.remove("hidden");
+      }else if(act==="delete"){
+        if(confirm("Delete this review?")) deleteReview(id);
+      }
+    }
+
+    async function postReply(reviewId, text){
+      const res = await apiPost(`/reviews/${reviewId}/reply/`, { text }); // :contentReference[oaicite:10]{index=10}
+      if(res){ toast("Reply posted"); await fetchReviews(); renderList(); }
+    }
+    async function deleteReview(id){
+      const ok = await apiDelete(`/reviews/${id}/`); // :contentReference[oaicite:11]{index=11}
+      if(ok){ toast("Review deleted"); await fetchReviews(); renderList(); }
+    }
+
+    async function fetchReviews(){
+      if(!ME || !ME.id) return;
+      const arr = await apiGet(`/reviews/user/${ME.id}/`); // :contentReference[oaicite:12]{index=12}
+      REVIEWS = Array.isArray(arr)? arr : (arr?.results || []);
+    }
+
+    /***************
+     * DRAWER (Add/Edit)
+     ***************/
+    const drawer = $("#reviewDrawer");
+    const drawerTitle = $("#drawerTitle");
+    function openDrawer(title="New Review"){
+      drawerTitle.textContent = title;
+      drawer.classList.add("open");
+    }
+    function closeDrawer(){
+      drawer.classList.remove("open");
+      editingId=null; selectedStars=0;
+      $("#targetUserId").value = "";
+      $("#comment").value="";
+      setStars(0);
+      $("#deleteBtn").classList.add("hidden");
+    }
+    $("#drawerClose").addEventListener("click", closeDrawer);
+    $("#newReviewBtn").addEventListener("click", ()=>{ openDrawer("New Review"); });
+
+    // rating stars select
+    $$("#ratingStars .star").forEach(el=>{
+      el.addEventListener("click", ()=> setStars(Number(el.dataset.val)));
+    });
+    function setStars(n){
+      selectedStars = n;
+      $$("#ratingStars .star").forEach(el=>{
+        const v = Number(el.dataset.val);
+        el.classList.toggle("active", v<=n);
+      });
+    }
+
+    // save (create/update)
+    $("#saveBtn").addEventListener("click", async ()=>{
+      const payload = buildReviewPayload();
+      if(!payload.target_user){ alert("Target user id is required"); return; }
+      if(!payload.rating){ alert("Please select a rating"); return; }
+      if(!payload.comment){ alert("Please write a comment"); return; }
+
+      let res;
+      if(editingId){
+        res = await apiPatch(`/reviews/${editingId}/`, { rating: payload.rating, comment: payload.comment }); // :contentReference[oaicite:13]{index=13}
+      }else{
+        res = await apiPost(`/reviews/create/`, payload); // :contentReference[oaicite:14]{index=14}
+      }
+      if(res){
+        toast(editingId?"Review updated":"Review created");
+        await fetchReviews(); renderList(); closeDrawer();
+      }else{
+        toast("Action failed","error");
+      }
+    });
+
+    $("#deleteBtn").addEventListener("click", async ()=>{
+      if(!editingId) return;
+      if(confirm("Delete this review?")) await deleteReview(editingId);
+      closeDrawer();
+    });
+
+    /***************
+     * FILTER UI
+     ***************/
+    $("#sortSelect").addEventListener("change", (e)=>{ sort=e.target.value; page=1; renderList(); });
+    $("#minStarSelect").addEventListener("change", (e)=>{ minStar=Number(e.target.value||0); page=1; renderList(); });
+    $("#q").addEventListener("input", (e)=>{ q=e.target.value; page=1; renderList(); });
+    $("#prevBtn").addEventListener("click", ()=>{ if(page>1){ page--; renderList(); }});
+    $("#nextBtn").addEventListener("click", ()=>{
+      const filtered = applyFilters(REVIEWS);
+      if( (page*perPage) < filtered.length ){ page++; renderList(); }
+    });
+
+    /***************
+     * INIT
+     ***************/
+    async function init(){
+      await loadProfile();
+      await loadHeaderWidgets();
+      await fetchReviews();
+      renderList();
+    }
+    init();
+
+    // cross-tab sync (if profile updated somewhere)
+    window.addEventListener("storage", (ev)=>{
+      if(ev.key==="profile_updated" && ev.newValue==="1"){
+        loadProfile();
+        setTimeout(()=>localStorage.removeItem("profile_updated"),300);
+      }
+    });
+
+    // open/close drawer on escape
+    document.addEventListener("keydown", (e)=>{ if(e.key==="Escape") closeDrawer(); });
+
+  </script>
+</body>
+</html>

@@ -1,0 +1,359 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Payments • JobsAlign</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
+  <style>
+    :root{ --bg:#F8FAFC; --line:#E5E7EB }
+    body{ background:var(--bg); }
+    .card{background:#fff;border:1px solid var(--line);border-radius:1rem;box-shadow:0 10px 30px rgba(2,6,23,.06)}
+    .chip{font-size:.75rem; padding:.25rem .55rem; border-radius:.5rem}
+    .chip-in:{}
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- NAV -->
+  <nav class="bg-white/80 backdrop-blur sticky top-0 border-b border-gray-200 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <a href="/freelancer/dashboard/" class="flex items-center gap-3 min-w-0">
+        <img src="{% static 'images/logo.jpeg' %}" class="w-28 h-auto object-contain" alt="JobsAlign">
+        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Payments</span>
+      </a>
+      <div class="flex items-center gap-2">
+        <a href="/freelancer/jobs/" class="hidden xs:inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"><i class="lucide-briefcase"></i><span class="hidden sm:inline">Jobs</span></a>
+        <button id="profileMenuBtn" class="flex items-center gap-2 px-2 py-1 rounded-lg border border-gray-200 hover:bg-gray-50">
+          <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-8 h-8 rounded-md border border-gray-200" alt="">
+          <span id="userName" class="hidden sm:block text-sm font-semibold truncate max-w-[120px]">Freelancer</span>
+          <i class="lucide-chevron-down text-gray-400"></i>
+        </button>
+        <div id="profileMenu" class="hidden absolute right-4 top-14 w-56 card p-2">
+          <a href="/freelancer/dashboard/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-layout-dashboard mr-2"></i>Dashboard</a>
+          <a href="/freelancer/profile/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-user mr-2"></i>Profile</a>
+          <a href="/freelancer/chat/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-message-square mr-2"></i>Messages</a>
+          <hr class="my-1">
+          <a href="/login/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm text-rose-600"><i class="lucide-log-out mr-2"></i>Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="flex-1">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-6">
+      <!-- Wallet -->
+      <aside class="space-y-4">
+        <div class="card p-5">
+          <div class="text-sm text-gray-500">Current Balance</div>
+          <div id="balance" class="text-3xl font-extrabold mt-1">$0.00</div>
+          <div class="mt-4 grid grid-cols-2 gap-3">
+            <button id="withdrawBtn" class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 flex items-center justify-center gap-2"><i class="lucide-banknote"></i> Withdraw</button>
+            <button id="methodsBtn" class="px-3 py-2 rounded-lg border hover:bg-gray-50 flex items-center justify-center gap-2"><i class="lucide-credit-card"></i> Methods</button>
+          </div>
+        </div>
+
+        <div class="card p-5">
+          <div class="text-sm font-semibold mb-2">Payout Methods</div>
+          <ul id="methodList" class="space-y-3">
+            <li class="text-sm text-gray-500">Loading…</li>
+          </ul>
+          <button id="addMethod" class="mt-3 text-sm text-indigo-700 hover:text-indigo-900 inline-flex items-center gap-2"><i class="lucide-plus"></i> Add method</button>
+        </div>
+      </aside>
+
+      <!-- History -->
+      <section class="min-w-0">
+        <div class="card p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <select id="type" class="px-3 py-2 border rounded-md">
+              <option value="">All</option>
+              <option value="in">In</option>
+              <option value="out">Out</option>
+            </select>
+            <input id="from" type="date" class="px-3 py-2 border rounded-md">
+            <input id="to" type="date" class="px-3 py-2 border rounded-md">
+            <button id="filter" class="px-3 py-2 rounded-md bg-indigo-600 text-white hover:bg-indigo-700">Apply</button>
+          </div>
+          <div class="text-xs text-gray-500"><span id="txCount">0</span> records</div>
+        </div>
+
+        <div id="txList" class="space-y-3">
+          <div class="card p-4"><div class="w-1/3 h-4 rounded skeleton"></div><div class="w-1/2 h-3 rounded skeleton mt-2"></div></div>
+          <div class="card p-4"><div class="w-1/4 h-4 rounded skeleton"></div><div class="w-1/3 h-3 rounded skeleton mt-2"></div></div>
+        </div>
+
+        <div class="flex justify-center my-6">
+          <button id="moreTx" class="hidden px-4 py-2 rounded-lg border hover:bg-gray-50 text-sm">Load more</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-12">
+    <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
+      <div>
+        <div class="flex items-center space-x-2 mb-3">
+          <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
+        </div>
+        <p class="text-gray-600 leading-relaxed">Empowering freelancers, clients, and businesses to collaborate, innovate, and succeed — all in one place.</p>
+        <div class="flex space-x-4 mt-4">
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Platform</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#marketplace" class="hover:text-primary">Marketplace</a></li>
+          <li><a href="#jobs" class="hover:text-primary">Job Listings</a></li>
+          <li><a href="#chats" class="hover:text-primary">Chats & Collaboration</a></li>
+          <li><a href="#notifications" class="hover:text-primary">Notifications</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Resources</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#analytics" class="hover:text-primary">Analytics Dashboard</a></li>
+          <li><a href="#support" class="hover:text-primary">Help & Support</a></li>
+          <li><a href="#disputes" class="hover:text-primary">Dispute Center</a></li>
+          <li><a href="#verification" class="hover:text-primary">Profile Verification</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">About</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#about" class="hover:text-primary">About Us</a></li>
+          <li><a href="#team" class="hover:text-primary">Our Team</a></li>
+          <li><a href="#terms" class="hover:text-primary">Terms & Conditions</a></li>
+          <li><a href="#privacy" class="hover:text-primary">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-200 mt-10 pt-6 pb-8 text-center text-gray-500 text-sm">
+      <p>&copy; 2025 <span class="font-semibold text-primary">JobsAlign</span>. All rights reserved.</p>
+      <p class="mt-2 text-blue-500">Developed by <a href="https://somadhansoft.com/" class="hover:underline font-semibold text-blue-600" target="_blank" rel="noopener noreferrer">SomadhanSoft</a></p>
+    </div>
+  </footer>
+
+  <!-- Withdraw Modal -->
+  <div id="withdrawModal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-end sm:items-center justify-center p-2 sm:p-6">
+    <div class="card w-full max-w-md">
+      <div class="p-4 border-b flex items-center justify-between">
+        <div class="font-semibold">Withdraw</div>
+        <button id="wClose" class="w-9 h-9 rounded-lg border hover:bg-gray-50"><i class="lucide-x"></i></button>
+      </div>
+      <form id="withdrawForm" class="p-4 space-y-3">
+        <div>
+          <label class="text-sm text-gray-600">Amount ($)</label>
+          <input id="wAmount" type="number" min="1" class="mt-1 w-full px-3 py-2 border rounded-md" required>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Method</label>
+          <select id="wMethod" class="mt-1 w-full px-3 py-2 border rounded-md" required></select>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Note (optional)</label>
+          <textarea id="wNote" rows="2" class="mt-1 w-full px-3 py-2 border rounded-md"></textarea>
+        </div>
+        <button class="w-full px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">Request Withdraw</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Add Method Modal -->
+  <div id="methodModal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-end sm:items-center justify-center p-2 sm:p-6">
+    <div class="card w-full max-w-md">
+      <div class="p-4 border-b flex items-center justify-between">
+        <div class="font-semibold">Add Payout Method</div>
+        <button id="mClose" class="w-9 h-9 rounded-lg border hover:bg-gray-50"><i class="lucide-x"></i></button>
+      </div>
+      <form id="methodForm" class="p-4 space-y-3">
+        <div>
+          <label class="text-sm text-gray-600">Type</label>
+          <select id="mType" class="mt-1 w-full px-3 py-2 border rounded-md" required>
+            <option value="bank">Bank</option>
+            <option value="paypal">PayPal</option>
+            <option value="bkash">bKash</option>
+            <option value="nagad">Nagad</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Account / Number</label>
+          <input id="mAccount" class="mt-1 w-full px-3 py-2 border rounded-md" required>
+        </div>
+        <div>
+          <label class="text-sm text-gray-600">Name</label>
+          <input id="mName" class="mt-1 w-full px-3 py-2 border rounded-md" required>
+        </div>
+        <button class="w-full px-4 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700">Save Method</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- JS -->
+  <script>
+    const API = "http://127.0.0.1:8000/api";
+    const ENDPOINTS = {
+      me: "/accounts/profile/",
+      wallet: "/payments/wallet/",
+      history: "/payments/history/",
+      withdraw: "/payments/withdraw/",
+      methods: "/payments/methods/",
+      methodCreate: "/payments/methods/",
+    };
+
+    const $=(id)=>document.getElementById(id);
+    const token = localStorage.getItem("access_token");
+    if(!token) window.location.href="/login/";
+    function auth(){ return { Authorization:"Bearer "+token }; }
+    function toast(msg,type="success"){
+      const t=document.createElement("div");
+      t.className="fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white "+(type==="success"?"bg-emerald-600":"bg-rose-600");
+      t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2800);
+    }
+    function money(n){ n=parseFloat(n||0); return "$"+n.toLocaleString(undefined,{maximumFractionDigits:2}); }
+    async function apiGet(path){
+      try{
+        const r=await fetch(API+path,{headers: auth()});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("GET",path,e); return null;}
+    }
+    async function apiPost(path, body={}){
+      try{
+        const r=await fetch(API+path,{method:"POST", headers:{"Content-Type":"application/json", ...auth()}, body:JSON.stringify(body)});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("POST",path,e); return null;}
+    }
+
+    let page=1,pageSize=12, reachedEnd=false, txList=[];
+
+    async function loadMe(){
+      const me=await apiGet(ENDPOINTS.me);
+      if(me){
+        $("userName").textContent=me.full_name||me.username||"Freelancer";
+        if(me.avatar_url||me.avatar) $("avatarImg").src=me.avatar_url||me.avatar;
+      }
+    }
+
+    async function loadWallet(){
+      const w = await apiGet(ENDPOINTS.wallet);
+      $("balance").textContent = money(w?.balance||0);
+      // sync other tabs
+      localStorage.setItem("wallet_changed","1");
+      setTimeout(()=>localStorage.removeItem("wallet_changed"), 200);
+    }
+
+    async function loadMethods(){
+      const data=await apiGet(ENDPOINTS.methods);
+      const ul=$("methodList"); const sel=$("wMethod");
+      let items=data?.results||data||[];
+      if(!items.length){ ul.innerHTML=`<li class="text-sm text-gray-500">No payout methods added.</li>`; sel.innerHTML=``; return; }
+      ul.innerHTML = items.map(m=>`
+        <li class="flex items-center justify-between p-3 rounded-lg border">
+          <div>
+            <div class="font-medium">${(m.type||"").toUpperCase()}</div>
+            <div class="text-xs text-gray-500">${m.account||m.number||"—"} • ${m.name||""}</div>
+          </div>
+          <span class="text-xs text-gray-500">${m.is_default ? "Default" : ""}</span>
+        </li>
+      `).join("");
+      sel.innerHTML = items.map(m=>`<option value="${m.id}">${(m.type||"").toUpperCase()} • ${m.account||m.number||"—"}</option>`).join("");
+    }
+
+    function txCard(t){
+      const sign = (t.type==="in" || t.amount>0) ? "+" : "-";
+      const color = sign==="+" ? "text-emerald-600" : "text-rose-600";
+      return `
+        <div class="card p-4">
+          <div class="flex items-center justify-between">
+            <div class="min-w-0">
+              <div class="font-medium truncate">${t.title || t.reason || "Transaction"}</div>
+              <div class="text-xs text-gray-500 mt-0.5 truncate">${new Date(t.created||t.created_at).toLocaleString()}</div>
+            </div>
+            <div class="${color} font-bold">${sign}${money(Math.abs(t.amount||0))}</div>
+          </div>
+          ${t.note ? `<div class="text-sm text-gray-600 mt-2">${t.note}</div>`:""}
+        </div>
+      `;
+    }
+
+    function renderTx(){
+      const box=$("txList");
+      if(!txList.length){ box.innerHTML=`<div class="card p-6 text-sm text-gray-500">No transactions found.</div>`; return; }
+      box.innerHTML = txList.map(txCard).join("");
+      $("txCount").textContent = txList.length;
+      $("moreTx").classList.toggle("hidden", reachedEnd);
+    }
+
+    async function fetchTx(reset=true){
+      if(reset){ page=1; reachedEnd=false; txList=[]; }
+      const type=$("type").value; const f=$("from").value; const t=$("to").value;
+      const qs=`?page=${page}&page_size=${pageSize}&type=${encodeURIComponent(type)}&from=${encodeURIComponent(f)}&to=${encodeURIComponent(t)}`;
+      const data=await apiGet(ENDPOINTS.history+qs);
+      let items = Array.isArray(data) ? data : (data?.results||[]);
+      if(items.length<pageSize) reachedEnd=true;
+      txList = reset ? items : txList.concat(items);
+      renderTx();
+      page++;
+    }
+
+    // Withdraw
+    $("withdrawBtn").onclick=()=>{$("withdrawModal").classList.remove("hidden");};
+    $("wClose").onclick=()=>{$("withdrawModal").classList.add("hidden");};
+    $("withdrawForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const payload={
+        amount: parseFloat($("wAmount").value||0),
+        method_id: $("wMethod").value,
+        note: $("wNote").value||""
+      };
+      if(!payload.amount || !payload.method_id){ toast("Enter amount & select method","error"); return; }
+      const res = await apiPost(ENDPOINTS.withdraw, payload);
+      if(res && (res.id||res.success)){
+        toast("Withdraw requested");
+        $("withdrawModal").classList.add("hidden");
+        $("wAmount").value=""; $("wNote").value="";
+        await loadWallet(); await fetchTx(true);
+      }else toast("Withdraw failed","error");
+    });
+
+    // Methods
+    $("methodsBtn").onclick=()=>{$("methodModal").classList.remove("hidden");};
+    $("mClose").onclick=()=>{$("methodModal").classList.add("hidden");};
+    $("addMethod").onclick=()=>{$("methodModal").classList.remove("hidden");};
+    $("methodForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const payload={ type:$("mType").value, account:$("mAccount").value, name:$("mName").value };
+      const res = await apiPost(ENDPOINTS.methodCreate, payload);
+      if(res && (res.id||res.success)){ toast("Method added"); $("methodModal").classList.add("hidden"); await loadMethods(); }
+      else toast("Failed to add method","error");
+    });
+
+    // Filters
+    $("filter").onclick=()=>fetchTx(true);
+    $("moreTx").onclick=()=>fetchTx(false);
+
+    // menu
+    (function bindMenu(){
+      const btn=$("profileMenuBtn"), menu=$("profileMenu");
+      btn.addEventListener("click", ()=>menu.classList.toggle("hidden"));
+      document.addEventListener("click",(e)=>{ if(!btn.contains(e.target) && !menu.contains(e.target)) menu.classList.add("hidden"); });
+    })();
+
+    (async function init(){
+      await loadMe();
+      await loadWallet();
+      await loadMethods();
+      await fetchTx(true);
+    })();
+  </script>
+</body>
+</html>

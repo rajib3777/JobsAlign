@@ -1,0 +1,499 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>Find Work • JobsAlign</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
+  <style>
+    :root{
+      --ink:#0F172A; --muted:#64748B; --brand:#4F46E5; --accent:#22C55E; --warn:#F59E0B; --rose:#EF4444; --bg:#F8FAFC; --line:#E5E7EB;
+    }
+    body{background:var(--bg); color:var(--ink); font-family: ui-sans-serif, system-ui, Inter, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+    .card{background:#fff;border:1px solid var(--line);border-radius:1rem;box-shadow:0 10px 30px rgba(2,6,23,.06)}
+    .hover-rise{transition:transform .25s ease, box-shadow .25s ease}
+    .hover-rise:hover{transform:translateY(-3px); box-shadow:0 16px 40px rgba(2,6,23,.10)}
+    .chip{font-size:.75rem; padding:.25rem .55rem; border-radius:.5rem; background:#EEF2FF; color:#3730A3}
+    .skeleton{background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 37%,#f3f4f6 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite}
+    @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+    .no-scrollbar::-webkit-scrollbar{display:none}
+    .no-scrollbar{scrollbar-width:none}
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+  <!-- NAV -->
+  <nav class="bg-white/80 backdrop-blur sticky top-0 border-b border-gray-200 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <a href="/freelancer/dashboard/" class="flex items-center gap-3 min-w-0">
+        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-28 h-auto object-contain shrink-0">
+        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Find Work</span>
+      </a>
+
+      <div class="flex items-center gap-2">
+        <a href="/freelancer/profile/" class="hidden xs:inline-flex items-center gap-2 text-sm text-indigo-700 hover:text-indigo-900">
+          <i class="lucide-user"></i><span class="hidden sm:inline">Profile</span>
+        </a>
+        <a href="/freelancer/chat/" class="hidden xs:inline-flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900">
+          <i class="lucide-message-square"></i><span class="hidden sm:inline">Messages</span>
+        </a>
+        <button id="profileMenuBtn" class="flex items-center gap-2 px-2 py-1 rounded-lg border border-gray-200 hover:bg-gray-50">
+          <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-8 h-8 rounded-md border border-gray-200" alt="">
+          <span id="userName" class="hidden sm:block text-sm font-semibold truncate max-w-[120px]">Freelancer</span>
+          <i class="lucide-chevron-down text-gray-400"></i>
+        </button>
+        <div id="profileMenu" class="hidden absolute right-4 top-14 w-56 card p-2">
+          <a href="/freelancer/dashboard/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-layout-dashboard mr-2"></i>Dashboard</a>
+          <a href="/freelancer/profile/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-user mr-2"></i>Profile</a>
+          <a href="/freelancer/payments/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-wallet mr-2"></i>Payments</a>
+          <hr class="my-1">
+          <a href="/login/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm text-rose-600"><i class="lucide-log-out mr-2"></i>Logout</a>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- CONTENT -->
+  <main class="flex-1">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-6 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6">
+      <!-- FILTERS -->
+      <aside class="card p-4 h-fit sticky top-[68px]">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-semibold">Filters</h2>
+          <button id="clearFilters" class="text-xs text-gray-500 hover:text-gray-800">Clear</button>
+        </div>
+        <div class="space-y-4">
+          <div>
+            <label class="text-sm text-gray-600">Search</label>
+            <input id="q" type="text" placeholder="e.g. React dashboard"
+                   class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-indigo-400">
+          </div>
+          <div>
+            <label class="text-sm text-gray-600">Category</label>
+            <select id="category" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md">
+              <option value="">All</option>
+            </select>
+          </div>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-sm text-gray-600">Budget Min ($)</label>
+              <input id="minBudget" type="number" min="0" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md">
+            </div>
+            <div>
+              <label class="text-sm text-gray-600">Budget Max ($)</label>
+              <input id="maxBudget" type="number" min="0" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md">
+            </div>
+          </div>
+          <div>
+            <label class="text-sm text-gray-600">Sort by</label>
+            <select id="sort" class="mt-1 w-full px-3 py-2 border border-gray-300 rounded-md">
+              <option value="-created">Newest</option>
+              <option value="budget">Budget (Low → High)</option>
+              <option value="-budget">Budget (High → Low)</option>
+              <option value="deadline">Deadline (Nearest)</option>
+            </select>
+          </div>
+          <button id="applyFilters" class="w-full mt-2 inline-flex items-center justify-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-semibold px-3 py-2 rounded-md">
+            <i class="lucide-search"></i> Apply
+          </button>
+        </div>
+
+        <hr class="my-4">
+        <div class="space-y-2">
+          <div class="text-sm font-semibold">Quick</div>
+          <button id="onlyFixed" class="w-full text-left px-3 py-2 rounded hover:bg-gray-50 text-sm">Fixed-Price Jobs</button>
+          <button id="onlyHourly" class="w-full text-left px-3 py-2 rounded hover:bg-gray-50 text-sm">Hourly Jobs</button>
+          <button id="highBudget" class="w-full text-left px-3 py-2 rounded hover:bg-gray-50 text-sm">$1000+ Budget</button>
+        </div>
+      </aside>
+
+      <!-- LIST -->
+      <section class="min-w-0">
+        <div class="card p-3 sm:p-4 mb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <button id="tabAll" class="px-3 py-1.5 rounded-lg border text-sm bg-indigo-600 text-white">Explore</button>
+            <button id="tabSaved" class="px-3 py-1.5 rounded-lg border text-sm">Saved</button>
+            <button id="tabProposals" class="px-3 py-1.5 rounded-lg border text-sm">My Proposals</button>
+            <button id="tabContracts" class="px-3 py-1.5 rounded-lg border text-sm">Contracts</button>
+          </div>
+          <div class="text-xs text-gray-500"><span id="resultCount">0</span> results</div>
+        </div>
+
+        <div id="jobList" class="space-y-3">
+          <!-- skeletons -->
+          <div class="card p-4">
+            <div class="w-1/3 h-4 rounded skeleton"></div>
+            <div class="mt-2 w-2/3 h-3 rounded skeleton"></div>
+            <div class="mt-3 w-24 h-7 rounded skeleton"></div>
+          </div>
+          <div class="card p-4">
+            <div class="w-1/4 h-4 rounded skeleton"></div>
+            <div class="mt-2 w-1/2 h-3 rounded skeleton"></div>
+            <div class="mt-3 w-24 h-7 rounded skeleton"></div>
+          </div>
+        </div>
+
+        <div class="flex justify-center my-6">
+          <button id="loadMore" class="hidden px-4 py-2 rounded-lg border hover:bg-gray-50 text-sm">Load more</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- FOOTER (required) -->
+  <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-12">
+    <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
+      <div>
+        <div class="flex items-center space-x-2 mb-3">
+          <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
+        </div>
+        <p class="text-gray-600 leading-relaxed">Empowering freelancers, clients, and businesses to collaborate, innovate, and succeed — all in one place.</p>
+        <div class="flex space-x-4 mt-4">
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Platform</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#marketplace" class="hover:text-primary">Marketplace</a></li>
+          <li><a href="#jobs" class="hover:text-primary">Job Listings</a></li>
+          <li><a href="#chats" class="hover:text-primary">Chats & Collaboration</a></li>
+          <li><a href="#notifications" class="hover:text-primary">Notifications</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Resources</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#analytics" class="hover:text-primary">Analytics Dashboard</a></li>
+          <li><a href="#support" class="hover:text-primary">Help & Support</a></li>
+          <li><a href="#disputes" class="hover:text-primary">Dispute Center</a></li>
+          <li><a href="#verification" class="hover:text-primary">Profile Verification</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">About</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#about" class="hover:text-primary">About Us</a></li>
+          <li><a href="#team" class="hover:text-primary">Our Team</a></li>
+          <li><a href="#terms" class="hover:text-primary">Terms & Conditions</a></li>
+          <li><a href="#privacy" class="hover:text-primary">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-200 mt-10 pt-6 pb-8 text-center text-gray-500 text-sm">
+      <p>&copy; 2025 <span class="font-semibold text-primary">JobsAlign</span>. All rights reserved.</p>
+      <p class="mt-2 text-blue-500">Developed by <a href="https://somadhansoft.com/" class="hover:underline font-semibold text-blue-600" target="_blank" rel="noopener noreferrer">SomadhanSoft</a></p>
+    </div>
+  </footer>
+
+  <!-- JOB MODAL -->
+  <div id="jobModal" class="hidden fixed inset-0 z-[100] bg-black/40 flex items-end sm:items-center justify-center p-2 sm:p-6">
+    <div class="card w-full max-w-3xl max-h-[92vh] overflow-y-auto no-scrollbar">
+      <div class="p-4 border-b flex items-center justify-between">
+        <div class="font-semibold truncate pr-2" id="mTitle">Job</div>
+        <button id="mClose" class="w-9 h-9 rounded-lg border hover:bg-gray-50"><i class="lucide-x"></i></button>
+      </div>
+      <div class="p-4 space-y-4">
+        <div class="text-sm text-gray-600" id="mMeta"></div>
+        <div class="prose max-w-none text-[15px]" id="mDesc"></div>
+        <div id="mTags" class="flex flex-wrap gap-2 pt-1"></div>
+        <div class="grid sm:grid-cols-2 gap-3">
+          <button id="mSave" class="px-3 py-2 rounded-lg border hover:bg-gray-50 flex items-center justify-center gap-2"><i class="lucide-bookmark"></i> <span>Save</span></button>
+          <button id="mApply" class="px-3 py-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 flex items-center justify-center gap-2"><i class="lucide-send"></i> <span>Apply</span></button>
+        </div>
+      </div>
+      <div class="p-4 border-t">
+        <div class="font-semibold mb-2">Submit Proposal</div>
+        <form id="proposalForm" class="grid sm:grid-cols-[140px_1fr] gap-3 items-start">
+          <input id="bidAmount" type="number" min="0" placeholder="Bid ($)" class="px-3 py-2 border rounded-md w-full">
+          <textarea id="coverLetter" rows="3" placeholder="Write a concise, tailored cover letter..." class="px-3 py-2 border rounded-md w-full"></textarea>
+          <button class="sm:col-span-2 px-4 py-2 rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 font-semibold">Send Proposal</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- INLINE JS -->
+  <script>
+    /******** Config ********/
+    const API = "http://127.0.0.1:8000/api";
+    const ENDPOINTS = {
+      me:            "/accounts/profile/",        // GET/PUT (RetrieveUpdateAPIView)
+      categories:    "/categories/",              // GET list (fallback to /categories/list/)
+      jobs:          "/marketplace/jobs/",        // GET list & filter
+      jobDetail:     (id)=>`/marketplace/jobs/${id}/`, // GET
+      save:          (id)=>`/marketplace/jobs/${id}/save/`, // POST toggle
+      proposals:     "/marketplace/proposals/",   // POST create, GET my proposals (?me=1)
+      myProposals:   "/marketplace/proposals/me/",
+      contractsMe:   "/marketplace/contracts/me/",
+    };
+
+    /******** Helpers ********/
+    const $ = (id)=>document.getElementById(id);
+    const token = localStorage.getItem("access_token");
+    if(!token){ window.location.href="/login/"; }
+    function authHeader(){ return { Authorization: "Bearer "+token }; }
+    function toast(msg,type="success"){
+      const t=document.createElement("div");
+      t.className="fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white "+(type==="success"?"bg-emerald-600":"bg-rose-600");
+      t.textContent=msg; document.body.appendChild(t); setTimeout(()=>t.remove(),2800);
+    }
+    function safe(v,fb=""){ return (v==null||v===undefined) ? fb : v; }
+    function money(n){ n=parseFloat(n||0); return "$"+n.toLocaleString(undefined,{maximumFractionDigits:2}); }
+
+    async function apiGet(path){
+      try{
+        const r=await fetch(API+path,{headers: authHeader()});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("GET", path, e); return null; }
+    }
+    async function apiPost(path, body={}){
+      try{
+        const r=await fetch(API+path,{method:"POST", headers:{"Content-Type":"application/json", ...authHeader()}, body:JSON.stringify(body)});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("POST", path, e); return null; }
+    }
+
+    /******** Profile header sync ********/
+    async function loadMe(){
+      const me = await apiGet(ENDPOINTS.me);
+      if(me){
+        $("userName").textContent = me.full_name || me.username || "Freelancer";
+        if(me.avatar) $("avatarImg").src = me.avatar; else if(me.avatar_url) $("avatarImg").src = me.avatar_url;
+        localStorage.setItem("profile_cache", JSON.stringify({name:me.username, avatar: me.avatar || me.avatar_url || ""}));
+      }else{
+        // fall back to cache
+        try{
+          const c = JSON.parse(localStorage.getItem("profile_cache")||"{}");
+          if(c.name) $("userName").textContent = c.name;
+          if(c.avatar) $("avatarImg").src = c.avatar;
+        }catch(_){}
+      }
+    }
+
+    /******** Filters & List ********/
+    let page=1, pageSize=10, activeTab="all", lastQuery="", reachedEnd=false, currentJobs=[];
+    let currentJobId=null, savedMap=new Map();
+
+    function buildQuery(resetPage=true){
+      if(resetPage){ page=1; reachedEnd=false; currentJobs=[]; }
+      const q = encodeURIComponent(($("q").value||"").trim());
+      const cat = encodeURIComponent($("category").value||"");
+      const minB = encodeURIComponent($("minBudget").value||"");
+      const maxB = encodeURIComponent($("maxBudget").value||"");
+      const sort = encodeURIComponent($("sort").value||"-created");
+      let qs = `?page=${page}&page_size=${pageSize}&search=${q}&category=${cat}&min_budget=${minB}&max_budget=${maxB}&ordering=${sort}`;
+      lastQuery = qs;
+      return qs;
+    }
+
+    function jobCard(j){
+      const tags = (j.skills||j.tags||[]).slice(0,5).map(s=>`<span class="chip">${s}</span>`).join(" ");
+      const amount = j.budget ? money(j.budget) : (j.hourly_rate ? money(j.hourly_rate)+"/hr" : "—");
+      const saved = savedMap.get(j.id) ? 'text-rose-600' : 'text-gray-500';
+      return `
+        <div class="card p-4 hover-rise">
+          <div class="flex items-start justify-between gap-3">
+            <div class="min-w-0">
+              <div class="font-semibold text-[15px] truncate">${safe(j.title,"Untitled job")}</div>
+              <div class="text-xs text-gray-500 mt-0.5">#${j.id || "—"} • ${safe(j.category_name || j.category, "General")}</div>
+            </div>
+            <div class="flex items-center gap-1">
+              <button data-id="${j.id}" class="saveBtn w-9 h-9 rounded-lg border hover:bg-gray-50 ${saved}" title="Save"><i class="lucide-bookmark"></i></button>
+              <button data-id="${j.id}" class="openBtn w-9 h-9 rounded-lg border hover:bg-gray-50" title="View"><i class="lucide-eye"></i></button>
+            </div>
+          </div>
+          <p class="text-sm text-gray-600 mt-2 line-clamp-2">${safe(j.short_description || j.description || "", "")}</p>
+          <div class="flex flex-wrap gap-2 mt-3">${tags}</div>
+          <div class="flex items-center justify-between mt-3 text-sm">
+            <div class="text-gray-700 font-semibold">${amount}</div>
+            <div class="text-xs text-gray-500">Posted ${safe(j.created_human, "recently")}</div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function loadCategories(){
+      const cats = await apiGet(ENDPOINTS.categories) || await apiGet("/categories/list/");
+      const sel=$("category");
+      if(cats && cats.length){
+        sel.innerHTML = `<option value="">All</option>` + cats.map(c=>`<option value="${c.slug||c.id}">${c.name||c.title}</option>`).join("");
+      }
+    }
+
+    async function fetchJobs(reset=true){
+      if(reachedEnd && !reset) return;
+      if(reset){
+        $("jobList").innerHTML = `
+          <div class="card p-4"><div class="w-1/3 h-4 rounded skeleton"></div><div class="mt-2 w-2/3 h-3 rounded skeleton"></div><div class="mt-3 w-24 h-7 rounded skeleton"></div></div>
+          <div class="card p-4"><div class="w-1/4 h-4 rounded skeleton"></div><div class="mt-2 w-1/2 h-3 rounded skeleton"></div><div class="mt-3 w-24 h-7 rounded skeleton"></div></div>`;
+      }
+      let url="";
+      if(activeTab==="all") url = ENDPOINTS.jobs + buildQuery(!reset?false:true);
+      else if(activeTab==="saved") url = ENDPOINTS.jobs + `?saved=1&page=${page}&page_size=${pageSize}`;
+      else if(activeTab==="proposals") url = ENDPOINTS.myProposals + `?page=${page}&page_size=${pageSize}`;
+      else if(activeTab==="contracts") url = ENDPOINTS.contractsMe + `?page=${page}&page_size=${pageSize}`;
+
+      const data = await apiGet(url);
+      let items = [];
+      if(!data){ items=[]; }
+      else if(Array.isArray(data)){ items = data; }
+      else if(data.results){ items = data.results; }
+      else if(data.items){ items = data.items; }
+      else { items = []; }
+
+      if(items.length < pageSize) reachedEnd = true; else reachedEnd = false;
+
+      if(reset){ currentJobs = []; }
+      currentJobs = currentJobs.concat(items);
+
+      // map saved flags if present
+      items.forEach(j=>{
+        if(j.is_saved!==undefined) savedMap.set(j.id, !!j.is_saved);
+      });
+
+      renderJobs();
+      page += 1;
+      $("loadMore").classList.toggle("hidden", reachedEnd);
+      $("resultCount").textContent = currentJobs.length;
+    }
+
+    function renderJobs(){
+      if(!currentJobs.length){
+        $("jobList").innerHTML = `<div class="card p-6 text-sm text-gray-500">No jobs found.</div>`;
+        return;
+      }
+      $("jobList").innerHTML = currentJobs.map(j=>{
+        // proposal/contract tabs item presentation
+        if(activeTab==="proposals" && (j.job || j.project)){
+          const job = j.job || j.project || {};
+          return jobCard({ ...job, id: job.id || j.job_id, short_description: job.description, created_human: j.created_human, is_saved: j.is_saved });
+        }
+        if(activeTab==="contracts" && (j.project || j.contract)){
+          const job = j.project || j.contract || {};
+          return jobCard({ ...job, id: job.id || j.project_id || j.contract_id, short_description: job.description, created_human: j.created_human, is_saved: j.is_saved });
+        }
+        return jobCard(j);
+      }).join("");
+
+      // bind buttons
+      document.querySelectorAll(".openBtn").forEach(b=>{
+        b.onclick=()=>openJobModal(parseInt(b.dataset.id));
+      });
+      document.querySelectorAll(".saveBtn").forEach(b=>{
+        b.onclick=()=>toggleSave(parseInt(b.dataset.id), b);
+      });
+    }
+
+    /******** Modal + Proposal ********/
+    async function openJobModal(id){
+      currentJobId = id;
+      $("jobModal").classList.remove("hidden");
+      $("mTitle").textContent = "Loading…";
+      $("mMeta").textContent = "";
+      $("mDesc").textContent = "";
+      $("mTags").innerHTML = "";
+
+      const d = await apiGet(ENDPOINTS.jobDetail(id));
+      if(!d){ $("mTitle").textContent="Not found"; return; }
+
+      $("mTitle").textContent = d.title || "Untitled";
+      const budget = d.budget ? money(d.budget) : (d.hourly_rate ? money(d.hourly_rate)+"/hr" : "—");
+      $("mMeta").textContent = `${budget} • ${d.category_name||d.category||"General"} • Posted ${d.created_human||"recently"}`;
+      $("mDesc").textContent = d.description || "";
+      $("mTags").innerHTML = (d.skills||d.tags||[]).slice(0,10).map(s=>`<span class="chip">${s}</span>`).join(" ");
+
+      // set save button state
+      $("mSave").classList.toggle("text-rose-600", !!d.is_saved);
+      $("mSave").onclick = ()=>toggleSave(id, $("mSave"));
+
+      $("mApply").onclick = ()=>{
+        document.getElementById("coverLetter").focus();
+        document.getElementById("coverLetter").scrollIntoView({behavior:"smooth", block:"center"});
+      };
+    }
+
+    async function toggleSave(id, btn){
+      const res = await apiPost(ENDPOINTS.save(id), {});
+      if(res){
+        const isSaved = !!(res.is_saved ?? res.saved ?? !savedMap.get(id));
+        savedMap.set(id, isSaved);
+        btn.classList.toggle("text-rose-600", isSaved);
+        toast(isSaved ? "Saved to shortlist" : "Removed from saved");
+      }else{
+        toast("Could not update saved list", "error");
+      }
+    }
+
+    $("proposalForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      if(!currentJobId) return;
+      const payload = {
+        job: currentJobId,
+        bid_amount: parseFloat($("bidAmount").value||0),
+        cover_letter: $("coverLetter").value||""
+      };
+      const res = await apiPost(ENDPOINTS.proposals, payload);
+      if(res && (res.id || res.success)){
+        toast("Proposal sent");
+        $("coverLetter").value=""; $("bidAmount").value="";
+      }else{
+        toast("Failed to send proposal","error");
+      }
+    });
+
+    $("mClose").onclick=()=>$("jobModal").classList.add("hidden");
+    window.addEventListener("keydown",(e)=>{ if(e.key==="Escape") $("jobModal").classList.add("hidden"); });
+
+    /******** Tabs ********/
+    function setActiveTab(t){
+      activeTab=t; page=1; currentJobs=[]; reachedEnd=false;
+      document.querySelectorAll("button[id^='tab']").forEach(b=>b.classList.remove("bg-indigo-600","text-white"));
+      (t==="all"?$("tabAll"):t==="saved"?$("tabSaved"):t==="proposals"?$("tabProposals"):$("tabContracts"))
+        .classList.add("bg-indigo-600","text-white");
+      fetchJobs(true);
+    }
+    $("tabAll").onclick=()=>setActiveTab("all");
+    $("tabSaved").onclick=()=>setActiveTab("saved");
+    $("tabProposals").onclick=()=>setActiveTab("proposals");
+    $("tabContracts").onclick=()=>setActiveTab("contracts");
+
+    /******** Filter binds ********/
+    let debounceTimer=null;
+    $("q").addEventListener("input", ()=>{
+      clearTimeout(debounceTimer);
+      debounceTimer=setTimeout(()=>fetchJobs(true), 400);
+    });
+    $("applyFilters").onclick=()=>fetchJobs(true);
+    $("clearFilters").onclick=()=>{
+      $("q").value=""; $("category").value=""; $("minBudget").value=""; $("maxBudget").value=""; $("sort").value="-created";
+      fetchJobs(true);
+    };
+    $("onlyFixed").onclick=()=>{ $("sort").value="-created"; $("minBudget").value=""; $("maxBudget").value=""; fetchJobs(true); lastQuery+="&type=fixed"; };
+    $("onlyHourly").onclick=()=>{ $("sort").value="-created"; $("minBudget").value=""; $("maxBudget").value=""; fetchJobs(true); lastQuery+="&type=hourly"; };
+    $("highBudget").onclick=()=>{ $("minBudget").value=1000; $("maxBudget").value=""; fetchJobs(true); };
+
+    $("loadMore").onclick=()=>fetchJobs(false);
+
+    /******** Menu ********/
+    (function bindProfileMenu(){
+      const btn=$("profileMenuBtn"), menu=$("profileMenu");
+      btn.addEventListener("click", ()=>menu.classList.toggle("hidden"));
+      document.addEventListener("click",(e)=>{ if(!btn.contains(e.target) && !menu.contains(e.target)) menu.classList.add("hidden"); });
+    })();
+
+    /******** Init ********/
+    (async function init(){
+      await loadMe();
+      await loadCategories();
+      setActiveTab("all");
+    })();
+  </script>
+</body>
+</html>

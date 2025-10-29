@@ -1,0 +1,549 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Analytics • JobsAlign (Freelancer)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Tailwind -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons -->
+  <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
+
+  <style>
+    :root{
+      --ink:#0F172A; --muted:#64748B; --brand:#4F46E5; --accent:#22C55E; --warn:#F59E0B; --rose:#EF4444; --sky:#06B6D4;
+      --bg:#F8FAFC; --card:#FFFFFF; --line:#E5E7EB;
+    }
+    body{
+      background:
+        radial-gradient(920px 440px at 90% -8%, rgba(79,70,229,.08), transparent 60%),
+        radial-gradient(840px 420px at 0% 0%, rgba(34,197,94,.06), transparent 60%),
+        var(--bg);
+      color:var(--ink);
+      font-family: ui-sans-serif, system-ui, Inter, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    }
+    .card{background:var(--card); border:1px solid var(--line); border-radius:1rem; box-shadow:0 12px 34px rgba(2,6,23,.06)}
+    .hover-rise{transition:transform .25s ease, box-shadow .25s ease}
+    .hover-rise:hover{transform:translateY(-3px); box-shadow:0 16px 40px rgba(2,6,23,.10)}
+    .chip{font-size:.72rem; padding:.22rem .5rem; border-radius:.5rem}
+    .chip-green{background:#DCFCE7;color:#166534}
+    .chip-amber{background:#FEF3C7;color:#92400E}
+    .chip-blue{background:#DBEAFE;color:#1E40AF}
+    .chip-gray{background:#F1F5F9;color:#0F172A}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem .9rem;border-radius:.7rem;font-weight:600}
+    .btn-primary{background:var(--brand);color:#fff}
+    .btn-primary:hover{background:#4338CA}
+    .btn-soft{background:#EEF2FF;color:#3730A3}
+    .btn-soft:hover{background:#E0E7FF}
+    .dot{width:.5rem;height:.5rem;border-radius:9999px;display:inline-block}
+
+    /* Charts: prevent vertical bloat on small screens */
+    .chart-wrap{position:relative; width:100%;}
+    .chart-wrap canvas{width:100% !important; height:auto !important; aspect-ratio: 16/9; max-height: 340px;}
+    @media (min-width: 640px){ .chart-wrap canvas{ max-height: 300px; } }
+    @media (min-width: 1024px){ .chart-wrap canvas{ max-height: 320px; } }
+
+    /* Tables: no horizontal scroll */
+    .table{width:100%; border-collapse:separate; border-spacing:0}
+    .table th,.table td{padding:.7rem .8rem; border-bottom:1px solid #E5E7EB; text-align:left}
+    .table th{font-size:.8rem; text-transform:uppercase; letter-spacing:.04em; color:#6b7280}
+    .no-scrollbar::-webkit-scrollbar{display:none}
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+  <!-- NAV -->
+  <nav class="bg-white/80 backdrop-blur sticky top-0 border-b border-gray-200 z-50">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <a href="/freelancer/dashboard/" class="flex items-center gap-3">
+        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-28 sm:w-32 h-auto object-contain">
+        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Freelancer</span>
+      </a>
+
+      <div class="flex items-center gap-2 sm:gap-3">
+        <!-- Notifications -->
+        <div class="relative">
+          <button id="notifBtn" class="w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50">
+            <i class="lucide-bell"></i>
+            <span id="notifCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-[1px] rounded-full">0</span>
+          </button>
+          <div id="notifDrop" class="hidden absolute right-0 mt-2 w-[22rem] sm:w-[26rem] card p-0 overflow-hidden">
+            <div class="px-4 py-3 border-b text-sm font-semibold">Notifications</div>
+            <ul id="notifList" class="max-h-80 overflow-auto divide-y no-scrollbar"></ul>
+            <div class="px-4 py-2 flex gap-2">
+              <button id="markAllReadBtn" class="text-sm text-indigo-600 hover:underline">Mark all as read</button>
+              <a href="/freelancer/support/" class="text-sm text-gray-500 hover:text-gray-700 ml-auto">Need help?</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Wallet -->
+        <button class="btn btn-soft" id="walletBtn">
+          <i class="lucide-wallet"></i>
+          <span id="walletBalance">$0.00</span>
+        </button>
+
+        <!-- Profile -->
+        <div class="relative">
+          <button id="profileBtn" class="flex items-center gap-2 sm:gap-3">
+            <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-gray-200 object-cover" alt="avatar">
+            <div class="hidden sm:block text-left leading-5">
+              <div id="userName" class="text-sm font-semibold truncate max-w-[10rem]">Freelancer</div>
+              <div id="userLevelSmall" class="text-[11px] text-gray-500">Level —</div>
+            </div>
+            <i class="lucide-chevron-down text-gray-400"></i>
+          </button>
+          <div id="profileDrop" class="hidden absolute right-0 mt-2 w-56 card p-2">
+            <a href="/freelancer/profile/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-user mr-2"></i>Profile</a>
+            <a href="/freelancer/verification/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-badge-check mr-2"></i>Verification</a>
+            <a href="/freelancer/payments/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-credit-card mr-2"></i>Payments</a>
+            <a href="/freelancer/reviews/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-star mr-2"></i>Reviews</a>
+            <hr class="my-1">
+            <a href="/login/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm text-red-600"><i class="lucide-log-out mr-2"></i>Logout</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- LAYOUT -->
+  <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-6">
+    <!-- SIDEBAR -->
+    <aside class="hidden lg:block">
+      <div class="card p-4">
+        <nav class="space-y-1 text-sm">
+          <a href="/freelancer/dashboard/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-layout-dashboard"></i> Dashboard</a>
+          <a href="/freelancer/jobs/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-briefcase"></i> My Jobs</a>
+          <a href="/freelancer/chat/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-message-square"></i> Messages</a>
+          <a href="/freelancer/reviews/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-star"></i> Reviews</a>
+          <a href="/freelancer/analytics/" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-semibold"><i class="lucide-bar-chart-2"></i> Analytics</a>
+          <a href="/freelancer/verification/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-shield-check"></i> Verification</a>
+          <a href="/freelancer/support/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-life-buoy"></i> Support</a>
+        </nav>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="space-y-6">
+      <!-- HEADER -->
+      <section class="card p-5 sm:p-6 flex flex-col md:flex-row md:items-center md:justify-between gap-4 hover-rise">
+        <div>
+          <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight">Performance Analytics</h1>
+          <p class="text-gray-500 mt-1 text-sm">Your earnings, success rate & marketplace insights at a glance.</p>
+          <div class="flex flex-wrap gap-2 mt-3" id="skillBadges"></div>
+        </div>
+        <div class="flex items-center gap-3">
+          <div class="text-center">
+            <div class="text-3xl font-extrabold" id="trustIndex">—</div>
+            <div class="text-xs text-gray-500">Trust Index</div>
+          </div>
+          <div class="w-px h-10 bg-gray-200 hidden sm:block"></div>
+          <div class="text-center">
+            <div class="text-3xl font-extrabold" id="successRate">—</div>
+            <div class="text-xs text-gray-500">Success Rate</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- KPI GRID -->
+      <section class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
+        <div class="card p-6 hover-rise">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500 font-medium">Total Earnings</div>
+            <i class="lucide-dollar-sign text-indigo-600"></i>
+          </div>
+          <div id="totalEarnings" class="text-3xl font-bold mt-2">$0</div>
+          <div id="earningsDelta" class="text-xs text-green-600 mt-1 hidden">↑ 0% vs last month</div>
+        </div>
+        <div class="card p-6 hover-rise">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500 font-medium">Active Contracts</div>
+            <i class="lucide-briefcase text-green-600"></i>
+          </div>
+          <div id="activeContracts" class="text-3xl font-bold mt-2">0</div>
+          <div class="text-xs text-gray-500 mt-1">Across clients</div>
+        </div>
+        <div class="card p-6 hover-rise">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500 font-medium">Pending Invoices</div>
+            <i class="lucide-receipt text-amber-600"></i>
+          </div>
+          <div id="pendingInvoices" class="text-3xl font-bold mt-2">0</div>
+          <div class="text-xs text-gray-500 mt-1">Awaiting payment</div>
+        </div>
+        <div class="card p-6 hover-rise">
+          <div class="flex items-center justify-between">
+            <div class="text-sm text-gray-500 font-medium">Disputes</div>
+            <i class="lucide-scale text-rose-600"></i>
+          </div>
+          <div id="openDisputes" class="text-3xl font-bold mt-2">0</div>
+          <div class="text-xs text-gray-500 mt-1">Open cases</div>
+        </div>
+      </section>
+
+      <!-- CHARTS ROW -->
+      <section class="grid lg:grid-cols-3 gap-6">
+        <!-- Earnings (Line) -->
+        <div class="card p-5 lg:col-span-2">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-lg font-semibold">Earnings (Last 12 months)</h2>
+            <div class="text-xs text-gray-500">Monthly trend</div>
+          </div>
+          <div class="chart-wrap"><canvas id="earningsChart"></canvas></div>
+        </div>
+
+        <!-- Mix (Doughnut) -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-lg font-semibold">Work Mix</h2>
+            <span class="text-xs text-gray-500">Last 90 days</span>
+          </div>
+          <div class="chart-wrap"><canvas id="mixChart"></canvas></div>
+          <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
+            <div class="flex items-center gap-2"><span class="dot" style="background:#4F46E5"></span> Fixed</div>
+            <div class="flex items-center gap-2"><span class="dot" style="background:#22C55E"></span> Hourly</div>
+            <div class="flex items-center gap-2"><span class="dot" style="background:#F59E0B"></span> Milestone</div>
+            <div class="flex items-center gap-2"><span class="dot" style="background:#06B6D4"></span> Others</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- INSIGHTS + PLATFORM -->
+      <section class="grid lg:grid-cols-3 gap-6">
+        <!-- Market Insights -->
+        <div class="card p-5 lg:col-span-2">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-lg font-semibold">Market Insights</h2>
+            <span id="insightsUpdated" class="text-xs text-gray-500">—</span>
+          </div>
+          <div class="overflow-hidden rounded-lg border border-gray-100">
+            <table class="table">
+              <thead>
+                <tr>
+                  <th>Skill/Category</th>
+                  <th>Demand</th>
+                  <th>Competition</th>
+                  <th>Win Prob.</th>
+                </tr>
+              </thead>
+              <tbody id="insightsBody">
+                <tr>
+                  <td class="text-gray-400" colspan="4">Loading…</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Platform Overview -->
+        <div class="card p-5">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-lg font-semibold">Platform Overview</h2>
+            <span id="platformUpdated" class="text-xs text-gray-500">—</span>
+          </div>
+          <ul class="space-y-3 text-sm" id="platformList">
+            <li class="flex items-center justify-between">
+              <span class="text-gray-500">Active Users</span>
+              <span class="font-semibold">—</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span class="text-gray-500">Open Jobs</span>
+              <span class="font-semibold">—</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span class="text-gray-500">Avg. Job Value</span>
+              <span class="font-semibold">—</span>
+            </li>
+            <li class="flex items-center justify-between">
+              <span class="text-gray-500">Trust Health</span>
+              <span class="font-semibold">—</span>
+            </li>
+          </ul>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- FOOTER (exact content you provided) -->
+  <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20"> 
+    <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
+      <div>
+        <div class="flex items-center space-x-2 mb-3">
+          <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
+        </div>
+        <p class="text-gray-600 leading-relaxed">
+          Empowering freelancers, clients, and businesses to collaborate, innovate, and succeed — all in one place.
+        </p>
+        <div class="flex space-x-4 mt-4">
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-facebook-f"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-twitter"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-linkedin-in"></i></a>
+          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-instagram"></i></a>
+        </div>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Platform</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#marketplace" class="hover:text-primary">Marketplace</a></li>
+          <li><a href="#jobs" class="hover:text-primary">Job Listings</a></li>
+          <li><a href="#chats" class="hover:text-primary">Chats & Collaboration</a></li>
+          <li><a href="#notifications" class="hover:text-primary">Notifications</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">Resources</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#analytics" class="hover:text-primary">Analytics Dashboard</a></li>
+          <li><a href="#support" class="hover:text-primary">Help & Support</a></li>
+          <li><a href="#disputes" class="hover:text-primary">Dispute Center</a></li>
+          <li><a href="#verification" class="hover:text-primary">Profile Verification</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="text-lg font-semibold mb-3 text-secondary">About</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="#about" class="hover:text-primary">About Us</a></li>
+          <li><a href="#team" class="hover:text-primary">Our Team</a></li>
+          <li><a href="#terms" class="hover:text-primary">Terms & Conditions</a></li>
+          <li><a href="#privacy" class="hover:text-primary">Privacy Policy</a></li>
+        </ul>
+      </div>
+    </div>
+    <div class="border-t border-gray-200 mt-10 pt-6 pb-8 text-center text-gray-500 text-sm">
+      <p>&copy; 2025 <span class="font-semibold text-primary">JobsAlign</span>. All rights reserved.</p>
+      <p class="mt-2 text-blue-500">
+        Developed by 
+        <a href="https://somadhansoft.com/" class="hover:underline font-semibold text-blue-600" target="_blank" rel="noopener noreferrer">
+          SomadhanSoft
+        </a>
+      </p>
+    </div>
+  </footer>
+
+  <!-- INLINE JS -->
+  <script>
+    /***************
+     * CONFIG
+     ***************/
+    const API = "http://127.0.0.1:8000/api";
+    const token = localStorage.getItem("access_token");
+    if(!token) window.location.href="/login/";
+
+    const $ = (sel)=> document.querySelector(sel);
+    const $$ = (sel)=> Array.from(document.querySelectorAll(sel));
+    const money=(n)=>"$"+(parseFloat(n||0)).toFixed(2);
+    const pct=(n)=> (Number(n||0)).toFixed(0) + "%";
+    const nowStr=()=> new Date().toLocaleTimeString();
+
+    function toast(msg, type="success"){
+      const t=document.createElement("div");
+      t.className="fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white "+(type==="success"?"bg-emerald-600":"bg-rose-600");
+      t.textContent=msg; document.body.appendChild(t);
+      setTimeout(()=>t.remove(),2800);
+    }
+
+    async function apiGet(path){
+      try{
+        const r = await fetch(API+path,{headers:{Authorization:"Bearer "+token}});
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("GET",path,e); return null; }
+    }
+    async function apiPost(path, body={}){
+      try{
+        const r = await fetch(API+path,{
+          method:"POST",
+          headers:{"Content-Type":"application/json", Authorization:"Bearer "+token},
+          body:JSON.stringify(body)
+        });
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("POST",path,e); return null; }
+    }
+
+    /***************
+     * STATE
+     ***************/
+    let earningsChart, mixChart;
+
+    /***************
+     * HEADER PROFILE + WIDGETS
+     ***************/
+    async function loadProfile(){
+      const me = await apiGet("/accounts/profile/");
+      if(!me) return;
+      $("#userName").textContent = me.full_name || me.username || "Freelancer";
+      $("#userLevelSmall").textContent = me.level || "Level —";
+      if(me.profile_photo) $("#avatarImg").src = me.profile_photo;
+
+      // skills
+      const wrap = $("#skillBadges"); wrap.innerHTML="";
+      (me.skills || me.tags || []).slice(0,12).forEach(s=>{
+        const span=document.createElement("span");
+        span.className="chip chip-gray";
+        span.textContent=s;
+        wrap.appendChild(span);
+      });
+    }
+
+    async function loadHeaderWidgets(){
+      const wallet = await apiGet("/payments/wallet/");
+      if(wallet) $("#walletBalance").textContent = money(wallet.balance||0);
+
+      const res = await apiGet("/notifications/");
+      const countBox = $("#notifCount"), ul = $("#notifList");
+      if(!res){ countBox.classList.add("hidden"); ul.innerHTML='<li class="p-4 text-sm text-gray-500">No notifications.</li>'; return; }
+      const items = res.results || res;
+      let unread=0;
+      ul.innerHTML = items.slice(0,10).map(n=>{
+        const isUnread = (n.read===false || n.is_read===false);
+        if(isUnread) unread++;
+        const level=(n.level||"info").toLowerCase();
+        const dot = level==="success"?"bg-emerald-500":level==="warning"?"bg-amber-500":level==="critical"?"bg-rose-500":"bg-indigo-500";
+        return `
+          <li class="p-3 hover:bg-gray-50 text-sm">
+            <div class="flex items-start gap-3">
+              <span class="mt-1 w-2 h-2 rounded-full ${dot}"></span>
+              <div>
+                <div class="font-medium">${n.title || n.verb || "Notification"}</div>
+                <div class="text-gray-600">${n.message || ""}</div>
+              </div>
+            </div>
+          </li>
+        `;
+      }).join("");
+      if(unread>0){ countBox.textContent = unread; countBox.classList.remove("hidden"); } else { countBox.classList.add("hidden"); }
+
+      $("#markAllReadBtn").onclick = async ()=>{
+        const ids = (items||[]).filter(i=>i && i.id).map(i=>i.id);
+        if(ids.length){ await apiPost("/notifications/read/", { ids }); toast("All notifications marked read"); countBox.classList.add("hidden"); }
+      };
+    }
+
+    (function bindDropdowns(){
+      const nb=$("#notifBtn"), nd=$("#notifDrop");
+      nb.addEventListener("click", ()=> nd.classList.toggle("hidden"));
+      document.addEventListener("click", (e)=>{ if(!nb.contains(e.target) && !nd.contains(e.target)) nd.classList.add("hidden"); });
+
+      const pb=$("#profileBtn"), pd=$("#profileDrop");
+      pb.addEventListener("click", ()=> pd.classList.toggle("hidden"));
+      document.addEventListener("click", (e)=>{ if(!pb.contains(e.target) && !pd.contains(e.target)) pd.classList.add("hidden"); });
+    })();
+
+    /***************
+     * CHART HELPERS
+     ***************/
+    function drawEarningsChart(labels=[], data=[]){
+      const ctx = document.getElementById("earningsChart");
+      if(earningsChart) earningsChart.destroy();
+      earningsChart = new Chart(ctx,{
+        type:"line",
+        data:{
+          labels,
+          datasets:[{label:"Earnings ($)", data, borderColor:"#4F46E5", backgroundColor:"rgba(79,70,229,.12)", tension:.35, fill:true, pointRadius:2}]
+        },
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          plugins:{legend:{display:false}},
+          scales:{y:{beginAtZero:true}}
+        }
+      });
+    }
+    function drawMixChart(d=[50,30,15,5]){
+      const ctx=document.getElementById("mixChart");
+      if(mixChart) mixChart.destroy();
+      mixChart=new Chart(ctx,{
+        type:"doughnut",
+        data:{ labels:["Fixed","Hourly","Milestone","Others"], datasets:[{data:d, backgroundColor:["#4F46E5","#22C55E","#F59E0B","#06B6D4"]}]},
+        options:{ plugins:{legend:{display:false}}, cutout:"62%", responsive:true, maintainAspectRatio:false }
+      });
+    }
+
+    /***************
+     * LOAD ANALYTICS
+     ***************/
+    async function loadAnalytics(){
+      const stats = await apiGet("/analytics/freelancer/summary/");
+      if(stats){
+        $("#totalEarnings").textContent = money(stats.total_earnings||0);
+        $("#activeContracts").textContent = stats.active_projects || 0;
+        $("#pendingInvoices").textContent = stats.pending_invoices || 0;
+        $("#openDisputes").textContent = stats.open_disputes || 0;
+        $("#trustIndex").textContent = stats.trust_index!=null ? pct(stats.trust_index) : "—";
+        $("#successRate").textContent = stats.success_rate!=null ? pct(stats.success_rate) : "—";
+
+        if(typeof stats.delta_earnings_pct === "number"){
+          const d=$("#earningsDelta");
+          d.classList.remove("hidden");
+          d.textContent = (stats.delta_earnings_pct>=0?"↑ ":"↓ ")+Math.abs(stats.delta_earnings_pct).toFixed(1)+"% vs last month";
+          d.className = "text-xs mt-1 "+(stats.delta_earnings_pct>=0?"text-green-600":"text-rose-600");
+        }
+
+        drawEarningsChart(stats.labels||[], stats.earnings||[]);
+        drawMixChart(stats.mix || [50,30,15,5]);
+      }else{
+        drawEarningsChart(["Jan","Feb","Mar"], [0,0,0]);
+        drawMixChart([50,30,15,5]);
+      }
+
+      // Platform overview
+      const platform = await apiGet("/analytics/platform/overview/");
+      if(platform){
+        const items=[
+          ["Active Users", platform.active_users],
+          ["Open Jobs", platform.open_jobs],
+          ["Avg. Job Value", platform.avg_job_value ? money(platform.avg_job_value) : "—"],
+          ["Trust Health", platform.trust_health!=null ? pct(platform.trust_health) : "—"]
+        ];
+        const ul=$("#platformList"); ul.innerHTML="";
+        items.forEach(([k,v])=>{
+          const li=document.createElement("li");
+          li.className="flex items-center justify-between";
+          li.innerHTML=`<span class="text-gray-500">${k}</span><span class="font-semibold">${v ?? "—"}</span>`;
+          ul.appendChild(li);
+        });
+        $("#platformUpdated").textContent = "Updated "+nowStr();
+      }
+
+      // Insights
+      const insights = await apiGet("/analytics/market-insights/");
+      const tbody = $("#insightsBody");
+      if(insights && Array.isArray(insights)){
+        tbody.innerHTML = insights.slice(0,10).map(x=>{
+          const name = x.skill || x.category || "—";
+          const dem = x.demand_index!=null ? pct(x.demand_index) : "—";
+          const comp = x.competition_index!=null ? pct(x.competition_index) : "—";
+          const win = x.win_probability!=null ? pct(x.win_probability) : "—";
+          return `<tr>
+            <td class="font-medium">${name}</td>
+            <td>${dem}</td>
+            <td>${comp}</td>
+            <td>${win}</td>
+          </tr>`;
+        }).join("");
+        $("#insightsUpdated").textContent = "Updated "+nowStr();
+      }else{
+        tbody.innerHTML = `<tr><td colspan="4" class="text-gray-500">No insights available.</td></tr>`;
+      }
+    }
+
+    /***************
+     * INIT
+     ***************/
+    async function init(){
+      await loadProfile();
+      await loadHeaderWidgets();
+      await loadAnalytics();
+    }
+    init();
+
+    // dropdown close on outside
+    // (already bound above)
+
+  </script>
+</body>
+</html>
