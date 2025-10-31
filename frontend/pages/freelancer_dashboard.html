@@ -3,29 +3,25 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Freelancer Dashboard • JobsAlign (Pro+)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-
-  <!-- Tailwind (CDN) -->
+  <title>Freelancer Dashboard • JobsAlign</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Lucide Icons -->
   <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
 
   <style>
     :root{
-      --ink:#0F172A; --muted:#64748B; --brand:#4F46E5; --accent:#22C55E; --warn:#F59E0B; --rose:#EF4444;
+      --ink:#0F172A; --muted:#64748B; --brand:#2563EB; --accent:#06B6D4; --ok:#22C55E; --warn:#F59E0B; --danger:#EF4444;
       --bg:#F8FAFC; --card:#FFFFFF; --line:#E5E7EB;
     }
     body{
       background:
-        radial-gradient(900px 500px at 10% -10%, rgba(79,70,229,.10), transparent 60%),
-        radial-gradient(800px 400px at 90% 0%, rgba(34,197,94,.10), transparent 60%),
+        radial-gradient(900px 500px at 0% -10%, rgba(37,99,235,.10), transparent 60%),
+        radial-gradient(800px 400px at 100% 0%, rgba(6,182,212,.10), transparent 60%),
         var(--bg);
       color:var(--ink);
-      font-family: ui-sans-serif, system-ui, Inter, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      overflow-x:hidden; /* ✅ no horizontal scroll */
+      font-family: ui-sans-serif, Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+      overflow-x: hidden;
     }
     .card{background:var(--card); border:1px solid var(--line); border-radius:1rem; box-shadow:0 10px 30px rgba(2,6,23,.06)}
     .hover-rise{transition:transform .25s ease, box-shadow .25s ease}
@@ -37,40 +33,40 @@
     .chip-gray{background:#F1F5F9; color:#0F172A}
     .skeleton{background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 37%,#f3f4f6 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite}
     @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
-    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem .9rem;border-radius:.7rem;font-weight:600}
-    .btn-primary{background:var(--brand);color:#fff}
-    .btn-primary:hover{background:#4338CA}
+    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem .95rem;border-radius:.75rem;font-weight:600}
+    .btn-primary{background:linear-gradient(90deg,var(--brand),var(--accent));color:#fff}
+    .btn-primary:hover{opacity:.95}
     .btn-soft{background:#EEF2FF;color:#3730A3}
     .btn-soft:hover{background:#E0E7FF}
     .dot{width:.5rem;height:.5rem;border-radius:9999px;display:inline-block}
-    .chart-wrap{width:100%}
-    .chart-wrap canvas{width:100% !important; max-height:260px}
-    @media (max-width:480px){
-      .chart-wrap canvas{max-height:220px}
-    }
+    .chart-wrap{width:100%; overflow:hidden}
+    canvas{max-width:100% !important; height:auto !important; aspect-ratio: 16/9;}
+    .grid-safe{display:grid; gap:1rem; grid-template-columns:1fr}
+    @media(min-width:640px){ .grid-safe{grid-template-columns: repeat(2,1fr)} }
+    @media(min-width:1280px){ .grid-safe{grid-template-columns: repeat(4,1fr)} }
   </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
   <!-- NAV -->
-  <nav class="bg-white/80 backdrop-blur sticky top-0 border-b border-gray-200 z-50">
+  <nav class="bg-white/85 backdrop-blur border-b border-gray-200 sticky top-0 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
       <a href="/" class="flex items-center gap-3 min-w-0">
-        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-28 sm:w-32 h-auto object-contain">
-        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Freelancer</span>
+        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-28 h-auto object-contain shrink-0">
+        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold shrink-0">Freelancer</span>
       </a>
       <div class="flex items-center gap-2 sm:gap-3">
-        <button id="refreshBtn" class="w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50" title="Refresh">
-          <i class="lucide-rotate-cw"></i>
-        </button>
+        <a href="/freelancer/payments/" class="btn btn-soft">
+          <i class="lucide-wallet"></i>
+          <span id="walletBalance">$0.00</span>
+        </a>
 
-        <!-- Notifications -->
         <div class="relative">
-          <button id="notifBtn" class="w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50 transition">
+          <button id="notifBtn" class="w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50 transition" title="Notifications">
             <i class="lucide-bell"></i>
             <span id="notifCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-[1px] rounded-full">0</span>
           </button>
-          <div id="notifDrop" class="hidden absolute right-0 mt-2 w-[28rem] max-w-[92vw] card p-0 overflow-hidden">
+          <div id="notifDrop" class="hidden absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-[28rem] card p-0 overflow-hidden">
             <div class="px-4 py-3 border-b text-sm font-semibold">Notifications</div>
             <ul id="notifList" class="max-h-96 overflow-auto divide-y"></ul>
             <div class="px-4 py-2 flex gap-2">
@@ -80,19 +76,12 @@
           </div>
         </div>
 
-        <!-- Wallet -->
-        <button class="btn btn-soft" id="walletBtn">
-          <i class="lucide-wallet"></i>
-          <span id="walletBalance">$0.00</span>
-        </button>
-
-        <!-- Profile -->
         <div class="relative">
           <button id="profileBtn" class="flex items-center gap-3">
             <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-10 h-10 rounded-lg border border-gray-200 object-cover" alt="avatar">
             <div class="hidden sm:block text-left leading-5">
-              <div id="userName" class="text-sm font-semibold">Freelancer</div>
-              <div id="userLevelSmall" class="text-[11px] text-gray-500">Level —</div>
+              <div id="userName" class="text-sm font-semibold truncate max-w-[10rem]">Freelancer</div>
+              <div id="userLevelSmall" class="text-[11px] text-gray-500 truncate">Level —</div>
             </div>
             <i class="lucide-chevron-down text-gray-400"></i>
           </button>
@@ -101,6 +90,7 @@
             <a href="/freelancer/verification/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-badge-check mr-2"></i>Verification</a>
             <a href="/freelancer/payments/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-credit-card mr-2"></i>Payments</a>
             <a href="/freelancer/analytics/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-bar-chart-2 mr-2"></i>Analytics</a>
+            <a href="/freelancer/support/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-life-buoy mr-2"></i>Support</a>
             <hr class="my-1">
             <a href="/login/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm text-red-600"><i class="lucide-log-out mr-2"></i>Logout</a>
           </div>
@@ -109,13 +99,12 @@
     </div>
   </nav>
 
-  <!-- LAYOUT -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 w-full">
-    <!-- SIDEBAR -->
+  <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8">
     <aside class="hidden lg:block">
       <div class="card p-4">
         <nav class="space-y-1 text-sm">
-          <a href="/freelancer/dashboard/" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-semibold"><i class="lucide-layout-dashboard"></i> Dashboard</a>
+          <a href="/frontend/pages/freelancer_dashboard.html" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-semibold"><i class="lucide-layout-dashboard"></i> Dashboard</a>
+          <a href="/freelancer/profile/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-user"></i> Profile</a>
           <a href="/freelancer/jobs/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-briefcase"></i> My Jobs</a>
           <a href="/freelancer/chat/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-message-square"></i> Messages</a>
           <a href="/freelancer/reviews/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-star"></i> Reviews</a>
@@ -124,7 +113,6 @@
           <a href="/freelancer/support/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-life-buoy"></i> Support</a>
         </nav>
       </div>
-
       <div class="card p-4 mt-6">
         <div class="text-sm font-semibold mb-3">Quick Actions</div>
         <div class="grid gap-2">
@@ -134,31 +122,26 @@
       </div>
     </aside>
 
-    <!-- MAIN -->
-    <main class="space-y-8">
-      <!-- GREETING -->
+    <main class="space-y-8 min-w-0">
       <section class="card p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
         <div class="min-w-0">
-          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight truncate">
+          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight">
             Welcome back, <span id="greetName">Freelancer</span> 👋
           </h1>
-          <p class="text-gray-500 mt-1 text-sm">Live snapshot of your performance across JobsAlign.</p>
-          <div class="mt-3 flex flex-wrap gap-2" id="skillBadges">
-            <!-- dynamic skill badges -->
-          </div>
+          <p class="text-gray-500 mt-1 text-sm">Here’s a live snapshot of your performance across JobsAlign.</p>
+          <div class="mt-3 flex flex-wrap gap-2" id="skillBadges"></div>
         </div>
-        <div class="flex items-center gap-3 shrink-0">
+        <div class="flex flex-wrap items-center gap-3">
           <a href="/freelancer/profile/" class="btn btn-soft"><i class="lucide-user-cog"></i> Profile</a>
           <a href="/freelancer/jobs/" class="btn btn-primary"><i class="lucide-rocket"></i> Find Work</a>
         </div>
       </section>
 
-      <!-- KPI GRID -->
-      <section class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
+      <section class="grid-safe">
         <div class="card p-6 hover-rise">
           <div class="flex items-center justify-between">
             <div class="text-sm text-gray-500 font-medium">Total Earnings</div>
-            <i class="lucide-dollar-sign text-indigo-600"></i>
+            <i class="lucide-dollar-sign text-brand"></i>
           </div>
           <div id="totalEarnings" class="text-3xl font-bold mt-2">$0</div>
           <div id="earningsDelta" class="text-xs text-green-600 mt-1 hidden">↑ 0% vs last month</div>
@@ -167,7 +150,7 @@
         <div class="card p-6 hover-rise">
           <div class="flex items-center justify-between">
             <div class="text-sm text-gray-500 font-medium">Active Contracts</div>
-            <i class="lucide-briefcase text-green-600"></i>
+            <i class="lucide-briefcase text-ok"></i>
           </div>
           <div id="activeContracts" class="text-3xl font-bold mt-2">0</div>
           <div class="text-xs text-gray-500 mt-1">Across current clients</div>
@@ -176,7 +159,7 @@
         <div class="card p-6 hover-rise">
           <div class="flex items-center justify-between">
             <div class="text-sm text-gray-500 font-medium">Unread Messages</div>
-            <i class="lucide-message-circle text-amber-600"></i>
+            <i class="lucide-message-circle text-warn"></i>
           </div>
           <div id="unreadChats" class="text-3xl font-bold mt-2">0</div>
           <div class="text-xs text-gray-500 mt-1">Inbox across contracts</div>
@@ -185,37 +168,30 @@
         <div class="card p-6 hover-rise">
           <div class="flex items-center justify-between">
             <div class="text-sm text-gray-500 font-medium">Level</div>
-            <i class="lucide-award text-sky-600"></i>
+            <i class="lucide-award text-accent"></i>
           </div>
           <div id="userLevel" class="text-3xl font-bold mt-2">—</div>
           <div id="successRate" class="text-xs text-gray-500 mt-1">Success rate —</div>
         </div>
       </section>
 
-      <!-- ANALYTICS ROW (Compact) -->
-      <section class="grid lg:grid-cols-3 gap-6">
-        <!-- Earnings Line -->
-        <div class="card p-6 lg:col-span-2">
+      <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div class="card p-6 xl:col-span-2">
           <div class="flex items-center justify-between mb-2">
             <h2 class="text-lg font-semibold">Earnings Overview</h2>
             <div class="text-xs text-gray-500">Monthly trend</div>
           </div>
-          <div class="chart-wrap">
-            <canvas id="earningsChart"></canvas>
-          </div>
+          <div class="chart-wrap"><canvas id="earningsChart"></canvas></div>
         </div>
 
-        <!-- Work Mix -->
         <div class="card p-6">
           <div class="flex items-center justify-between mb-2">
             <h2 class="text-lg font-semibold">Work Mix</h2>
             <span class="text-xs text-gray-500">Last 90 days</span>
           </div>
-          <div class="chart-wrap">
-            <canvas id="mixChart"></canvas>
-          </div>
-          <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
-            <div class="flex items-center gap-2"><span class="dot" style="background:#4F46E5"></span> Fixed</div>
+          <div class="chart-wrap"><canvas id="mixChart"></canvas></div>
+          <div class="mt-4 grid grid-cols-2 sm:grid-cols-4 gap-3 text-sm">
+            <div class="flex items-center gap-2"><span class="dot" style="background:#2563EB"></span> Fixed</div>
             <div class="flex items-center gap-2"><span class="dot" style="background:#22C55E"></span> Hourly</div>
             <div class="flex items-center gap-2"><span class="dot" style="background:#F59E0B"></span> Milestone</div>
             <div class="flex items-center gap-2"><span class="dot" style="background:#06B6D4"></span> Others</div>
@@ -223,60 +199,27 @@
         </div>
       </section>
 
-      <!-- CONTRACTS + ACTIVITY -->
-      <section class="grid lg:grid-cols-3 gap-6">
-        <!-- Recent Contracts -->
-        <div class="card lg:col-span-2">
+      <section class="grid grid-cols-1 xl:grid-cols-3 gap-6">
+        <div class="card xl:col-span-2">
           <div class="flex items-center justify-between p-6 pb-3">
             <h2 class="text-lg font-semibold">Recent Contracts</h2>
             <a href="/freelancer/jobs/" class="text-sm text-indigo-600 hover:underline">View all</a>
           </div>
-          <div id="recentContracts" class="divide-y">
-            <!-- skeleton rows -->
-            <div class="p-5 flex items-center justify-between">
-              <div class="w-2/5 h-5 rounded skeleton"></div>
-              <div class="w-20 h-6 rounded skeleton"></div>
-            </div>
-            <div class="p-5 flex items-center justify-between">
-              <div class="w-1/3 h-5 rounded skeleton"></div>
-              <div class="w-20 h-6 rounded skeleton"></div>
-            </div>
-            <div class="p-5 flex items-center justify-between">
-              <div class="w-1/2 h-5 rounded skeleton"></div>
-              <div class="w-20 h-6 rounded skeleton"></div>
-            </div>
-          </div>
+          <div id="recentContracts" class="divide-y"></div>
         </div>
 
-        <!-- Live Activity -->
         <div class="card p-6">
           <div class="flex items-center justify-between mb-3">
             <h2 class="text-lg font-semibold">Live Activity</h2>
             <span id="lastSync" class="text-xs text-gray-500">—</span>
           </div>
-          <ul id="activityFeed" class="space-y-3">
-            <li class="flex gap-3 items-start">
-              <span class="dot" style="background:#CBD5E1"></span>
-              <div class="w-full">
-                <div class="w-3/4 h-4 skeleton rounded"></div>
-                <div class="w-1/3 h-3 skeleton rounded mt-2"></div>
-              </div>
-            </li>
-            <li class="flex gap-3 items-start">
-              <span class="dot" style="background:#CBD5E1"></span>
-              <div class="w-full">
-                <div class="w-2/3 h-4 skeleton rounded"></div>
-                <div class="w-1/4 h-3 skeleton rounded mt-2"></div>
-              </div>
-            </li>
-          </ul>
+          <ul id="activityFeed" class="space-y-3"></ul>
         </div>
       </section>
     </main>
   </div>
 
-  <!-- FOOTER (required) -->
-  <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20"> 
+  <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20">
     <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
       <div>
         <div class="flex items-center space-x-2 mb-3">
@@ -295,19 +238,19 @@
       <div>
         <h4 class="text-lg font-semibold mb-3 text-secondary">Platform</h4>
         <ul class="space-y-2 text-gray-600">
-          <li><a href="#marketplace" class="hover:text-primary">Marketplace</a></li>
-          <li><a href="#jobs" class="hover:text-primary">Job Listings</a></li>
-          <li><a href="#chats" class="hover:text-primary">Chats & Collaboration</a></li>
-          <li><a href="#notifications" class="hover:text-primary">Notifications</a></li>
+          <li><a href="/freelancer/jobs/" class="hover:text-primary">Marketplace</a></li>
+          <li><a href="/freelancer/jobs/" class="hover:text-primary">Job Listings</a></li>
+          <li><a href="/freelancer/chat/" class="hover:text-primary">Chats & Collaboration</a></li>
+          <li><a href="/freelancer/support/" class="hover:text-primary">Notifications</a></li>
         </ul>
       </div>
       <div>
         <h4 class="text-lg font-semibold mb-3 text-secondary">Resources</h4>
         <ul class="space-y-2 text-gray-600">
-          <li><a href="#analytics" class="hover:text-primary">Analytics Dashboard</a></li>
-          <li><a href="#support" class="hover:text-primary">Help & Support</a></li>
-          <li><a href="#disputes" class="hover:text-primary">Dispute Center</a></li>
-          <li><a href="#verification" class="hover:text-primary">Profile Verification</a></li>
+          <li><a href="/freelancer/analytics/" class="hover:text-primary">Analytics Dashboard</a></li>
+          <li><a href="/freelancer/support/" class="hover:text-primary">Help & Support</a></li>
+          <li><a href="/freelancer/support/" class="hover:text-primary">Dispute Center</a></li>
+          <li><a href="/freelancer/verification/" class="hover:text-primary">Profile Verification</a></li>
         </ul>
       </div>
       <div>
@@ -331,157 +274,136 @@
     </div>
   </footer>
 
-  <!-- INLINE JS (FULL BACKEND INTEGRATION + SYNC + POLLING) -->
   <script>
-    /********************
-     * CONFIG & GUARDS  *
-     ********************/
-    const API = "http://127.0.0.1:8000/api";
-    const $ = (id)=>document.getElementById(id);
-    const money=(n)=>"$"+(parseFloat(n||0)).toFixed(2);
-    const nowStr=()=>new Date().toLocaleTimeString();
+    const API = "/api";
+    const $ = id => document.getElementById(id);
+    const money = n => "$"+(parseFloat(n||0)).toFixed(2);
+    const nowStr = () => new Date().toLocaleTimeString();
 
-    function getToken(){ return localStorage.getItem("access_token"); }
-    (function authGuard(){
-      if(!getToken()) window.location.href="/login/";
-    })();
+    function getToken(){
+      return localStorage.getItem("access_token") || localStorage.getItem("access");
+    }
+    if(!getToken()) window.location.href="/login/";
 
     function toast(msg,type="success"){
-      const t=document.createElement("div");
-      t.className="fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white "+(type==="success"?"bg-emerald-600":"bg-rose-600");
-      t.textContent=msg; document.body.appendChild(t);
+      const t = document.createElement("div");
+      t.className = "fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white "+(type==="success"?"bg-emerald-600":"bg-rose-600");
+      t.textContent = msg;
+      document.body.appendChild(t);
       setTimeout(()=>t.remove(),2800);
     }
 
-    async function apiGet(path){
+    async function fetchJSON(url, opts={}){
+      opts.headers = opts.headers || {};
+      opts.headers["Authorization"] = "Bearer "+getToken();
+      if(opts.json) opts.headers["Content-Type"]="application/json";
       try{
-        const r=await fetch(API+path,{headers:{Authorization:"Bearer "+getToken()}});
-        if(!r.ok) throw new Error(path+" → "+r.status);
+        const r = await fetch(API+url, opts);
+        if(!r.ok) return null;
         return await r.json();
-      }catch(e){ console.warn("GET",path,e); return null; }
-    }
-    async function apiPost(path,body={}){
-      try{
-        const r=await fetch(API+path,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+getToken()},body:JSON.stringify(body)});
-        if(!r.ok) throw new Error(path+" → "+r.status);
-        return await r.json();
-      }catch(e){ console.warn("POST",path,e); return null; }
+      }catch(e){
+        return null;
+      }
     }
 
-    /********************
-     * PROFILE & SYNC   *
-     ********************/
+    async function tryURLs(urls){
+      for(let u of urls){
+        const d = await fetchJSON(u, {});
+        if(d) return d;
+      }
+      return null;
+    }
+
     async function loadProfile(){
-      let me = await apiGet("/accounts/me/");
-      if(!me) me = await apiGet("/accounts/profile/");
+      const me = await tryURLs(["/accounts/profile/","/accounts/me/"]);
       if(!me) return;
-
       $("greetName").textContent = me.first_name || me.full_name || me.username || "Freelancer";
-      $("userName").textContent = me.username || "Freelancer";
-      $("userLevelSmall").textContent = me.level || "Level —";
-      if(me.avatar_url || me.profile_photo) $("avatarImg").src = me.avatar_url || me.profile_photo;
+      $("userName").textContent = me.username || me.full_name || "Freelancer";
+      $("userLevelSmall").textContent = me.level || me.user_level || "Level —";
+      if(me.avatar_url) $("avatarImg").src = me.avatar_url;
 
-      // skills
-      const skills = Array.isArray(me.skills)? me.skills : (typeof me.skills==="string"? me.skills.split(",").map(s=>s.trim()).filter(Boolean):[]);
-      const container=document.getElementById("skillBadges");
+      const container = $("skillBadges");
       container.innerHTML="";
+      const skills = me.skills || me.tags || [];
       skills.slice(0,8).forEach(s=>{
-        const span=document.createElement("span");
-        span.className="chip chip-gray";
-        span.textContent=s;
-        container.appendChild(span);
+        const sp = document.createElement("span");
+        sp.className="chip chip-gray";
+        sp.textContent = s;
+        container.appendChild(sp);
       });
 
-      localStorage.setItem("profile_cache", JSON.stringify({name:me.username, level:me.level, avatar:me.avatar_url||me.profile_photo, skills}));
+      localStorage.setItem("profile_cache", JSON.stringify({name:me.username, level:me.level, avatar:me.avatar_url}));
     }
-    window.addEventListener("storage",(ev)=>{
-      if(ev.key==="profile_updated" && ev.newValue==="1"){
-        loadProfile();
-        setTimeout(()=>localStorage.removeItem("profile_updated"),200);
-      }
-      if(ev.key==="wallet_changed" && ev.newValue){
-        loadWalletAndKPIs();
-      }
-      if(ev.key==="contract_updated" && ev.newValue){
-        loadContracts();
-      }
-    });
 
-    /********************
-     * KPIs & ANALYTICS *
-     ********************/
     let earningsChart, mixChart;
 
-    function drawEarningsChart(labels=[], data=[]){
+    function drawEarnings(labels,data){
       const ctx = document.getElementById("earningsChart");
       if(earningsChart) earningsChart.destroy();
       earningsChart = new Chart(ctx,{
         type:"line",
-        data:{ labels, datasets:[{label:"Earnings ($)", data, borderColor:"#4F46E5", backgroundColor:"rgba(79,70,229,.12)", tension:.35, fill:true, pointRadius:2}]},
-        options:{ responsive:true, maintainAspectRatio:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+        data:{ labels, datasets:[{label:"Earnings", data, borderColor:"#2563EB", backgroundColor:"rgba(37,99,235,.12)", tension:.3, fill:true, pointRadius:2}]},
+        options:{responsive:true, maintainAspectRatio:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}}}
       });
     }
 
-    function drawMixChart(d=[50,30,15,5]){
-      const ctx=document.getElementById("mixChart");
+    function drawMix(d){
+      const ctx = document.getElementById("mixChart");
       if(mixChart) mixChart.destroy();
-      mixChart=new Chart(ctx,{
+      mixChart = new Chart(ctx,{
         type:"doughnut",
-        data:{ labels:["Fixed","Hourly","Milestone","Others"], datasets:[{data:d, backgroundColor:["#4F46E5","#22C55E","#F59E0B","#06B6D4"]}]},
-        options:{ plugins:{legend:{display:false}}, cutout:"62%", responsive:true, maintainAspectRatio:true }
+        data:{ labels:["Fixed","Hourly","Milestone","Others"], datasets:[{data:d, backgroundColor:["#2563EB","#22C55E","#F59E0B","#06B6D4"]}]},
+        options:{responsive:true, maintainAspectRatio:true, plugins:{legend:{display:false}}, cutout:"62%"}
       });
     }
 
-    async function loadWalletAndKPIs(){
-      const wallet = await apiGet("/payments/wallet/");
-      if(wallet){ $("walletBalance").textContent = money(wallet.balance||0); }
+    async function loadWalletAndStats(){
+      const wallet = await fetchJSON("/payments/wallet/");
+      if(wallet) $("walletBalance").textContent = money(wallet.balance||0);
 
-      let stats = await apiGet("/analytics/freelancer/stats/");
-      if(!stats) stats = await apiGet("/analytics/freelancer/summary/");
+      const stats = await tryURLs(["/analytics/freelancer/summary/","/analytics/freelancer/stats/"]);
       if(stats){
         $("totalEarnings").textContent = money(stats.total_earnings||0);
-        $("activeContracts").textContent = stats.active_projects || 0;
-        $("unreadChats").textContent = stats.unread_messages || 0;
-        $("userLevel").textContent = stats.level || "—";
-        $("successRate").textContent = "Success rate " + (stats.success_rate!=null ? (stats.success_rate+"%") : "—");
+        $("activeContracts").textContent = stats.active_projects || stats.active_contracts || 0;
+        $("unreadChats").textContent = stats.unread_messages || stats.unread || 0;
+        $("userLevel").textContent = stats.level || stats.user_level || "—";
+        $("successRate").textContent = stats.success_rate!=null ? stats.success_rate+"%" : "—";
+
         if(typeof stats.delta_earnings_pct === "number"){
-          const d=$("earningsDelta");
-          d.classList.remove("hidden");
-          d.textContent = (stats.delta_earnings_pct>=0?"↑ ":"↓ ")+Math.abs(stats.delta_earnings_pct).toFixed(1)+"% vs last month";
-          d.className = "text-xs mt-1 "+(stats.delta_earnings_pct>=0?"text-green-600":"text-rose-600");
+          const dEl = $("earningsDelta");
+          dEl.classList.remove("hidden");
+          dEl.textContent = (stats.delta_earnings_pct>=0?"↑ ":"↓ ")+Math.abs(stats.delta_earnings_pct).toFixed(1)+"% vs last month";
+          dEl.className = "text-xs mt-1 "+(stats.delta_earnings_pct>=0?"text-ok":"text-danger");
         }
-        drawEarningsChart(stats.labels||[], stats.earnings||[]);
-        drawMixChart(stats.mix || [50,30,15,5]);
-      }else{
-        drawEarningsChart(["Jan","Feb","Mar"], [0,0,0]);
-        drawMixChart([50,30,15,5]);
+        drawEarnings(stats.labels||[], stats.earnings||[]);
+        drawMix(stats.mix || [50,30,15,5]);
+      } else {
+        drawEarnings(["Jan","Feb","Mar"],[0,0,0]);
+        drawMix([50,30,15,5]);
       }
     }
 
-    /********************
-     * CONTRACTS & FEED *
-     ********************/
     async function loadContracts(){
-      const list = await apiGet("/marketplace/contracts/me/");
-      const box = $("recentContracts");
-      if(!box) return;
-      if(!list || !list.length){
-        box.innerHTML = `<div class="p-6 text-sm text-gray-500">No recent contracts found.</div>`;
+      const list = await tryURLs(["/marketplace/contracts/me/","/marketplace/contracts/?mine=true"]);
+      const container = $("recentContracts");
+      if(!container) return;
+      if(!list || list.length===0){
+        container.innerHTML = `<div class="p-6 text-sm text-gray-500">No recent contracts found.</div>`;
         return;
       }
-      box.innerHTML = list.slice(0,8).map(c=>{
-        const title = (c.project && c.project.title) ? c.project.title : (c.title || "Untitled");
-        const status = (c.status || "Pending");
+      container.innerHTML = list.slice(0,8).map(c=>{
+        const title = c.project?.title || c.title || "Untitled";
+        const status = c.status || "Pending";
         const chipClass = status.toLowerCase().includes("active")?"chip-green": status.toLowerCase().includes("complete")?"chip-blue":"chip-amber";
-        const amount = typeof c.amount !== "undefined" ? money(c.amount) : "";
+        const amount = (typeof c.amount !== "undefined" ? money(c.amount) : "");
         return `
           <div class="p-5 flex items-center justify-between">
             <div class="min-w-0">
               <div class="font-medium truncate">${title}</div>
-              <div class="text-xs text-gray-500 mt-1">#${c.id || "—"} · ${c.client?.name || c.client_name || "Client"}</div>
+              <div class="text-xs text-gray-500 mt-1">#${c.id||"—"} · ${c.client?.name||c.client_name||"Client"}</div>
             </div>
             <div class="flex items-center gap-3">
-              ${amount ? `<span class="hidden sm:inline-block text-indigo-600 font-semibold">${amount}</span>` : ""}
+              ${amount?`<span class="hidden sm:inline-block text-indigo-600 font-semibold">${amount}</span>`:""}
               <span class="chip ${chipClass}">${status}</span>
             </div>
           </div>
@@ -489,63 +411,57 @@
       }).join("");
     }
 
-    async function loadActivityFeed(){
-      const feed = await apiGet("/notifications/");
-      const ul=$("activityFeed");
-      if(!feed){ ul.innerHTML='<li class="text-sm text-gray-500">No activity.</li>'; return; }
+    async function loadActivity(){
+      const feed = await tryURLs(["/notifications/","/notifications/list/"]);
+      const ul = $("activityFeed");
+      if(!feed){ ul.innerHTML = '<li class="text-sm text-gray-500">No activity.</li>'; return; }
       const items = (feed.results || feed).slice(0,8);
       ul.innerHTML = items.map(n=>{
-        const level=(n.level||"info").toLowerCase();
+        const level = (n.level||"info").toLowerCase();
         const color = level==="success"?"#22C55E":level==="warning"?"#F59E0B":level==="critical"?"#EF4444":"#64748B";
-        const title = n.title || n.verb || "Notification";
-        const text = n.message || n.description || "";
         return `
           <li class="flex gap-3 items-start">
             <span class="dot" style="background:${color}"></span>
-            <div>
-              <div class="text-sm font-medium">${title}</div>
-              <div class="text-xs text-gray-500">${text}</div>
+            <div class="min-w-0">
+              <div class="text-sm font-medium truncate">${n.title||n.verb||"Notification"}</div>
+              <div class="text-xs text-gray-500">${n.message||""}</div>
             </div>
           </li>
         `;
       }).join("");
-      $("lastSync").textContent = "Updated " + nowStr();
+      $("lastSync").textContent = "Updated "+nowStr();
     }
 
-    /********************
-     * NOTIFICATIONS    *
-     ********************/
     async function loadNotifications(){
-      const res = await apiGet("/notifications/");
-      const countBox = $("notifCount"), ul = $("notifList");
+      const res = await tryURLs(["/notifications/","/notifications/list/"]);
+      const countBox = $("notifCount");
+      const ul = $("notifList");
       if(!res){ countBox.classList.add("hidden"); ul.innerHTML='<li class="p-4 text-sm text-gray-500">No notifications.</li>'; return; }
-
       const items = res.results || res || [];
       let unread = 0;
       ul.innerHTML = items.slice(0,12).map(n=>{
-        const isUnread = (n.read===false || n.read===0 || n.is_read===false);
-        if(isUnread) unread++;
+        const isUn = (n.read===false || n.is_read===false || n.unread_count>0);
+        if(isUn) unread++;
         const level = (n.level||"info").toLowerCase();
         const dot = level==="success"?"bg-emerald-500":level==="warning"?"bg-amber-500":level==="critical"?"bg-rose-500":"bg-indigo-500";
         return `
           <li class="p-3 hover:bg-gray-50 text-sm">
             <div class="flex items-start gap-3">
               <span class="mt-1 w-2 h-2 rounded-full ${dot}"></span>
-              <div>
-                <div class="font-medium">${n.title || n.verb || "Notification"}</div>
-                <div class="text-gray-600">${n.message || ""}</div>
+              <div class="min-w-0">
+                <div class="font-medium truncate">${n.title||n.verb||"Notification"}</div>
+                <div class="text-gray-600">${n.message||""}</div>
               </div>
             </div>
           </li>
         `;
       }).join("");
-
-      if(unread>0){ countBox.textContent = unread; countBox.classList.remove("hidden"); } else { countBox.classList.add("hidden"); }
-
+      if(unread>0){ countBox.textContent = unread; countBox.classList.remove("hidden"); }
+      else{ countBox.classList.add("hidden"); }
       $("markAllReadBtn").onclick = async ()=>{
         const ids = items.filter(i=>i && i.id).map(i=>i.id);
         if(ids.length){
-          await apiPost("/notifications/read/", { ids });
+          await fetchJSON("/notifications/read/", { method:"POST", json:true, body:JSON.stringify({ ids }) });
           toast("All notifications marked as read");
           countBox.classList.add("hidden");
           loadNotifications();
@@ -553,38 +469,40 @@
       };
     }
 
-    /********************
-     * UX BINDINGS      *
-     ********************/
-    (function bindDropdowns(){
+    (function bindDrops(){
       const nb=$("notifBtn"), nd=$("notifDrop");
-      nb.addEventListener("click", ()=>{ nd.classList.toggle("hidden"); });
-      document.addEventListener("click", (e)=>{ if(!nb.contains(e.target) && !nd.contains(e.target)){ nd.classList.add("hidden"); }});
+      nb.addEventListener("click",()=>{ nd.classList.toggle("hidden"); });
+      document.addEventListener("click",(e)=>{ if(!nb.contains(e.target) && !nd.contains(e.target)) nd.classList.add("hidden"); });
+
       const pb=$("profileBtn"), pd=$("profileDrop");
-      pb.addEventListener("click", ()=>{ pd.classList.toggle("hidden"); });
-      document.addEventListener("click", (e)=>{ if(!pb.contains(e.target) && !pd.contains(e.target)){ pd.classList.add("hidden"); }});
-      $("refreshBtn").addEventListener("click", ()=>refreshAll(true));
+      pb.addEventListener("click",()=>{ pd.classList.toggle("hidden"); });
+      document.addEventListener("click",(e)=>{ if(!pb.contains(e.target) && !pd.contains(e.target)) pd.classList.add("hidden"); });
     })();
 
-    /********************
-     * POLLING & REFRESH*
-     ********************/
-    async function refreshAll(showToast=false){
-      await Promise.all([
-        loadProfile(),
-        loadWalletAndKPIs(),
-        loadContracts(),
-        loadNotifications(),
-        loadActivityFeed()
-      ]);
-      if(showToast) toast("Dashboard refreshed");
+    // Cross-tab sync
+    window.addEventListener("storage",(ev)=>{
+      if(ev.key==="profile_updated" && ev.newValue==="1"){
+        loadProfile();
+        setTimeout(()=>localStorage.removeItem("profile_updated"),200);
+      }
+      if(ev.key==="wallet_changed" && ev.newValue){
+        loadWalletAndStats();
+      }
+      if(ev.key==="contract_updated" && ev.newValue){
+        loadContracts();
+      }
+    });
+
+    async function init(){
+      await loadProfile();
+      await loadWalletAndStats();
+      await loadContracts();
+      await loadActivity();
+      await loadNotifications();
     }
+    init();
 
-    // initial load
-    refreshAll();
-
-    // background polling every 60s
-    setInterval(()=>refreshAll(false), 60000);
+    setInterval(()=>loadActivity(),60000);
   </script>
 </body>
 </html>

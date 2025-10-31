@@ -1,0 +1,254 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Support • JobsAlign</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      background: linear-gradient(180deg, #f8fafc, #f1f5f9);
+      font-family: 'Inter', sans-serif;
+      color: #0f172a;
+    }
+    .card {
+      background: white;
+      border-radius: 1rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+      transition: all 0.25s ease;
+    }
+    .card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 25px rgba(0,0,0,0.08);
+    }
+    .btn-primary {
+      background: linear-gradient(90deg, #4f46e5, #06b6d4);
+      color: white;
+      transition: 0.3s;
+    }
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex flex-col">
+  <!-- NAV -->
+  <nav class="bg-white/80 backdrop-blur border-b border-gray-200 sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+      <a href="/freelancer/dashboard/" class="flex items-center gap-3">
+        <img src="{% static 'images/logo.jpeg' %}" alt="Logo" class="w-28 rounded">
+        <h1 class="font-bold text-lg text-indigo-600">Freelancer Support</h1>
+      </a>
+      <a href="/login/" class="text-sm text-rose-600 hover:text-rose-700 flex items-center gap-1">
+        <i class="lucide-log-out"></i> Logout
+      </a>
+    </div>
+  </nav>
+
+  <!-- MAIN -->
+  <main class="flex-grow max-w-7xl mx-auto w-full p-6 space-y-10">
+
+    <!-- CREATE TICKET -->
+    <section class="card p-6">
+      <div class="flex justify-between items-center mb-4">
+        <h2 class="text-2xl font-bold text-indigo-700">Create Support Ticket</h2>
+        <button id="refreshTickets" class="btn-primary px-4 py-2 rounded-lg font-medium">
+          <i class="lucide-refresh-ccw"></i> Refresh
+        </button>
+      </div>
+
+      <form id="createTicketForm" class="grid md:grid-cols-2 gap-5">
+        <div>
+          <label class="text-sm font-semibold text-gray-700 mb-1 block">Subject</label>
+          <input id="subject" type="text" placeholder="Enter subject" class="w-full border border-gray-300 p-3 rounded-lg">
+        </div>
+
+        <div>
+          <label class="text-sm font-semibold text-gray-700 mb-1 block">Category</label>
+          <select id="category" class="w-full border border-gray-300 p-3 rounded-lg">
+            <option value="">Select category</option>
+          </select>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="text-sm font-semibold text-gray-700 mb-1 block">Description</label>
+          <textarea id="description" rows="4" placeholder="Describe your issue..." class="w-full border border-gray-300 p-3 rounded-lg"></textarea>
+        </div>
+
+        <div class="md:col-span-2">
+          <label class="text-sm font-semibold text-gray-700 mb-1 block">Attachment</label>
+          <input id="attachment" type="file" class="w-full border border-gray-300 p-2 rounded-lg">
+        </div>
+
+        <button type="submit" class="md:col-span-2 btn-primary py-3 rounded-lg font-semibold shadow">
+          Submit Ticket
+        </button>
+      </form>
+
+      <p id="ticketMsg" class="text-center text-sm mt-3"></p>
+    </section>
+
+    <!-- MY TICKETS -->
+    <section class="card p-6">
+      <h2 class="text-xl font-bold mb-4 text-indigo-700">My Tickets</h2>
+      <div id="ticketsList" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
+    <!-- THREAD VIEW -->
+    <section id="ticketThreadSection" class="card p-6 hidden">
+      <div class="flex justify-between items-center mb-3">
+        <h2 id="threadTitle" class="text-lg font-bold text-indigo-700"></h2>
+        <button id="closeThread" class="text-rose-600 hover:underline">Close</button>
+      </div>
+
+      <div id="messagesContainer" class="space-y-3 max-h-[400px] overflow-y-auto bg-gray-50 p-4 rounded-xl"></div>
+
+      <form id="replyForm" class="mt-4 flex gap-2">
+        <input id="replyContent" placeholder="Type your reply..." class="flex-grow border p-2 rounded-lg focus:ring-2 focus:ring-indigo-400">
+        <button class="btn-primary px-4 py-2 rounded-lg"><i class="lucide-send"></i></button>
+      </form>
+    </section>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20">
+    <div class="max-w-7xl mx-auto px-6 py-12 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
+      <div>
+        <img src="{% static 'images/logo.jpeg' %}" class="w-32 mb-3">
+        <p class="text-gray-600">Empowering freelancers worldwide with reliable support and collaboration.</p>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-3 text-indigo-600">Resources</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="/freelancer/dashboard/" class="hover:text-indigo-600">Dashboard</a></li>
+          <li><a href="/freelancer/profile/" class="hover:text-indigo-600">Profile</a></li>
+          <li><a href="/freelancer/jobs/" class="hover:text-indigo-600">Jobs</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-3 text-indigo-600">Support</h4>
+        <ul class="space-y-2 text-gray-600">
+          <li><a href="/freelancer/support/" class="hover:text-indigo-600">Help Center</a></li>
+          <li><a href="/freelancer/chat/" class="hover:text-indigo-600">Chat</a></li>
+          <li><a href="/freelancer/verification/" class="hover:text-indigo-600">Verification</a></li>
+        </ul>
+      </div>
+      <div>
+        <h4 class="font-semibold mb-3 text-indigo-600">Contact</h4>
+        <p class="text-gray-600">Email: support@jobsalign.com</p>
+        <p class="text-gray-600">Phone: +1 555 123 4567</p>
+      </div>
+    </div>
+    <div class="border-t border-gray-200 text-center py-5 text-gray-500 text-sm">
+      © 2025 <b class="text-indigo-600">JobsAlign</b>. All rights reserved.
+    </div>
+  </footer>
+
+  <!-- JS -->
+  <script>
+    const API = "/api/support/";
+    const token = localStorage.getItem("access_token");
+    if (!token) window.location.href = "/login/";
+
+    async function apiGet(url) {
+      const res = await fetch(API + url, { headers: { Authorization: "Bearer " + token } });
+      return res.ok ? await res.json() : [];
+    }
+
+    async function apiPost(url, data, isForm = false) {
+      const opts = {
+        method: "POST",
+        headers: isForm ? { Authorization: "Bearer " + token } : {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + token
+        },
+        body: isForm ? data : JSON.stringify(data)
+      };
+      const res = await fetch(API + url, opts);
+      return await res.json();
+    }
+
+    // load categories
+    async function loadCategories() {
+      const cats = await apiGet("categories/");
+      const select = document.getElementById("category");
+      cats.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.id; opt.textContent = c.name;
+        select.appendChild(opt);
+      });
+    }
+
+    // load tickets
+    async function loadTickets() {
+      const tickets = await apiGet("tickets/me/");
+      const list = document.getElementById("ticketsList");
+      list.innerHTML = "";
+      tickets.forEach(t => {
+        const card = document.createElement("div");
+        card.className = "p-4 rounded-xl border shadow hover:shadow-md transition bg-gradient-to-tr from-gray-50 to-white cursor-pointer";
+        card.innerHTML = `
+          <h3 class="font-semibold text-gray-900">${t.subject}</h3>
+          <p class="text-sm text-gray-600">${t.category?.name || "General"}</p>
+          <p class="text-xs text-gray-500 mt-1">${new Date(t.created_at).toLocaleString()}</p>
+          <span class="inline-block mt-2 px-2 py-1 text-xs rounded-full ${t.status==="open"?"bg-green-100 text-green-700":"bg-gray-200 text-gray-700"}">${t.status}</span>
+        `;
+        card.onclick = () => openThread(t.id, t.subject);
+        list.appendChild(card);
+      });
+    }
+
+    // open thread
+    async function openThread(id, subject) {
+      document.getElementById("ticketThreadSection").classList.remove("hidden");
+      document.getElementById("threadTitle").textContent = subject;
+      const thread = await apiGet(`tickets/${id}/`);
+      const box = document.getElementById("messagesContainer");
+      box.innerHTML = "";
+      thread.messages.forEach(m => {
+        const msg = document.createElement("div");
+        msg.className = `p-3 rounded-lg max-w-[75%] ${m.is_staff ? "bg-indigo-600 text-white" : "bg-gray-200"} ${m.is_staff ? "ml-auto" : ""}`;
+        msg.innerHTML = `<p>${m.content}</p><p class="text-xs opacity-70 mt-1">${new Date(m.created_at).toLocaleString()}</p>`;
+        box.appendChild(msg);
+      });
+
+      document.getElementById("replyForm").onsubmit = async e => {
+        e.preventDefault();
+        const text = replyContent.value.trim();
+        if (!text) return;
+        await apiPost("messages/post/", { ticket: id, content: text });
+        replyContent.value = "";
+        openThread(id, subject);
+      };
+    }
+
+    // create ticket
+    document.getElementById("createTicketForm").onsubmit = async e => {
+      e.preventDefault();
+      const fd = new FormData();
+      fd.append("subject", subject.value);
+      fd.append("category", category.value);
+      fd.append("description", description.value);
+      if (attachment.files[0]) fd.append("attachment", attachment.files[0]);
+      const res = await apiPost("tickets/create/", fd, true);
+      ticketMsg.textContent = res.id ? "✅ Ticket created successfully!" : "❌ Failed to create ticket.";
+      loadTickets();
+    };
+
+    // close thread
+    document.getElementById("closeThread").onclick = () =>
+      document.getElementById("ticketThreadSection").classList.add("hidden");
+
+    // refresh
+    document.getElementById("refreshTickets").onclick = loadTickets;
+
+    loadCategories();
+    loadTickets();
+  </script>
+</body>
+</html>
