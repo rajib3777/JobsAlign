@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-m)+ori8z52b_q%b^e(zmlmz$)=bb-2dui_(0s9xx^%l7@z4p0b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["jobsalign.com","www.jobsalign.com".]
+ALLOWED_HOSTS = ["jobsalign.com","www.jobsalign.com"]
 
 
 # Application definition
