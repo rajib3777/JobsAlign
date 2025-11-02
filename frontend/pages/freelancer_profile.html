@@ -4,60 +4,51 @@
 <head>
   <meta charset="utf-8" />
   <title>Freelancer Profile • JobsAlign (Pro+)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- Tailwind (CDN) -->
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <!-- Lucide Icons -->
+
+  <!-- Lucide Icons (font) -->
   <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
-  <!-- Chart.js (mini chart) -->
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     :root{
-      --ink:#0F172A; --muted:#64748B; --brand:#4F46E5; --emerald:#10B981; --amber:#F59E0B; --rose:#EF4444; --cyan:#06B6D4; --violet:#7C3AED;
+      --ink:#0F172A; --muted:#64748B; --brand:#4F46E5; --emerald:#10B981; --amber:#F59E0B; --cyan:#06B6D4;
       --bg:#F8FAFC; --card:#FFFFFF; --line:#E5E7EB;
     }
-    html,body{height:100%}
+    html,body{height:100%; overflow-x:hidden;}
     body{
       background:
-        radial-gradient(900px 500px at 10% -10%, rgba(79,70,229,.08), transparent 60%),
-        radial-gradient(800px 400px at 90% 0, rgba(34,197,94,.08), transparent 60%),
+        radial-gradient(900px 500px at 8% -8%, rgba(79,70,229,.08), transparent 60%),
+        radial-gradient(800px 400px at 92% 0%, rgba(16,185,129,.08), transparent 60%),
         var(--bg);
       color:var(--ink);
       font-family: ui-sans-serif, system-ui, Inter, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      overflow-x:hidden; /* ✅ kill any horizontal scroll on all devices */
     }
-    .card{background:var(--card); border:1px solid var(--line); border-radius:1rem; box-shadow:0 10px 30px rgba(2,6,23,.06)}
+    .card{background:var(--card); border:1px solid var(--line); border-radius:1rem; box-shadow:0 12px 32px rgba(2,6,23,.06)}
     .hover-rise{transition:transform .25s ease, box-shadow .25s ease}
-    .hover-rise:hover{transform:translateY(-3px); box-shadow:0 16px 38px rgba(2,6,23,.10)}
-    .badge{font-size:.75rem; padding:.25rem .55rem; border-radius:.5rem; white-space:nowrap}
-    .badge-indigo{background:#EEF2FF; color:#3730A3}
-    .badge-emerald{background:#ECFDF5; color:#065F46}
-    .badge-amber{background:#FEF3C7; color:#92400E}
-    .badge-cyan{background:#ECFEFF; color:#155E75}
-    .badge-rose{background:#FFE4E6; color:#9F1239}
-    .skeleton{background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 37%,#f3f4f6 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite}
-    @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
-    .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem .95rem;border-radius:.7rem;font-weight:600}
+    .hover-rise:hover{transform:translateY(-4px); box-shadow:0 18px 44px rgba(2,6,23,.10)}
+    .btn{display:inline-flex;align-items:center;gap:.55rem;padding:.65rem .95rem;border-radius:.8rem;font-weight:700}
     .btn-primary{background:var(--brand);color:#fff}
     .btn-primary:hover{background:#4338CA}
     .btn-soft{background:#EEF2FF;color:#3730A3}
     .btn-soft:hover{background:#E0E7FF}
-    .btn-emerald{background:var(--emerald); color:#fff}
-    .btn-emerald:hover{filter:brightness(.95)}
-    .btn-rose{background:var(--rose); color:#fff}
-    .btn-rose:hover{filter:brightness(.95)}
-    .pill{border:1px dashed #CBD5E1; border-radius:.75rem}
-    .text-ellipsis{min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap}
-    .grid-safe{min-width:0}
-    .avatar-xl{width:7.25rem; height:7.25rem}
-    .chart-wrap{width:100%}
-    .chart-wrap canvas{width:100% !important; max-height:220px}
-    @media (max-width:480px){
-      .avatar-xl{width:6rem; height:6rem}
-      .chart-wrap canvas{max-height:200px}
-    }
+    .btn-ghost{background:transparent;color:#0F172A}
+    .chip{font-size:.75rem;padding:.3rem .6rem;border-radius:.5rem;background:#F1F5F9;color:#0F172A;display:inline-flex;align-items:center;gap:.4rem}
+    .chip-green{background:#DCFCE7;color:#166534}
+    .chip-amber{background:#FEF3C7;color:#92400E}
+    .chip-indigo{background:#E0E7FF;color:#3730A3}
+    .input{border:1px solid #CBD5E1;border-radius:.7rem;padding:.65rem .85rem;width:100%;background:#fff}
+    .input:focus{outline:none;box-shadow:0 0 0 4px rgba(79,70,229,.15);border-color:#A5B4FC}
+    .textarea{border:1px solid #CBD5E1;border-radius:.7rem;padding:.7rem .9rem;width:100%;min-height:110px;resize:vertical;background:#fff}
+    .textarea:focus{outline:none;box-shadow:0 0 0 4px rgba(79,70,229,.15);border-color:#A5B4FC}
+    .pill{border:1px dashed #CBD5E1;border-radius:.7rem;padding:.45rem .75rem;font-size:.85rem;color:#334155;background:#fff}
+    .divider{height:1px;background:#E5E7EB}
+    .row{display:grid;grid-template-columns:1fr;gap:1rem}
+    @media (min-width:640px){ .row-sm-2{grid-template-columns:1fr 1fr} }
+    @media (min-width:1024px){ .row-lg-3{grid-template-columns:1fr 1fr 1fr} }
+    .no-scrollbar::-webkit-scrollbar{display:none}
   </style>
 </head>
 
@@ -67,256 +58,229 @@
   <nav class="bg-white/90 backdrop-blur sticky top-0 border-b border-gray-200 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
       <a href="/freelancer/dashboard/" class="flex items-center gap-3 min-w-0">
-        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-28 sm:w-32 h-auto object-contain">
-        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Freelancer • Profile</span>
+        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
+        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Freelancer</span>
       </a>
       <div class="flex items-center gap-2 sm:gap-3">
-        <a href="/freelancer/dashboard/" class="btn btn-soft"><i class="lucide-layout-dashboard"></i><span class="hidden xs:inline">Dashboard</span></a>
-        <a href="/login/" class="btn btn-rose"><i class="lucide-log-out"></i><span class="hidden xs:inline">Logout</span></a>
+        <a href="/freelancer/jobs/" class="btn btn-soft"><i class="lucide-briefcase"></i><span class="hidden xs:inline">Jobs</span></a>
+        <a href="/freelancer/chat/" class="btn btn-soft"><i class="lucide-message-square"></i><span class="hidden xs:inline">Chat</span></a>
+        <a href="/freelancer/payments/" class="btn btn-soft"><i class="lucide-credit-card"></i><span class="hidden xs:inline">Payments</span></a>
+        <a href="/freelancer/support/" class="btn btn-soft"><i class="lucide-life-buoy"></i><span class="hidden xs:inline">Support</span></a>
+        <a href="/login/" class="btn btn-primary"><i class="lucide-log-out"></i> Logout</a>
       </div>
     </div>
   </nav>
 
-  <!-- CONTENT -->
-  <main class="flex-1 max-w-7xl mx-auto px-4 sm:px-6 py-6 sm:py-10 grid-safe">
+  <!-- PAGE -->
+  <main class="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 py-8 space-y-8">
 
-    <!-- HEADER: Avatar + Basic -->
-    <section class="card p-5 sm:p-6 hover-rise">
-      <div class="flex flex-col lg:flex-row gap-6 lg:items-center">
-        <!-- Avatar -->
-        <div class="relative self-center lg:self-start">
-          <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="avatar-xl rounded-full border-4 border-indigo-500 shadow-md object-cover" alt="avatar">
-          <label for="avatarUpload" title="Upload new photo" class="absolute -right-1 bottom-0 bg-indigo-600 p-2 rounded-full cursor-pointer hover:bg-indigo-700 shadow">
-            <i class="lucide-camera text-white text-[18px]"></i>
+    <!-- PROFILE HEADER -->
+    <section class="card p-6 hover-rise">
+      <div class="flex flex-col lg:flex-row lg:items-center gap-6">
+        <!-- Avatar + Basic -->
+        <div class="flex items-center gap-5 min-w-0">
+          <img id="avatarPreview" src="{% static 'images/avatar.png' %}" alt="Avatar"
+               class="w-24 h-24 rounded-xl border border-gray-200 object-cover">
+          <div class="min-w-0">
+            <h1 id="profileName" class="text-2xl font-extrabold tracking-tight truncate">—</h1>
+            <p id="profileEmail" class="text-gray-500 text-sm truncate">—</p>
+
+            <div class="flex flex-wrap gap-2 mt-2">
+              <span id="levelBadge" class="chip chip-indigo">Level —</span>
+              <span id="verifyBadge" class="chip">Verification —</span>
+              <span id="planBadge" class="chip">Plan —</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Actions -->
+        <div class="lg:ml-auto flex flex-wrap items-center gap-3">
+          <label class="btn btn-soft cursor-pointer">
+            <i class="lucide-camera"></i> Change Picture
+            <input type="file" id="avatarInput" accept="image/*" class="hidden">
           </label>
-          <input id="avatarUpload" type="file" accept="image/*" class="hidden" />
+          <a href="/freelancer/dashboard/" class="btn btn-primary"><i class="lucide-layout-dashboard"></i> Dashboard</a>
+        </div>
+      </div>
+
+      <!-- Skills Badges -->
+      <div class="mt-5">
+        <div class="text-sm font-semibold text-gray-600 mb-2">Skills</div>
+        <div id="skillsBadges" class="flex flex-wrap gap-2"></div>
+      </div>
+    </section>
+
+    <!-- GRID SECTIONS -->
+    <section class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- LEFT STACK -->
+      <div class="space-y-6 lg:col-span-2">
+
+        <!-- PERSONAL & PROFESSIONAL -->
+        <div class="card p-6">
+          <h2 class="text-lg font-bold mb-4">Profile Information</h2>
+          <form id="profileForm" class="space-y-5">
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Full Name</label>
+                <input id="nameInput" type="text" class="input" placeholder="Your full name" required>
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Email</label>
+                <input id="emailInput" type="email" class="input bg-gray-50" readonly>
+              </div>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Location</label>
+                <input id="locationInput" type="text" class="input" placeholder="City, Country">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">Hourly Rate ($)</label>
+                <input id="rateInput" type="number" min="0" step="1" class="input" placeholder="e.g. 25">
+              </div>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">Bio</label>
+              <textarea id="bioInput" class="textarea" placeholder="Write a short, focused bio..."></textarea>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium mb-1">Skills (comma separated)</label>
+              <input id="skillsInput" type="text" class="input" placeholder="React, Tailwind, Django, PostgreSQL">
+              <p class="text-xs text-gray-500 mt-1">
+                Tip: Keep 5–10 focused skills. Example: <span class="pill">Django</span> <span class="pill">DRF</span> <span class="pill">Tailwind</span>
+              </p>
+            </div>
+
+            <div class="grid sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-sm font-medium mb-1">Website / Portfolio</label>
+                <input id="portfolioInput" type="url" class="input" placeholder="https://your-portfolio.com">
+              </div>
+              <div>
+                <label class="block text-sm font-medium mb-1">LinkedIn</label>
+                <input id="linkedinInput" type="url" class="input" placeholder="https://linkedin.com/in/username">
+              </div>
+            </div>
+
+            <div class="flex flex-wrap gap-3 pt-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="lucide-save"></i> Save Changes
+              </button>
+              <button type="button" id="syncDashBtn" class="btn btn-ghost">
+                <i class="lucide-refresh-ccw"></i> Sync to Dashboard
+              </button>
+            </div>
+          </form>
         </div>
 
-        <!-- Basic Info -->
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2 flex-wrap">
-            <h1 id="freelancerName" class="text-2xl sm:text-3xl font-extrabold tracking-tight text-ellipsis">Loading...</h1>
-            <span id="freelancerLevel" class="badge badge-indigo">Level —</span>
-            <span id="verificationBadge" class="badge badge-amber">Verification —</span>
-            <span id="subscriptionPlan" class="badge badge-emerald">Plan —</span>
+        <!-- PORTFOLIO (URLs & notes) -->
+        <div class="card p-6">
+          <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold">Portfolio</h2>
+            <button id="addPortfolioBtn" class="btn btn-soft"><i class="lucide-plus"></i> Add Link</button>
           </div>
-          <p id="freelancerBio" class="text-gray-600 mt-2 text-sm sm:text-[15px]">—</p>
+          <p class="text-sm text-gray-500 mt-1">Add a few best-of links (case study / live demo / GitHub / Dribbble).</p>
 
-          <div class="mt-3 flex flex-wrap gap-2" id="skillBadges">
-            <!-- dynamic skill badges -->
+          <div id="portfolioList" class="mt-4 space-y-3">
+            <!-- dynamically rendered -->
           </div>
 
-          <div class="mt-4 flex flex-wrap gap-2">
-            <a href="/freelancer/jobs/" class="btn btn-primary"><i class="lucide-rocket"></i> Find Work</a>
-            <button id="saveProfileBtn" class="btn btn-emerald"><i class="lucide-save"></i> Save Profile</button>
-          </div>
+          <div class="divider my-5"></div>
+
+          <form id="portfolioForm" class="grid sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium mb-1">New portfolio URL</label>
+              <input id="portfolioNewUrl" type="url" class="input" placeholder="https://">
+            </div>
+            <div class="sm:col-span-2">
+              <label class="block text-sm font-medium mb-1">Short note (optional)</label>
+              <input id="portfolioNewNote" type="text" class="input" placeholder="e.g., Landing page with real-time charts">
+            </div>
+            <div class="sm:col-span-2">
+              <button type="submit" class="btn btn-primary">
+                <i class="lucide-link"></i> Save Portfolio Item
+              </button>
+            </div>
+          </form>
         </div>
 
-        <!-- Quick Metrics -->
-        <div class="grid grid-cols-3 lg:grid-cols-1 gap-3 w-full lg:w-auto">
-          <div class="p-4 rounded-xl pill bg-white">
-            <div class="text-[11px] text-gray-500">Avg Rating</div>
-            <div id="ratingScore" class="text-xl font-bold">—</div>
-          </div>
-          <div class="p-4 rounded-xl pill bg-white">
-            <div class="text-[11px] text-gray-500">Projects</div>
-            <div id="projectsCount" class="text-xl font-bold">—</div>
-          </div>
-          <div class="p-4 rounded-xl pill bg-white">
-            <div class="text-[11px] text-gray-500">Earnings</div>
-            <div id="totalEarnings" class="text-xl font-bold">—</div>
+        <!-- SECURITY -->
+        <div class="card p-6">
+          <h2 class="text-lg font-bold">Security</h2>
+          <p class="text-sm text-gray-500">Change your password regularly to keep your account secure.</p>
+
+          <form id="passwordForm" class="row row-sm-2 mt-4">
+            <div>
+              <label class="block text-sm font-medium mb-1">Old Password</label>
+              <input id="oldPass" type="password" class="input" autocomplete="current-password">
+            </div>
+            <div>
+              <label class="block text-sm font-medium mb-1">New Password</label>
+              <input id="newPass" type="password" class="input" autocomplete="new-password">
+            </div>
+          </form>
+
+          <button id="changePassBtn" class="btn btn-soft mt-4">
+            <i class="lucide-lock"></i> Change Password
+          </button>
+        </div>
+
+      </div>
+
+      <!-- RIGHT STACK -->
+      <div class="space-y-6">
+        <!-- ACCOUNT STATUS -->
+        <div class="card p-6">
+          <h2 class="text-lg font-bold">Account Status</h2>
+          <dl class="mt-3 space-y-2 text-sm">
+            <div class="flex items-center justify-between">
+              <dt class="text-gray-600">Email Verified</dt>
+              <dd id="emailVerified" class="chip">—</dd>
+            </div>
+            <div class="flex items-center justify-between">
+              <dt class="text-gray-600">Identity (KYC)</dt>
+              <dd id="kycVerified" class="chip">—</dd>
+            </div>
+            <div class="flex items-center justify-between">
+              <dt class="text-gray-600">Current Plan</dt>
+              <dd id="planSmall" class="chip">—</dd>
+            </div>
+          </dl>
+          <div class="divider my-4"></div>
+
+          <h3 class="font-semibold mb-2">Upload KYC Document</h3>
+          <form id="kycForm" class="space-y-3">
+            <input id="kycFile" type="file" accept=".jpg,.jpeg,.png,.pdf" class="input">
+            <button type="submit" class="btn btn-primary w-full sm:w-auto">
+              <i class="lucide-upload"></i> Upload & Submit
+            </button>
+          </form>
+          <p id="kycMsg" class="text-xs text-gray-500 mt-2">Accepted: JPG, PNG, PDF</p>
+        </div>
+
+        <!-- QUICK LINKS -->
+        <div class="card p-6">
+          <h2 class="text-lg font-bold">Quick Links</h2>
+          <div class="grid sm:grid-cols-2 gap-3 mt-3">
+            <a href="/freelancer/verification/" class="btn btn-soft w-full"><i class="lucide-shield-check"></i> Verification</a>
+            <a href="/freelancer/analytics/" class="btn btn-soft w-full"><i class="lucide-bar-chart-2"></i> Analytics</a>
+            <a href="/freelancer/reviews/" class="btn btn-soft w-full"><i class="lucide-star"></i> Reviews</a>
+            <a href="/freelancer/support/" class="btn btn-soft w-full"><i class="lucide-life-buoy"></i> Support</a>
           </div>
         </div>
       </div>
     </section>
 
-    <!-- TABS -->
-    <section class="mt-6">
-      <div class="card p-4 sm:p-6">
-        <!-- Tab Header -->
-        <div class="flex items-center gap-2 sm:gap-4 border-b border-gray-200 pb-2 overflow-x-auto no-scrollbar">
-          <button data-tab="overview" class="tab-btn px-3 py-2 rounded-lg text-sm font-semibold bg-indigo-50 text-indigo-700">Overview</button>
-          <button data-tab="edit" class="tab-btn px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">Edit Profile</button>
-          <button data-tab="verify" class="tab-btn px-3 py-2 rounded-lg text-sm font-semibold hover:bg-gray-50">Verification & Portfolio</button>
-        </div>
-
-        <!-- Tab Bodies -->
-        <div class="mt-6 space-y-6">
-
-          <!-- OVERVIEW -->
-          <div id="tab-overview" class="tab-body grid lg:grid-cols-3 gap-6">
-            <!-- About -->
-            <div class="card p-5 sm:p-6 lg:col-span-2">
-              <h3 class="text-base sm:text-lg font-semibold mb-4">About</h3>
-              <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-                <div>
-                  <dt class="text-gray-500">Full Name</dt>
-                  <dd id="ovFullName" class="font-medium text-ellipsis">—</dd>
-                </div>
-                <div>
-                  <dt class="text-gray-500">Email</dt>
-                  <dd id="ovEmail" class="font-medium text-ellipsis">—</dd>
-                </div>
-                <div>
-                  <dt class="text-gray-500">Location</dt>
-                  <dd id="ovLocation" class="font-medium text-ellipsis">—</dd>
-                </div>
-                <div>
-                  <dt class="text-gray-500">Hourly Rate</dt>
-                  <dd id="ovRate" class="font-medium">—</dd>
-                </div>
-                <div class="sm:col-span-2">
-                  <dt class="text-gray-500">Bio</dt>
-                  <dd id="ovBio" class="font-medium break-words">—</dd>
-                </div>
-              </dl>
-            </div>
-
-            <!-- Mini Performance -->
-            <div class="card p-5 sm:p-6">
-              <div class="flex items-center justify-between mb-2">
-                <h3 class="text-base sm:text-lg font-semibold">Last 6 Months</h3>
-                <span class="text-xs text-gray-500">Earnings</span>
-              </div>
-              <div class="chart-wrap"><canvas id="miniEarnChart"></canvas></div>
-            </div>
-          </div>
-
-          <!-- EDIT PROFILE -->
-          <div id="tab-edit" class="tab-body hidden grid lg:grid-cols-3 gap-6">
-            <!-- Personal -->
-            <div class="card p-5 sm:p-6 lg:col-span-2">
-              <h3 class="text-base sm:text-lg font-semibold mb-4">Personal & Professional</h3>
-              <div class="grid sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="text-sm text-gray-600">Full Name</label>
-                  <input id="fullName" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Enter full name">
-                </div>
-                <div>
-                  <label class="text-sm text-gray-600">Email (readonly)</label>
-                  <input id="email" type="text" class="w-full border border-gray-200 bg-gray-100 rounded-md px-3 py-2" readonly>
-                </div>
-                <div>
-                  <label class="text-sm text-gray-600">Location</label>
-                  <input id="location" type="text" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Your location">
-                </div>
-                <div>
-                  <label class="text-sm text-gray-600">Hourly Rate ($)</label>
-                  <input id="hourlyRate" type="number" min="0" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g. 25">
-                </div>
-                <div class="sm:col-span-2">
-                  <label class="text-sm text-gray-600">Skills (comma-separated)</label>
-                  <input id="skills" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="React, Django, Tailwind, ..." />
-                </div>
-                <div class="sm:col-span-2">
-                  <label class="text-sm text-gray-600">Bio</label>
-                  <textarea id="bio" class="w-full border border-gray-300 rounded-md px-3 py-2" rows="4" placeholder="Write a short introduction..."></textarea>
-                </div>
-              </div>
-
-              <div class="mt-5 flex gap-2">
-                <button id="saveBtn" class="btn btn-emerald"><i class="lucide-save"></i> Save Changes</button>
-                <button id="resetBtn" class="btn btn-soft"><i class="lucide-rotate-ccw"></i> Reset</button>
-              </div>
-            </div>
-
-            <!-- Avatar & Cover -->
-            <div class="card p-5 sm:p-6">
-              <h3 class="text-base sm:text-lg font-semibold mb-4">Profile Media</h3>
-              <div class="space-y-4">
-                <div class="p-4 border rounded-xl">
-                  <div class="text-sm mb-2 text-gray-700 font-medium">Profile Photo</div>
-                  <input id="avatarFile" type="file" accept="image/*" class="block w-full text-sm" />
-                  <button id="uploadAvatarBtn" class="btn btn-primary mt-3 w-full justify-center"><i class="lucide-upload"></i> Upload Avatar</button>
-                </div>
-                <div class="p-4 border rounded-xl">
-                  <div class="text-sm mb-2 text-gray-700 font-medium">Cover Photo (optional)</div>
-                  <input id="coverFile" type="file" accept="image/*" class="block w-full text-sm" />
-                  <button id="uploadCoverBtn" class="btn btn-soft mt-3 w-full justify-center"><i class="lucide-image-plus"></i> Upload Cover</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- VERIFY & PORTFOLIO -->
-          <div id="tab-verify" class="tab-body hidden">
-            <div class="grid lg:grid-cols-3 gap-6">
-              <!-- Verification -->
-              <div class="card p-5 sm:p-6">
-                <h3 class="text-base sm:text-lg font-semibold mb-4">Verification</h3>
-                <div class="space-y-3 text-sm">
-                  <div class="flex items-center justify-between">
-                    <span>Email</span>
-                    <span id="emailVerifyPill" class="badge badge-indigo">—</span>
-                  </div>
-                  <div class="flex items-center justify-between">
-                    <span>Identity (KYC)</span>
-                    <span id="kycVerifyPill" class="badge badge-amber">—</span>
-                  </div>
-                </div>
-
-                <div class="mt-5">
-                  <label class="text-sm text-gray-700">Upload KYC Document</label>
-                  <input id="kycFile" type="file" accept="image/*,.pdf" class="block w-full text-sm mt-1" />
-                  <button id="uploadKycBtn" class="btn btn-primary mt-3 w-full justify-center"><i class="lucide-id-card"></i> Upload KYC</button>
-                </div>
-              </div>
-
-              <!-- Portfolio Upload -->
-              <div class="card p-5 sm:p-6 lg:col-span-2">
-                <div class="flex items-center justify-between">
-                  <h3 class="text-base sm:text-lg font-semibold">Portfolio</h3>
-                  <span id="pfCount" class="text-xs text-gray-500">0 items</span>
-                </div>
-
-                <div class="mt-4 grid sm:grid-cols-2 gap-4">
-                  <div>
-                    <label class="text-sm text-gray-600">Title</label>
-                    <input id="pfTitle" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Project title">
-                  </div>
-                  <div>
-                    <label class="text-sm text-gray-600">URL (optional)</label>
-                    <input id="pfUrl" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="https://...">
-                  </div>
-                  <div class="sm:col-span-2">
-                    <label class="text-sm text-gray-600">Description</label>
-                    <textarea id="pfDesc" rows="3" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="What did you build?"></textarea>
-                  </div>
-                  <div class="sm:col-span-2">
-                    <label class="text-sm text-gray-600">Attachment (image/pdf/zip)</label>
-                    <input id="pfFile" type="file" accept="image/*,.pdf,.zip" class="block w-full text-sm" />
-                  </div>
-                </div>
-
-                <div class="mt-4 flex gap-2">
-                  <button id="addPortfolioBtn" class="btn btn-emerald"><i class="lucide-plus"></i> Add to Portfolio</button>
-                  <button id="reloadPortfolioBtn" class="btn btn-soft"><i class="lucide-rotate-cw"></i> Reload</button>
-                </div>
-
-                <!-- Portfolio list -->
-                <div id="portfolioList" class="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <!-- skeletons -->
-                  <div class="h-28 rounded-xl skeleton"></div>
-                  <div class="h-28 rounded-xl skeleton"></div>
-                  <div class="h-28 rounded-xl skeleton"></div>
-                </div>
-
-                <!-- Graceful note if endpoint missing -->
-                <div id="portfolioEmptyNote" class="hidden mt-4 text-sm text-gray-500">
-                  Portfolio endpoint not found. If your backend doesn’t expose <code>/api/portfolio/</code>, this section is hidden gracefully.
-                </div>
-              </div>
-            </div>
-          </div>
-
-        </div><!--/tab bodies-->
-      </div>
-    </section>
   </main>
 
-  <!-- FOOTER (required) -->
+  <!-- FOOTER (must include as you provided) -->
   <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20"> 
     <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
+      
+      <!-- Brand Section -->
       <div>
         <div class="flex items-center space-x-2 mb-3">
           <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
@@ -331,6 +295,8 @@
           <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-instagram"></i></a>
         </div>
       </div>
+
+      <!-- Platform Links -->
       <div>
         <h4 class="text-lg font-semibold mb-3 text-secondary">Platform</h4>
         <ul class="space-y-2 text-gray-600">
@@ -340,6 +306,8 @@
           <li><a href="#notifications" class="hover:text-primary">Notifications</a></li>
         </ul>
       </div>
+
+      <!-- Resources -->
       <div>
         <h4 class="text-lg font-semibold mb-3 text-secondary">Resources</h4>
         <ul class="space-y-2 text-gray-600">
@@ -349,6 +317,8 @@
           <li><a href="#verification" class="hover:text-primary">Profile Verification</a></li>
         </ul>
       </div>
+
+      <!-- About / Legal -->
       <div>
         <h4 class="text-lg font-semibold mb-3 text-secondary">About</h4>
         <ul class="space-y-2 text-gray-600">
@@ -358,7 +328,10 @@
           <li><a href="#privacy" class="hover:text-primary">Privacy Policy</a></li>
         </ul>
       </div>
+
     </div>
+
+    <!-- Bottom Section -->
     <div class="border-t border-gray-200 mt-10 pt-6 pb-8 text-center text-gray-500 text-sm">
       <p>&copy; 2025 <span class="font-semibold text-primary">JobsAlign</span>. All rights reserved.</p>
       <p class="mt-2 text-blue-500">
@@ -370,361 +343,311 @@
     </div>
   </footer>
 
-  <!-- JS -->
+  <!-- INLINE JS: FULL BACKEND INTEGRATION + SYNC -->
   <script>
-    /********************
-     * CONFIG & HELPERS *
-     ********************/
+    /**********************
+     * CONFIG + GUARDS
+     **********************/
     const API = "http://127.0.0.1:8000/api";
     const $ = (id)=>document.getElementById(id);
     const token = localStorage.getItem("access_token");
-    if(!token) window.location.href = "/login/";
+    if(!token){ window.location.href="/login/"; }
 
-    const money = (n)=> "$"+(parseFloat(n||0)).toFixed(2);
-    const compact = (n)=> (n>=1000 ? (n/1000).toFixed(1)+'k' : n);
+    const toast = (msg, type="success")=>{
+      const el=document.createElement("div");
+      el.className = "fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white " + (type==="success"?"bg-emerald-600":"bg-rose-600");
+      el.textContent = msg; document.body.appendChild(el);
+      setTimeout(()=>el.remove(), 2600);
+    };
 
-    function toast(msg, type="success"){
-      const t=document.createElement("div");
-      t.className="fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white "+(type==="success"?"bg-emerald-600":"bg-rose-600");
-      t.textContent=msg; document.body.appendChild(t);
-      setTimeout(()=>t.remove(),2800);
-    }
-
-    async function getJson(path, extra={}){
+    async function apiGet(path){
       try{
-        const r = await fetch(API+path, { headers:{ Authorization:"Bearer "+token, ...extra.headers }});
-        if(!r.ok) throw {status:r.status};
+        const r=await fetch(API+path,{headers:{Authorization:"Bearer "+token}});
+        if(!r.ok) throw new Error("GET "+path+" → "+r.status);
         return await r.json();
-      }catch(e){ return {__error:true, status:e.status||0}; }
+      }catch(err){ console.warn(err); return null; }
     }
-
-    async function postJson(path, body, isForm=false){
+    async function apiPatchForm(path, formData){
       try{
-        const opts = { method:"POST", headers:{ Authorization:"Bearer "+token }, body: isForm? body : JSON.stringify(body) };
-        if(!isForm) opts.headers["Content-Type"]="application/json";
-        const r = await fetch(API+path, opts);
-        if(!r.ok) throw {status:r.status};
+        const r=await fetch(API+path,{method:"PATCH",headers:{Authorization:"Bearer "+token}, body:formData});
+        if(!r.ok) throw new Error("PATCH "+path+" → "+r.status);
         return await r.json();
-      }catch(e){ return {__error:true, status:e.status||0}; }
+      }catch(err){ console.warn(err); return null; }
     }
-
-    async function putJson(path, body, isForm=false){
+    async function apiPatchJSON(path, obj){
       try{
-        const opts = { method:"PUT", headers:{ Authorization:"Bearer "+token }, body: isForm? body : JSON.stringify(body) };
-        if(!isForm) opts.headers["Content-Type"]="application/json";
-        const r = await fetch(API+path, opts);
-        if(!r.ok) throw {status:r.status};
+        const r=await fetch(API+path,{method:"PATCH",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token}, body:JSON.stringify(obj)});
+        if(!r.ok) throw new Error("PATCH "+path+" → "+r.status);
         return await r.json();
-      }catch(e){ return {__error:true, status:e.status||0}; }
+      }catch(err){ console.warn(err); return null; }
+    }
+    async function apiPostForm(path, formData){
+      try{
+        const r=await fetch(API+path,{method:"POST",headers:{Authorization:"Bearer "+token}, body:formData});
+        if(!r.ok) throw new Error("POST "+path+" → "+r.status);
+        return await r.json();
+      }catch(err){ console.warn(err); return null; }
+    }
+    async function apiPostJSON(path, obj){
+      try{
+        const r=await fetch(API+path,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+token}, body:JSON.stringify(obj)});
+        if(!r.ok) throw new Error("POST "+path+" → "+r.status);
+        return await r.json();
+      }catch(err){ console.warn(err); return null; }
     }
 
-    /********************
-     * TABS
-     ********************/
-    (function tabs(){
-      const btns = document.querySelectorAll(".tab-btn");
-      const bodies = {
-        overview: $("tab-overview"),
-        edit: $("tab-edit"),
-        verify: $("tab-verify"),
-      };
-      btns.forEach(b=>{
-        b.addEventListener("click", ()=>{
-          btns.forEach(x=>x.classList.remove("bg-indigo-50","text-indigo-700"));
-          b.classList.add("bg-indigo-50","text-indigo-700");
-          const tab = b.getAttribute("data-tab");
-          Object.keys(bodies).forEach(k=>{
-            if(k===tab) bodies[k].classList.remove("hidden");
-            else bodies[k].classList.add("hidden");
-          });
-          window.scrollTo({top:0, behavior:"smooth"});
-        });
-      });
-    })();
+    const setText=(id,val)=>{ const el=$(id); if(el) el.textContent = val; };
 
-    /********************
-     * PROFILE LOAD & UI
-     ********************/
-    let profileCache = null;
-    let miniChart=null;
+    /**********************
+     * PROFILE LOAD/RENDER
+     **********************/
+    let PROFILE = null;
+    let PORTFOLIO_ITEMS = []; // local UI list (saved back into `portfolio` text or keep one-by-one)
 
-    async function fetchProfile(){
-      // Primary: /accounts/me/ (তোমার আগের 404 অনুযায়ী fallback রাখা হয়েছে)
-      let me = await getJson("/accounts/me/");
-      if(me.__error) me = await getJson("/accounts/profile/");
-      if(me.__error) { toast("Failed to load profile", "error"); return null; }
-      return me;
+    function renderBadges(user){
+      // Level
+      setText("levelBadge", "Level "+(user.level || "—"));
+      // Email verified (assume user.is_verified or user.email_verified)
+      const emailOk = !!(user.is_verified || user.email_verified);
+      const ev = $("emailVerified");
+      ev.className = "chip "+(emailOk?"chip-green":"chip-amber");
+      ev.textContent = emailOk ? "Verified" : "Not Verified";
+
+      // KYC
+      const kycOk = !!(user.is_identity_verified);
+      const kv = $("kycVerified");
+      kv.className = "chip "+(kycOk?"chip-green":"chip-amber");
+      kv.textContent = kycOk ? "Verified" : "Pending";
+
+      // Plan (if available)
+      const plan = user.plan_name || user.subscription_plan || "Free";
+      setText("planBadge", "Plan "+plan);
+      setText("planSmall", "Plan "+plan);
+
+      // Verification badge main
+      const vb = $("verifyBadge");
+      vb.className = "chip "+(emailOk && kycOk ? "chip-green":"chip-amber");
+      vb.textContent = (emailOk && kycOk) ? "Fully Verified" : (emailOk ? "Email Verified" : "Not Verified");
     }
 
-    function renderBadges(me){
-      $("freelancerLevel").textContent = me.level ? `Level ${me.level}` : "Level —";
-      const verified = (me.is_verified===true || me.email_verified===true);
-      $("verificationBadge").textContent = verified ? "✅ Email Verified" : "⏳ Email Not Verified";
-      $("subscriptionPlan").textContent = me.plan_name || me.subscription_plan || "Free Plan";
-    }
-
-    function renderBasics(me){
-      const name = me.full_name || me.first_name || me.username || "Freelancer";
-      $("freelancerName").textContent = name;
-      $("freelancerBio").textContent = me.bio || "No bio added yet.";
-      if(me.avatar_url || me.profile_photo) $("avatarImg").src = me.avatar_url || me.profile_photo;
-
-      const skills = Array.isArray(me.skills) ? me.skills : (typeof me.skills==="string" ? me.skills.split(",").map(s=>s.trim()).filter(Boolean) : []);
-      const wrap = $("skillBadges"); wrap.innerHTML="";
-      skills.slice(0,12).forEach(s=>{
-        const el = document.createElement("span");
-        el.className = "badge badge-cyan";
-        el.textContent = s;
-        wrap.appendChild(el);
-      });
-
-      $("ovFullName").textContent = name;
-      $("ovEmail").textContent = me.email || "—";
-      $("ovLocation").textContent = me.location || "—";
-      $("ovRate").textContent = me.hourly_rate ? "$"+me.hourly_rate : "—";
-      $("ovBio").textContent = me.bio || "—";
-
-      $("fullName").value = me.full_name || me.first_name || me.username || "";
-      $("email").value = me.email || "";
-      $("location").value = me.location || "";
-      $("hourlyRate").value = me.hourly_rate || "";
-      $("bio").value = me.bio || "";
-      $("skills").value = skills.join(", ");
-
-      profileCache = me;
-      localStorage.setItem("profile_cache", JSON.stringify({name, level: me.level, avatar: me.avatar_url || me.profile_photo, skills}));
-    }
-
-    function drawMiniChart(labels=[], data=[]){
-      const ctx = $("miniEarnChart");
-      if(miniChart) miniChart.destroy();
-      const L = labels.length ? labels : ["Jan","Feb","Mar","Apr","May","Jun"];
-      const D = data.length ? data : [0,0,0,0,0,0];
-      miniChart = new Chart(ctx,{
-        type:"bar",
-        data:{ labels:L, datasets:[{ label:"Earnings ($)", data:D, backgroundColor:["#4f46e5","#10b981","#f59e0b","#06b6d4","#ef4444","#7c3aed"], borderRadius:8 }]},
-        options:{ plugins:{legend:{display:false}}, responsive:true, maintainAspectRatio:true, scales:{ y:{ beginAtZero:true, ticks:{ callback:(v)=>'$'+v }} } }
+    function renderSkills(skills){
+      const box = $("skillsBadges");
+      box.innerHTML = "";
+      (skills||[]).slice(0,14).forEach(s=>{
+        const span=document.createElement("span");
+        span.className = "chip";
+        span.innerHTML = `<i class="lucide-badge-check text-indigo-700"></i> ${s}`;
+        box.appendChild(span);
       });
     }
 
-    async function loadRatings(){
-      const r = await getJson("/reviews/freelancer/");
-      if(!r.__error){
-        const avg = typeof r.rating_avg === "number" ? r.rating_avg.toFixed(1) : (r.avg || r.average || "—");
-        $("ratingScore").textContent = avg || "—";
-        $("projectsCount").textContent = compact(r.projects_completed || r.total_reviews || r.count || 0);
-        $("totalEarnings").textContent = r.total_earnings ? money(r.total_earnings) : (profileCache?.total_earnings ? money(profileCache.total_earnings) : "—");
-        drawMiniChart(r.labels || [], r.earnings || []);
-      }else{
-        $("ratingScore").textContent = profileCache?.rating || "—";
-        $("projectsCount").textContent = compact(profileCache?.projects || 0);
-        $("totalEarnings").textContent = profileCache?.total_earnings ? money(profileCache.total_earnings) : "—";
-        drawMiniChart([], []);
-      }
-    }
-
-    async function loadVerification(){
-      const v = await getJson("/verification/status/");
-      if(!v.__error){
-        $("verificationBadge").textContent = v.verified ? "✅ Email Verified" : "⏳ Email Not Verified";
-        $("emailVerifyPill").textContent = v.verified ? "Verified" : "Pending";
-        $("emailVerifyPill").className = "badge "+(v.verified? "badge-emerald":"badge-amber");
-        $("kycVerifyPill").textContent = v.kyc_verified ? "KYC Verified" : "KYC Pending";
-        $("kycVerifyPill").className = "badge "+(v.kyc_verified? "badge-emerald":"badge-amber");
-      }else{
-        const me = profileCache || {};
-        const emailOK = (me.is_verified===true || me.email_verified===true);
-        const kycOK = (me.is_identity_verified===true || me.kyc_verified===true);
-        $("verificationBadge").textContent = emailOK ? "✅ Email Verified" : "⏳ Email Not Verified";
-        $("emailVerifyPill").textContent = emailOK ? "Verified" : "Pending";
-        $("emailVerifyPill").className = "badge "+(emailOK? "badge-emerald":"badge-amber");
-        $("kycVerifyPill").textContent = kycOK ? "KYC Verified" : "KYC Pending";
-        $("kycVerifyPill").className = "badge "+(kycOK? "badge-emerald":"badge-amber");
-      }
-    }
-
-    /********************
-     * SAVE & UPLOAD
-     ********************/
-    async function saveProfile(){
-      const payload = {
-        full_name: $("fullName").value.trim(),
-        bio: $("bio").value.trim(),
-        location: $("location").value.trim(),
-        hourly_rate: $("hourlyRate").value ? parseFloat($("hourlyRate").value) : null,
-        skills: $("skills").value.split(",").map(s=>s.trim()).filter(Boolean)
-      };
-      let res = await putJson("/accounts/me/", payload);
-      if(res.__error) res = await putJson("/accounts/profile/", payload);
-      if(res.__error){
-        toast("Failed to save profile", "error");
-      }else{
-        toast("Profile updated");
-        localStorage.setItem("profile_updated","1");
-        await init();
-      }
-    }
-
-    async function uploadAvatar(file){
-      if(!file){ toast("Select an image first","error"); return; }
-      const form = new FormData();
-      form.append("avatar", file);
-      let r = await postJson("/accounts/upload-avatar/", form, true);
-      if(r.__error){
-        const form2 = new FormData();
-        form2.append("profile_photo", file); // fallback field name
-        r = await putJson("/accounts/profile/", form2, true);
-      }
-      if(r.__error){
-        toast("Avatar upload failed","error");
-      }else{
-        toast("Avatar updated");
-        localStorage.setItem("profile_updated","1");
-        if(r.avatar_url || r.profile_photo) $("avatarImg").src = r.avatar_url || r.profile_photo;
-        else {$("avatarImg").src = $("avatarImg").src + "?v="+Date.now();}
-      }
-    }
-
-    async function uploadCover(file){
-      if(!file){ toast("Select a cover image first","error"); return; }
-      const form = new FormData();
-      form.append("cover_photo", file);
-      let r = await putJson("/accounts/me/", form, true);
-      if(r.__error) r = await putJson("/accounts/profile/", form, true);
-      if(r.__error) toast("Cover upload failed","error");
-      else { toast("Cover updated"); localStorage.setItem("profile_updated","1"); }
-    }
-
-    async function uploadKyc(file){
-      if(!file){ toast("Select a document first","error"); return; }
-      const form = new FormData();
-      form.append("identity_document", file);
-      const r = await postJson("/accounts/kyc/upload/", form, true);
-      if(r.__error) toast("KYC upload failed","error");
-      else { toast("KYC uploaded (pending verification)"); await loadVerification(); }
-    }
-
-    /********************
-     * PORTFOLIO
-     ********************/
-    let portfolioEnabled = true;
-
-    async function loadPortfolio(){
-      const listWrap = $("portfolioList");
-      const note = $("portfolioEmptyNote");
-      const counter = $("pfCount");
-
-      const r = await getJson("/portfolio/");
-      if(r.__error){
-        portfolioEnabled = false;
-        listWrap.innerHTML = "";
-        note.classList.remove("hidden");
-        counter.textContent = "0 items";
+    function renderPortfolio(list){
+      const wrap = $("portfolioList");
+      wrap.innerHTML = "";
+      if(!list || list.length===0){
+        wrap.innerHTML = `<div class="text-sm text-gray-500">No portfolio items added yet.</div>`;
         return;
       }
-
-      note.classList.add("hidden");
-      const items = Array.isArray(r) ? r : (r.results || []);
-      counter.textContent = (items.length||0)+" items";
-
-      if(!items.length){
-        listWrap.innerHTML = `<div class="col-span-full p-6 text-sm text-gray-500 border rounded-xl bg-white">No portfolio items yet.</div>`;
-        return;
-      }
-
-      listWrap.innerHTML = items.map(it=>{
-        const title = it.title || it.name || "Untitled";
-        const desc = it.description || "";
-        const url  = it.url || it.link || it.file_url || "";
-        const img  = it.image || it.thumbnail || "";
-        return `
-          <article class="p-4 border rounded-xl bg-white hover-rise">
-            <div class="flex items-start gap-3">
-              <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center overflow-hidden shrink-0">
-                ${img ? `<img src="${img}" class="w-full h-full object-cover">` : `<i class="lucide-image text-gray-400"></i>`}
-              </div>
-              <div class="min-w-0">
-                <h4 class="font-semibold text-ellipsis">${title}</h4>
-                <p class="text-xs text-gray-600 mt-1 break-words">${desc}</p>
-                ${url ? `<a href="${url}" target="_blank" class="text-xs text-indigo-600 mt-2 inline-flex items-center gap-1">Open <i class="lucide-external-link"></i></a>`:""}
-              </div>
-            </div>
-          </article>
+      list.forEach((it,idx)=>{
+        const url = it.url || it;
+        const note = it.note || "";
+        const row = document.createElement("div");
+        row.className = "flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 p-3 border border-gray-200 rounded-lg";
+        row.innerHTML = `
+          <a href="${url}" target="_blank" class="text-indigo-600 break-all hover:underline flex-1">${url}</a>
+          ${note ? `<div class="text-xs text-gray-500 flex-1">${note}</div>`:""}
+          <div class="flex items-center gap-2">
+            <button class="px-3 py-1.5 rounded-md border text-sm hover:bg-gray-50" data-action="edit" data-index="${idx}"><i class="lucide-pencil"></i></button>
+            <button class="px-3 py-1.5 rounded-md border text-sm hover:bg-gray-50 text-rose-600" data-action="remove" data-index="${idx}"><i class="lucide-trash-2"></i></button>
+          </div>
         `;
-      }).join("");
+        wrap.appendChild(row);
+      });
     }
 
-    async function addPortfolio(){
-      if(!portfolioEnabled){ toast("Portfolio endpoint not found","error"); return; }
-      const title = $("pfTitle").value.trim();
-      const desc  = $("pfDesc").value.trim();
-      const link  = $("pfUrl").value.trim();
-      const file  = $("pfFile").files[0] || null;
-
-      if(!title && !file){ toast("Add title or attach a file","error"); return; }
-
-      const form = new FormData();
-      if(title) form.append("title", title);
-      if(desc)  form.append("description", desc);
-      if(link)  form.append("url", link);
-      if(file)  form.append("file", file);
-
-      const r = await postJson("/portfolio/", form, true);
-      if(r.__error){ toast("Failed to add portfolio","error"); }
-      else{
-        toast("Portfolio item added");
-        $("pfTitle").value = ""; $("pfDesc").value = ""; $("pfUrl").value = ""; $("pfFile").value = "";
-        loadPortfolio();
+    function collectPortfolioFromProfile(user){
+      // Support both: array or single string
+      // If `user.portfolio_links` exists -> use it; else if `user.portfolio` URL present -> seed single
+      if(Array.isArray(user.portfolio_links)){
+        PORTFOLIO_ITEMS = user.portfolio_links.map(u => (typeof u==="string") ? {url:u} : u);
+      }else if(user.portfolio){
+        PORTFOLIO_ITEMS = [{url:user.portfolio}];
+      }else{
+        PORTFOLIO_ITEMS = [];
       }
+      renderPortfolio(PORTFOLIO_ITEMS);
     }
 
-    /********************
-     * EVENT BINDINGS
-     ********************/
-    $("saveProfileBtn").addEventListener("click", saveProfile);
-    $("saveBtn").addEventListener("click", saveProfile);
-    $("resetBtn").addEventListener("click", async()=> init());
+    async function loadProfile(){
+      const u = await apiGet("/accounts/profile/");
+      if(!u) return;
 
-    $("avatarUpload").addEventListener("change", (e)=> uploadAvatar(e.target.files[0]));
-    $("uploadAvatarBtn").addEventListener("click", ()=> {
-      const f = $("avatarFile").files[0]; uploadAvatar(f);
-    });
+      PROFILE = u;
 
-    $("uploadCoverBtn").addEventListener("click", ()=> {
-      const f = $("coverFile").files[0]; uploadCover(f);
-    });
+      // Header + top badges
+      $("avatarPreview").src = u.avatar_url || "{% static 'images/avatar.png' %}";
+      setText("profileName", u.full_name || u.username || "Freelancer");
+      setText("profileEmail", u.email || "—");
+      renderBadges(u);
 
-    $("uploadKycBtn").addEventListener("click", ()=> {
-      const f = $("kycFile").files[0]; uploadKyc(f);
-    });
+      // Form values
+      $("nameInput").value     = u.full_name || u.username || "";
+      $("emailInput").value    = u.email || "";
+      $("locationInput").value = u.location || "";
+      $("rateInput").value     = u.hourly_rate || "";
+      $("bioInput").value      = u.bio || "";
+      $("skillsInput").value   = (u.skills || []).join(", ");
+      $("portfolioInput").value = u.portfolio || "";
+      $("linkedinInput").value  = u.linkedin || "";
 
-    $("addPortfolioBtn").addEventListener("click", addPortfolio);
-    $("reloadPortfolioBtn").addEventListener("click", loadPortfolio);
-
-    /********************
-     * INIT
-     ********************/
-    async function init(){
-      const me = await fetchProfile();
-      if(!me) return;
-      renderBasics(me);
-      renderBadges(me);
-      await Promise.all([
-        loadRatings(),
-        loadVerification(),
-        loadPortfolio()
-      ]);
+      renderSkills(u.skills || []);
+      collectPortfolioFromProfile(u);
     }
 
-    // cross-tab sync
+    /**********************
+     * AVATAR UPLOAD
+     **********************/
+    $("avatarInput").addEventListener("change", async (e)=>{
+      const file = e.target.files?.[0];
+      if(!file) return;
+
+      const fd = new FormData();
+      fd.append("avatar", file); // Serializer/ImageField name: avatar
+
+      const res = await apiPatchForm("/accounts/profile/", fd);
+      if(res){
+        $("avatarPreview").src = res.avatar_url || $("avatarPreview").src;
+        localStorage.setItem("profile_updated","1");
+        toast("Profile picture updated!");
+      }else{
+        toast("Avatar upload failed!", "error");
+      }
+    });
+
+    /**********************
+     * PROFILE UPDATE (JSON)
+     **********************/
+    $("profileForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const payload = {
+        full_name: $("nameInput").value,
+        location: $("locationInput").value,
+        hourly_rate: $("rateInput").value ? parseFloat($("rateInput").value) : null,
+        bio: $("bioInput").value,
+        skills: $("skillsInput").value.split(",").map(s=>s.trim()).filter(Boolean),
+        portfolio: $("portfolioInput").value,  // primary portfolio URL
+        linkedin: $("linkedinInput").value,
+        // optionally save array also if backend supports:
+        portfolio_links: PORTFOLIO_ITEMS
+      };
+
+      const res = await apiPatchJSON("/accounts/profile/", payload);
+      if(res){
+        PROFILE = res;
+        renderSkills(res.skills || []);
+        localStorage.setItem("profile_updated","1"); // dashboard listens
+        toast("Profile saved!");
+      }else{
+        toast("Save failed!", "error");
+      }
+    });
+
+    // Sync to dashboard manually (also happens on save/upload)
+    $("syncDashBtn").addEventListener("click", ()=>{
+      localStorage.setItem("profile_updated","1");
+      toast("Synced. Open dashboard to see updates.");
+    });
+
+    /**********************
+     * KYC UPLOAD
+     **********************/
+    $("kycForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const file = $("kycFile").files?.[0];
+      if(!file) return toast("Please select a file.", "error");
+
+      const fd = new FormData();
+      fd.append("identity_document", file);
+
+      const res = await apiPostForm("/accounts/kyc/upload/", fd);
+      if(res){
+        $("kycMsg").textContent = (res.message || "KYC uploaded. Pending verification.");
+        localStorage.setItem("profile_updated", "1");
+        loadProfile();
+        toast("KYC document submitted!");
+      }else{
+        toast("KYC upload failed!", "error");
+      }
+    });
+
+    /**********************
+     * PASSWORD CHANGE
+     **********************/
+    $("changePassBtn").addEventListener("click", async ()=>{
+      const oldP = $("oldPass").value.trim();
+      const newP = $("newPass").value.trim();
+      if(!oldP || !newP) return toast("Fill old & new passwords.", "error");
+      const res = await apiPostJSON("/accounts/password/change/", {old_password:oldP, new_password:newP});
+      if(res && (res.detail || res.success)){
+        $("oldPass").value = ""; $("newPass").value = "";
+        toast("Password changed!");
+      }else{
+        toast("Password change failed!", "error");
+      }
+    });
+
+    /**********************
+     * PORTFOLIO LIST (Local UI → save with main form)
+     **********************/
+    $("addPortfolioBtn").addEventListener("click", ()=>{
+      $("portfolioNewUrl").focus();
+      window.scrollTo({top: document.body.scrollHeight, behavior:"smooth"});
+    });
+
+    $("portfolioForm").addEventListener("submit",(e)=>{
+      e.preventDefault();
+      const url = $("portfolioNewUrl").value.trim();
+      const note = $("portfolioNewNote").value.trim();
+      if(!url) return toast("Enter a valid URL.","error");
+      PORTFOLIO_ITEMS.push({url, note});
+      $("portfolioNewUrl").value = ""; $("portfolioNewNote").value="";
+      renderPortfolio(PORTFOLIO_ITEMS);
+      toast("Portfolio item added. Click 'Save Changes' to persist.");
+    });
+
+    $("portfolioList").addEventListener("click",(e)=>{
+      const btn = e.target.closest("button");
+      if(!btn) return;
+      const idx = parseInt(btn.dataset.index,10);
+      const action = btn.dataset.action;
+      if(Number.isNaN(idx)) return;
+
+      if(action==="remove"){
+        PORTFOLIO_ITEMS.splice(idx,1);
+        renderPortfolio(PORTFOLIO_ITEMS);
+      }else if(action==="edit"){
+        const it = PORTFOLIO_ITEMS[idx];
+        const newUrl = prompt("Edit URL:", it.url);
+        if(!newUrl) return;
+        const newNote = prompt("Edit note (optional):", it.note || "");
+        PORTFOLIO_ITEMS[idx] = {url:newUrl, note:newNote};
+        renderPortfolio(PORTFOLIO_ITEMS);
+      }
+    });
+
+    /**********************
+     * DASHBOARD CROSS-TAB SYNC
+     **********************/
     window.addEventListener("storage",(ev)=>{
       if(ev.key==="profile_updated" && ev.newValue==="1"){
-        init();
-        setTimeout(()=>localStorage.removeItem("profile_updated"),200);
+        // If dashboard updated something (rare), reflect here too
+        loadProfile();
+        setTimeout(()=>localStorage.removeItem("profile_updated"), 300);
       }
     });
 
-    init();
+    // Initial load
+    loadProfile();
   </script>
 </body>
 </html>

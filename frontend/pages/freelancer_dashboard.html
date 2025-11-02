@@ -3,76 +3,125 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Freelancer Dashboard • JobsAlign (Pro+)</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Freelancer Dashboard • JobsAlign (Ultra)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Tailwind (CDN) -->
   <script src="https://cdn.tailwindcss.com"></script>
+
   <!-- Chart.js -->
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <!-- Lucide Icons -->
-  <link href="https://unpkg.com/lucide-static@latest/font/lucide.css" rel="stylesheet">
+
+  <!-- Lucide (SVG icons runtime: ensures icons always render) -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <!-- Font Awesome (extra icons for variety) -->
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" rel="stylesheet">
 
   <style>
     :root{
-      --ink:#0F172A; --muted:#64748B; --brand:#4F46E5; --accent:#22C55E; --warn:#F59E0B; --rose:#EF4444;
+      --ink:#0F172A; --muted:#64748B;
+      --indigo:#4F46E5; --emerald:#10B981; --amber:#F59E0B; --cyan:#06B6D4; --rose:#EF4444;
       --bg:#F8FAFC; --card:#FFFFFF; --line:#E5E7EB;
+      --grad1: radial-gradient(900px 500px at 10% -10%, rgba(79,70,229,.08), transparent 60%);
+      --grad2: radial-gradient(800px 400px at 95% 0%, rgba(16,185,129,.08), transparent 60%);
     }
+    html,body{height:100%}
     body{
-      background:
-        radial-gradient(900px 500px at 10% -10%, rgba(79,70,229,.10), transparent 60%),
-        radial-gradient(800px 400px at 90% 0%, rgba(34,197,94,.10), transparent 60%),
-        var(--bg);
+      overflow-x:hidden; /* ✅ kill horizontal scroll globally */
+      background: var(--grad1), var(--grad2), var(--bg);
       color:var(--ink);
-      font-family: ui-sans-serif, system-ui, Inter, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-      overflow-x:hidden; /* ✅ no horizontal scroll */
+      font-family: ui-sans-serif,system-ui,Inter,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;
     }
+    /* Cards */
     .card{background:var(--card); border:1px solid var(--line); border-radius:1rem; box-shadow:0 10px 30px rgba(2,6,23,.06)}
     .hover-rise{transition:transform .25s ease, box-shadow .25s ease}
     .hover-rise:hover{transform:translateY(-4px); box-shadow:0 16px 40px rgba(2,6,23,.10)}
+    /* Chips & Badges */
     .chip{font-size:.75rem; padding:.25rem .55rem; border-radius:.5rem; white-space:nowrap}
     .chip-green{background:#DCFCE7; color:#166534}
     .chip-amber{background:#FEF3C7; color:#92400E}
     .chip-blue{background:#DBEAFE; color:#1E40AF}
     .chip-gray{background:#F1F5F9; color:#0F172A}
+    .badge{border:1px dashed #CBD5E1; padding:.25rem .5rem; border-radius:.5rem; font-size:.72rem}
+
+    /* Skeletons */
     .skeleton{background:linear-gradient(90deg,#f3f4f6 25%,#e5e7eb 37%,#f3f4f6 63%);background-size:400% 100%;animation:shimmer 1.4s ease infinite}
     @keyframes shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}
+
+    /* Buttons */
     .btn{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem .9rem;border-radius:.7rem;font-weight:600}
-    .btn-primary{background:var(--brand);color:#fff}
+    .btn-primary{background:var(--indigo);color:#fff}
     .btn-primary:hover{background:#4338CA}
     .btn-soft{background:#EEF2FF;color:#3730A3}
     .btn-soft:hover{background:#E0E7FF}
+    .btn-ghost{background:transparent;color:#334155}
+    .btn-ghost:hover{background:#F1F5F9}
+
+    /* Dots */
     .dot{width:.5rem;height:.5rem;border-radius:9999px;display:inline-block}
-    .chart-wrap{width:100%}
-    .chart-wrap canvas{width:100% !important; max-height:260px}
-    @media (max-width:480px){
-      .chart-wrap canvas{max-height:220px}
+
+    /* Utilities */
+    .no-scrollbar::-webkit-scrollbar{display:none} .no-scrollbar{scrollbar-width:none}
+    .grid-safe{min-width:0} /* prevents overflow with long text */
+    .chart-wrap{position:relative; width:100%;}
+    .kpi-1{background:linear-gradient(135deg,#EEF2FF 0%,#FFFFFF 100%)}
+    .kpi-2{background:linear-gradient(135deg,#ECFDF5 0%,#FFFFFF 100%)}
+    .kpi-3{background:linear-gradient(135deg,#FFFBEB 0%,#FFFFFF 100%)}
+    .kpi-4{background:linear-gradient(135deg,#E0F2FE 0%,#FFFFFF 100%)}
+
+    /* Mobile nav drawer */
+    .drawer{position:fixed; inset:0; display:none}
+    .drawer.open{display:block}
+    .drawer-panel{
+      position:absolute; inset-y:0; left:0; width:280px; max-width:85vw;
+      background:#fff; border-right:1px solid #e5e7eb; padding:1rem; overflow:auto;
+      transform:translateX(-105%); transition:transform .28s ease;
     }
+    .drawer.open .drawer-panel{ transform:translateX(0%) }
+    .drawer-backdrop{ position:absolute; inset:0; background:rgba(0,0,0,.2); backdrop-filter: blur(2px) }
+
+    /* Upload drag area */
+    .dropzone{border:2px dashed #94A3B8; border-radius:1rem; padding:1.25rem; transition:border-color .2s ease}
+    .dropzone.drag{border-color:#4F46E5; background: #F8FAFF}
+
+    /* Prevent charts from forcing horizontal scroll */
+    canvas{max-width:100% !important}
+
+    /* Footer: full-width look */
+    footer{width:100%}
   </style>
 </head>
 
 <body class="min-h-screen flex flex-col">
-  <!-- NAV -->
+  <!-- NAVBAR -->
   <nav class="bg-white/80 backdrop-blur sticky top-0 border-b border-gray-200 z-50">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
-      <a href="/" class="flex items-center gap-3 min-w-0">
-        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-28 sm:w-32 h-auto object-contain">
-        <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Freelancer</span>
-      </a>
+      <div class="flex items-center gap-3 min-w-0">
+        <button id="mobileMenuBtn" class="lg:hidden w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50" aria-label="Open Menu">
+          <i class="fa-solid fa-bars"></i>
+        </button>
+        <a href="/" class="flex items-center gap-3 min-w-0">
+          <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-28 sm:w-32 h-auto object-contain">
+          <span class="hidden sm:inline-block px-2 py-0.5 rounded bg-indigo-50 text-indigo-700 text-xs font-semibold">Freelancer</span>
+        </a>
+      </div>
+
       <div class="flex items-center gap-2 sm:gap-3">
+        <!-- refresh -->
         <button id="refreshBtn" class="w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50" title="Refresh">
-          <i class="lucide-rotate-cw"></i>
+          <i class="fa-solid fa-rotate-right"></i>
         </button>
 
         <!-- Notifications -->
         <div class="relative">
-          <button id="notifBtn" class="w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50 transition">
-            <i class="lucide-bell"></i>
-            <span id="notifCount" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] px-1.5 py-[1px] rounded-full">0</span>
+          <button id="notifBtn" class="w-10 h-10 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50 transition" aria-haspopup="true" aria-expanded="false">
+            <i class="fa-regular fa-bell"></i>
+            <span id="notifCount" class="hidden absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] px-1.5 py-[1px] rounded-full">0</span>
           </button>
-          <div id="notifDrop" class="hidden absolute right-0 mt-2 w-[28rem] max-w-[92vw] card p-0 overflow-hidden">
+          <div id="notifDrop" class="hidden absolute right-0 mt-2 w-[calc(100vw-2rem)] sm:w-[28rem] card p-0 overflow-hidden">
             <div class="px-4 py-3 border-b text-sm font-semibold">Notifications</div>
-            <ul id="notifList" class="max-h-96 overflow-auto divide-y"></ul>
+            <ul id="notifList" class="max-h-96 overflow-auto divide-y no-scrollbar"></ul>
             <div class="px-4 py-2 flex gap-2">
               <button id="markAllReadBtn" class="text-sm text-indigo-600 hover:underline">Mark all as read</button>
               <a href="/freelancer/support/" class="text-sm text-gray-500 hover:text-gray-700 ml-auto">Need help?</a>
@@ -81,154 +130,201 @@
         </div>
 
         <!-- Wallet -->
-        <button class="btn btn-soft" id="walletBtn">
-          <i class="lucide-wallet"></i>
+        <button class="btn btn-soft">
+          <i class="fa-regular fa-wallet"></i>
           <span id="walletBalance">$0.00</span>
         </button>
 
         <!-- Profile -->
         <div class="relative">
-          <button id="profileBtn" class="flex items-center gap-3">
-            <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-10 h-10 rounded-lg border border-gray-200 object-cover" alt="avatar">
-            <div class="hidden sm:block text-left leading-5">
-              <div id="userName" class="text-sm font-semibold">Freelancer</div>
-              <div id="userLevelSmall" class="text-[11px] text-gray-500">Level —</div>
+          <button id="profileBtn" class="flex items-center gap-2 sm:gap-3 min-w-0" aria-haspopup="true" aria-expanded="false">
+            <img id="avatarImg" src="{% static 'images/avatar.png' %}" class="w-9 h-9 sm:w-10 sm:h-10 rounded-lg border border-gray-200 object-cover" alt="avatar">
+            <div class="hidden sm:block text-left leading-5 min-w-0">
+              <div id="userName" class="text-sm font-semibold truncate">Freelancer</div>
+              <div id="userLevelSmall" class="text-[11px] text-gray-500 truncate">Level —</div>
             </div>
-            <i class="lucide-chevron-down text-gray-400"></i>
+            <i class="fa-solid fa-chevron-down text-gray-400"></i>
           </button>
-          <div id="profileDrop" class="hidden absolute right-0 mt-2 w-56 card p-2">
-            <a href="/freelancer/profile/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-user mr-2"></i>Profile</a>
-            <a href="/freelancer/verification/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-badge-check mr-2"></i>Verification</a>
-            <a href="/freelancer/payments/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-credit-card mr-2"></i>Payments</a>
-            <a href="/freelancer/analytics/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="lucide-bar-chart-2 mr-2"></i>Analytics</a>
+          <div id="profileDrop" class="hidden absolute right-0 mt-2 w-60 card p-2">
+            <div class="px-3 py-2 text-xs text-gray-600" id="profileEmail">—</div>
+            <hr class="my-2">
+            <a href="/freelancer/profile/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="fa-regular fa-user mr-2"></i>Profile</a>
+            <a href="/freelancer/verification/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="fa-regular fa-shield-check mr-2"></i>Verification</a>
+            <a href="/freelancer/payments/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="fa-regular fa-credit-card mr-2"></i>Payments</a>
+            <a href="/freelancer/analytics/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm"><i class="fa-solid fa-chart-line mr-2"></i>Analytics</a>
             <hr class="my-1">
-            <a href="/login/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm text-red-600"><i class="lucide-log-out mr-2"></i>Logout</a>
+            <a href="/login/" class="block px-3 py-2 rounded hover:bg-gray-50 text-sm text-red-600"><i class="fa-solid fa-right-from-bria mr-2"></i>Logout</a>
           </div>
         </div>
       </div>
     </div>
   </nav>
 
+  <!-- MOBILE DRAWER (Sidebar for small screens) -->
+  <div id="drawer" class="drawer" aria-hidden="true">
+    <div class="drawer-backdrop" id="drawerBackdrop"></div>
+    <div class="drawer-panel">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2">
+          <img src="{% static 'images/logo.jpeg' %}" class="w-28 h-auto object-contain">
+        </div>
+        <button id="drawerClose" class="w-9 h-9 grid place-items-center rounded-lg border border-gray-200 hover:bg-gray-50">
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+      <nav class="space-y-1 text-sm">
+        <a href="/freelancer/dashboard/" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-semibold"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+        <a href="/freelancer/jobs/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-solid fa-briefcase"></i> My Jobs</a>
+        <a href="/freelancer/chat/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-regular fa-message"></i> Messages</a>
+        <a href="/freelancer/reviews/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-regular fa-star"></i> Reviews</a>
+        <a href="/freelancer/analytics/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+        <a href="/freelancer/verification/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-solid fa-shield-check"></i> Verification</a>
+        <a href="/freelancer/support/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-regular fa-life-ring"></i> Support</a>
+      </nav>
+
+      <div class="mt-6">
+        <div class="text-xs text-gray-500 mb-2">Quick Actions</div>
+        <div class="grid gap-2">
+          <a href="/freelancer/jobs/" class="btn btn-primary justify-center"><i class="fa-solid fa-magnifying-glass"></i> Browse Jobs</a>
+          <a href="/freelancer/profile/" class="btn btn-soft justify-center"><i class="fa-regular fa-pen-to-square"></i> Edit Profile</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- LAYOUT -->
-  <div class="max-w-7xl mx-auto px-4 sm:px-6 py-8 grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-8 w-full">
-    <!-- SIDEBAR -->
-    <aside class="hidden lg:block">
+  <div class="max-w-7xl mx-auto w-full px-4 sm:px-6 py-6 sm:py-8 grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-6 sm:gap-8">
+    <!-- SIDEBAR (desktop) -->
+    <aside class="hidden lg:block grid-safe">
       <div class="card p-4">
         <nav class="space-y-1 text-sm">
-          <a href="/freelancer/dashboard/" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-semibold"><i class="lucide-layout-dashboard"></i> Dashboard</a>
-          <a href="/freelancer/jobs/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-briefcase"></i> My Jobs</a>
-          <a href="/freelancer/chat/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-message-square"></i> Messages</a>
-          <a href="/freelancer/reviews/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-star"></i> Reviews</a>
-          <a href="/freelancer/analytics/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-bar-chart-2"></i> Analytics</a>
-          <a href="/freelancer/verification/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-shield-check"></i> Verification</a>
-          <a href="/freelancer/support/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="lucide-life-buoy"></i> Support</a>
+          <a href="/freelancer/dashboard/" class="flex items-center gap-3 px-3 py-2 rounded-lg bg-indigo-50 text-indigo-700 font-semibold"><i class="fa-solid fa-grid-2"></i> Dashboard</a>
+          <a href="/freelancer/jobs/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-solid fa-briefcase"></i> My Jobs</a>
+          <a href="/freelancer/chat/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-regular fa-message"></i> Messages</a>
+          <a href="/freelancer/reviews/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-regular fa-star"></i> Reviews</a>
+          <a href="/freelancer/analytics/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-solid fa-chart-line"></i> Analytics</a>
+          <a href="/freelancer/verification/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-solid fa-shield-check"></i> Verification</a>
+          <a href="/freelancer/support/" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-50"><i class="fa-regular fa-life-ring"></i> Support</a>
         </nav>
       </div>
 
       <div class="card p-4 mt-6">
         <div class="text-sm font-semibold mb-3">Quick Actions</div>
         <div class="grid gap-2">
-          <a href="/freelancer/jobs/" class="btn btn-primary justify-center"><i class="lucide-search"></i> Browse Jobs</a>
-          <a href="/freelancer/profile/" class="btn btn-soft justify-center"><i class="lucide-pencil-line"></i> Edit Profile</a>
+          <a href="/freelancer/jobs/" class="btn btn-primary justify-center"><i class="fa-solid fa-magnifying-glass"></i> Browse Jobs</a>
+          <a href="/freelancer/profile/" class="btn btn-soft justify-center"><i class="fa-regular fa-pen-to-square"></i> Edit Profile</a>
         </div>
       </div>
     </aside>
 
     <!-- MAIN -->
-    <main class="space-y-8">
-      <!-- GREETING -->
-      <section class="card p-6 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
-        <div class="min-w-0">
-          <h1 class="text-2xl md:text-3xl font-extrabold tracking-tight truncate">
-            Welcome back, <span id="greetName">Freelancer</span> 👋
-          </h1>
-          <p class="text-gray-500 mt-1 text-sm">Live snapshot of your performance across JobsAlign.</p>
-          <div class="mt-3 flex flex-wrap gap-2" id="skillBadges">
-            <!-- dynamic skill badges -->
+    <main class="space-y-6 sm:space-y-8 min-w-0 grid-safe">
+      <!-- PROFILE SUMMARY -->
+      <section class="card p-5 sm:p-6">
+        <div class="flex flex-col md:flex-row gap-5 md:gap-6 md:items-center md:justify-between">
+          <div class="flex items-center gap-4 min-w-0">
+            <img id="heroAvatar" src="{% static 'images/avatar.png' %}" class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl border border-gray-200 object-cover" />
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 flex-wrap">
+                <h1 class="text-xl sm:text-2xl font-extrabold tracking-tight truncate">
+                  <span id="greetName">Freelancer</span>
+                </h1>
+                <span id="verifyBadge" class="badge text-emerald-700 bg-emerald-50 hidden"><i class="fa-solid fa-badge-check mr-1"></i>Verified</span>
+              </div>
+              <p id="profileSubtitle" class="text-gray-500 text-sm truncate">—</p>
+              <div class="mt-2 flex flex-wrap gap-2 text-xs">
+                <span id="roleBadge" class="chip chip-blue">Role —</span>
+                <span id="levelBadge" class="chip chip-green">Level —</span>
+                <span id="planBadge"  class="chip chip-amber">Plan —</span>
+              </div>
+            </div>
+          </div>
+          <div class="flex gap-2 sm:gap-3 shrink-0">
+            <a href="/freelancer/profile/" class="btn btn-soft"><i class="fa-regular fa-user-gear"></i> Manage Profile</a>
+            <a href="/freelancer/jobs/" class="btn btn-primary"><i class="fa-solid fa-rocket"></i> Find Work</a>
           </div>
         </div>
-        <div class="flex items-center gap-3 shrink-0">
-          <a href="/freelancer/profile/" class="btn btn-soft"><i class="lucide-user-cog"></i> Profile</a>
-          <a href="/freelancer/jobs/" class="btn btn-primary"><i class="lucide-rocket"></i> Find Work</a>
+        <div id="skillBadges" class="mt-4 flex flex-wrap gap-2">
+          <!-- injected skill chips -->
         </div>
       </section>
 
-      <!-- KPI GRID -->
-      <section class="grid sm:grid-cols-2 xl:grid-cols-4 gap-6">
-        <div class="card p-6 hover-rise">
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-500 font-medium">Total Earnings</div>
-            <i class="lucide-dollar-sign text-indigo-600"></i>
+      <!-- KPIs -->
+      <section class="grid sm:grid-cols-2 xl:grid-cols-4 gap-4 sm:gap-6">
+        <div class="card p-5 hover-rise kpi-1">
+          <div class="flex items-center justify-between min-w-0">
+            <div class="text-sm text-gray-600 font-medium">Total Earnings</div>
+            <i class="fa-solid fa-dollar-sign text-indigo-600"></i>
           </div>
-          <div id="totalEarnings" class="text-3xl font-bold mt-2">$0</div>
+          <div id="totalEarnings" class="text-2xl sm:text-3xl font-bold mt-2">$0</div>
           <div id="earningsDelta" class="text-xs text-green-600 mt-1 hidden">↑ 0% vs last month</div>
         </div>
 
-        <div class="card p-6 hover-rise">
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-500 font-medium">Active Contracts</div>
-            <i class="lucide-briefcase text-green-600"></i>
+        <div class="card p-5 hover-rise kpi-2">
+          <div class="flex items-center justify-between min-w-0">
+            <div class="text-sm text-gray-600 font-medium">Active Contracts</div>
+            <i class="fa-solid fa-briefcase text-emerald-600"></i>
           </div>
-          <div id="activeContracts" class="text-3xl font-bold mt-2">0</div>
-          <div class="text-xs text-gray-500 mt-1">Across current clients</div>
+          <div id="activeContracts" class="text-2xl sm:text-3xl font-bold mt-2">0</div>
+          <div class="text-xs text-gray-600 mt-1">Across current clients</div>
         </div>
 
-        <div class="card p-6 hover-rise">
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-500 font-medium">Unread Messages</div>
-            <i class="lucide-message-circle text-amber-600"></i>
+        <div class="card p-5 hover-rise kpi-3">
+          <div class="flex items-center justify-between min-w-0">
+            <div class="text-sm text-gray-600 font-medium">Unread Messages</div>
+            <i class="fa-regular fa-message text-amber-600"></i>
           </div>
-          <div id="unreadChats" class="text-3xl font-bold mt-2">0</div>
-          <div class="text-xs text-gray-500 mt-1">Inbox across contracts</div>
+          <div id="unreadChats" class="text-2xl sm:text-3xl font-bold mt-2">0</div>
+          <div class="text-xs text-gray-600 mt-1">Inbox across contracts</div>
         </div>
 
-        <div class="card p-6 hover-rise">
-          <div class="flex items-center justify-between">
-            <div class="text-sm text-gray-500 font-medium">Level</div>
-            <i class="lucide-award text-sky-600"></i>
+        <div class="card p-5 hover-rise kpi-4">
+          <div class="flex items-center justify-between min-w-0">
+            <div class="text-sm text-gray-600 font-medium">Level</div>
+            <i class="fa-solid fa-award text-cyan-600"></i>
           </div>
-          <div id="userLevel" class="text-3xl font-bold mt-2">—</div>
-          <div id="successRate" class="text-xs text-gray-500 mt-1">Success rate —</div>
+          <div id="userLevel" class="text-2xl sm:text-3xl font-bold mt-2">—</div>
+          <div id="successRate" class="text-xs text-gray-600 mt-1">Success rate —</div>
         </div>
       </section>
 
-      <!-- ANALYTICS ROW (Compact) -->
-      <section class="grid lg:grid-cols-3 gap-6">
+      <!-- INSIGHTS + CHARTS (responsive, fixed height to avoid scroll irritation) -->
+      <section class="grid lg:grid-cols-3 gap-4 sm:gap-6">
         <!-- Earnings Line -->
-        <div class="card p-6 lg:col-span-2">
+        <div class="card p-4 sm:p-6 lg:col-span-2">
           <div class="flex items-center justify-between mb-2">
-            <h2 class="text-lg font-semibold">Earnings Overview</h2>
+            <h2 class="text-base sm:text-lg font-semibold">Earnings Overview</h2>
             <div class="text-xs text-gray-500">Monthly trend</div>
           </div>
-          <div class="chart-wrap">
+          <div class="chart-wrap" style="height: 240px; max-width: 100%;">
             <canvas id="earningsChart"></canvas>
           </div>
         </div>
 
-        <!-- Work Mix -->
-        <div class="card p-6">
+        <!-- Work Mix Donut (auto from backend; fallback infer from contracts) -->
+        <div class="card p-4 sm:p-6">
           <div class="flex items-center justify-between mb-2">
-            <h2 class="text-lg font-semibold">Work Mix</h2>
+            <h2 class="text-base sm:text-lg font-semibold">Work Mix</h2>
             <span class="text-xs text-gray-500">Last 90 days</span>
           </div>
-          <div class="chart-wrap">
+          <div class="chart-wrap" style="height: 240px; max-width: 100%;">
             <canvas id="mixChart"></canvas>
           </div>
           <div class="mt-4 grid grid-cols-2 gap-3 text-sm">
             <div class="flex items-center gap-2"><span class="dot" style="background:#4F46E5"></span> Fixed</div>
-            <div class="flex items-center gap-2"><span class="dot" style="background:#22C55E"></span> Hourly</div>
+            <div class="flex items-center gap-2"><span class="dot" style="background:#10B981"></span> Hourly</div>
             <div class="flex items-center gap-2"><span class="dot" style="background:#F59E0B"></span> Milestone</div>
             <div class="flex items-center gap-2"><span class="dot" style="background:#06B6D4"></span> Others</div>
           </div>
         </div>
       </section>
 
-      <!-- CONTRACTS + ACTIVITY -->
-      <section class="grid lg:grid-cols-3 gap-6">
+      <!-- CONTRACTS + REVIEWS -->
+      <section class="grid xl:grid-cols-3 gap-4 sm:gap-6">
         <!-- Recent Contracts -->
-        <div class="card lg:col-span-2">
-          <div class="flex items-center justify-between p-6 pb-3">
-            <h2 class="text-lg font-semibold">Recent Contracts</h2>
+        <div class="card xl:col-span-2">
+          <div class="flex items-center justify-between p-5 sm:p-6 pb-3">
+            <h2 class="text-base sm:text-lg font-semibold">Recent Contracts</h2>
             <a href="/freelancer/jobs/" class="text-sm text-indigo-600 hover:underline">View all</a>
           </div>
           <div id="recentContracts" class="divide-y">
@@ -248,10 +344,115 @@
           </div>
         </div>
 
-        <!-- Live Activity -->
-        <div class="card p-6">
+        <!-- Reviews Snapshot -->
+        <div class="card p-5 sm:p-6 min-w-0">
           <div class="flex items-center justify-between mb-3">
-            <h2 class="text-lg font-semibold">Live Activity</h2>
+            <h2 class="text-base sm:text-lg font-semibold">Reviews Snapshot</h2>
+            <a href="/freelancer/reviews/" class="text-sm text-indigo-600 hover:underline">See all</a>
+          </div>
+          <div id="reviewsBox" class="space-y-4">
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-full bg-gray-100 skeleton"></div>
+              <div class="flex-1">
+                <div class="w-2/3 h-4 rounded skeleton"></div>
+                <div class="w-1/2 h-3 rounded skeleton mt-2"></div>
+              </div>
+            </div>
+            <div class="flex items-start gap-3">
+              <div class="w-10 h-10 rounded-full bg-gray-100 skeleton"></div>
+              <div class="flex-1">
+                <div class="w-3/4 h-4 rounded skeleton"></div>
+                <div class="w-2/4 h-3 rounded skeleton mt-2"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- PROJECTS: UPLOAD + LIST (linked to marketplace) -->
+      <section class="grid lg:grid-cols-3 gap-4 sm:gap-6">
+        <!-- Uploader -->
+        <div class="card p-5 sm:p-6 lg:col-span-1">
+          <div class="flex items-center justify-between mb-2">
+            <h2 class="text-base sm:text-lg font-semibold">Upload Project</h2>
+            <span class="text-xs text-gray-500">Portfolio</span>
+          </div>
+
+          <form id="projectForm" class="space-y-4">
+            <div>
+              <label class="text-sm font-medium text-gray-700">Title</label>
+              <input id="projTitle" type="text" class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400" placeholder="e.g. Next.js Job Marketplace" required>
+            </div>
+            <div>
+              <label class="text-sm font-medium text-gray-700">Description</label>
+              <textarea id="projDesc" rows="3" class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-indigo-400" placeholder="Short description..." required></textarea>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-3">
+              <div>
+                <label class="text-sm font-medium text-gray-700">Category</label>
+                <input id="projCategory" type="text" class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="Web, AI, Mobile...">
+              </div>
+              <div>
+                <label class="text-sm font-medium text-gray-700">Tags (comma)</label>
+                <input id="projTags" type="text" class="mt-1 w-full border border-gray-300 rounded-lg px-3 py-2" placeholder="react, api, ui">
+              </div>
+            </div>
+
+            <div id="fileDrop" class="dropzone text-sm text-gray-600">
+              <div class="flex items-center gap-3">
+                <i class="fa-regular fa-file-arrow-up text-indigo-600 text-xl"></i>
+                <div>
+                  <div class="font-semibold">Drag & drop files here</div>
+                  <div class="text-xs text-gray-500">or click to select (images/videos/docs)</div>
+                </div>
+              </div>
+              <input id="projFiles" type="file" class="hidden" multiple accept="image/*,video/*,.pdf,.doc,.docx,.zip"/>
+              <div id="fileList" class="mt-3 text-xs space-y-1"></div>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-full justify-center">
+              <i class="fa-regular fa-cloud-arrow-up"></i> Submit Project
+            </button>
+            <div id="projMsg" class="text-xs text-center text-gray-600"></div>
+          </form>
+        </div>
+
+        <!-- Project List -->
+        <div class="card p-5 sm:p-6 lg:col-span-2">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base sm:text-lg font-semibold">My Projects</h2>
+            <div class="flex gap-2">
+              <button id="refreshProjects" class="btn btn-ghost"><i class="fa-solid fa-arrows-rotate"></i> Refresh</button>
+              <a href="/freelancer/profile/" class="btn btn-soft"><i class="fa-regular fa-pen-to-square"></i> Manage on Profile</a>
+            </div>
+          </div>
+          <div id="projectsList" class="divide-y">
+            <div class="p-4 flex gap-3 items-start">
+              <div class="w-16 h-16 rounded-lg bg-gray-100 skeleton"></div>
+              <div class="flex-1 min-w-0">
+                <div class="w-2/3 h-5 rounded skeleton"></div>
+                <div class="w-1/2 h-4 rounded skeleton mt-2"></div>
+              </div>
+              <div class="w-20 h-8 rounded skeleton"></div>
+            </div>
+            <div class="p-4 flex gap-3 items-start">
+              <div class="w-16 h-16 rounded-lg bg-gray-100 skeleton"></div>
+              <div class="flex-1 min-w-0">
+                <div class="w-3/4 h-5 rounded skeleton"></div>
+                <div class="w-2/4 h-4 rounded skeleton mt-2"></div>
+              </div>
+              <div class="w-20 h-8 rounded skeleton"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- LIVE ACTIVITY + NOTIFICATIONS INLINE -->
+      <section class="grid lg:grid-cols-2 gap-4 sm:gap-6">
+        <!-- Live Activity -->
+        <div class="card p-5 sm:p-6 min-w-0">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base sm:text-lg font-semibold">Live Activity</h2>
             <span id="lastSync" class="text-xs text-gray-500">—</span>
           </div>
           <ul id="activityFeed" class="space-y-3">
@@ -271,13 +472,71 @@
             </li>
           </ul>
         </div>
+
+        <!-- Notifications Drawer (inline) -->
+        <div class="card p-5 sm:p-6 min-w-0">
+          <div class="flex items-center justify-between mb-3">
+            <h2 class="text-base sm:text-lg font-semibold">Notifications</h2>
+            <button id="markAllReadBtn2" class="text-sm text-indigo-600 hover:underline">Mark all read</button>
+          </div>
+          <ul id="notifListInline" class="space-y-3">
+            <li class="flex items-start gap-3">
+              <span class="dot" style="background:#CBD5E1"></span>
+              <div class="min-w-0">
+                <div class="w-3/4 h-4 skeleton rounded"></div>
+                <div class="w-1/4 h-3 skeleton rounded mt-2"></div>
+              </div>
+            </li>
+            <li class="flex items-start gap-3">
+              <span class="dot" style="background:#CBD5E1"></span>
+              <div class="min-w-0">
+                <div class="w-2/3 h-4 skeleton rounded"></div>
+                <div class="w-1/3 h-3 skeleton rounded mt-2"></div>
+              </div>
+            </li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- QUICK LINKS -->
+      <section class="card p-5 sm:p-6">
+        <div class="grid md:grid-cols-3 gap-4 sm:gap-6">
+          <a href="/freelancer/verification/" class="block p-5 rounded-xl border border-gray-200 hover:bg-gray-50 transition">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-shield-check text-emerald-600"></i>
+              <div>
+                <div class="font-semibold">Get Verified</div>
+                <div class="text-xs text-gray-500">Boost trust and visibility</div>
+              </div>
+            </div>
+          </a>
+          <a href="/freelancer/analytics/" class="block p-5 rounded-xl border border-gray-200 hover:bg-gray-50 transition">
+            <div class="flex items-center gap-3">
+              <i class="fa-solid fa-chart-line text-indigo-600"></i>
+              <div>
+                <div class="font-semibold">Deep Analytics</div>
+                <div class="text-xs text-gray-500">Understand your performance</div>
+              </div>
+            </div>
+          </a>
+          <a href="/freelancer/support/" class="block p-5 rounded-xl border border-gray-200 hover:bg-gray-50 transition">
+            <div class="flex items-center gap-3">
+              <i class="fa-regular fa-life-ring text-cyan-600"></i>
+              <div>
+                <div class="font-semibold">Support Center</div>
+                <div class="text-xs text-gray-500">Submit & track tickets</div>
+              </div>
+            </div>
+          </a>
+        </div>
       </section>
     </main>
   </div>
 
-  <!-- FOOTER (required) -->
+  <!-- FOOTER (exactly as you provided) -->
   <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20"> 
     <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
+      <!-- Brand Section -->
       <div>
         <div class="flex items-center space-x-2 mb-3">
           <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
@@ -292,6 +551,8 @@
           <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-instagram"></i></a>
         </div>
       </div>
+
+      <!-- Platform Links -->
       <div>
         <h4 class="text-lg font-semibold mb-3 text-secondary">Platform</h4>
         <ul class="space-y-2 text-gray-600">
@@ -301,6 +562,8 @@
           <li><a href="#notifications" class="hover:text-primary">Notifications</a></li>
         </ul>
       </div>
+
+      <!-- Resources -->
       <div>
         <h4 class="text-lg font-semibold mb-3 text-secondary">Resources</h4>
         <ul class="space-y-2 text-gray-600">
@@ -310,6 +573,8 @@
           <li><a href="#verification" class="hover:text-primary">Profile Verification</a></li>
         </ul>
       </div>
+
+      <!-- About / Legal -->
       <div>
         <h4 class="text-lg font-semibold mb-3 text-secondary">About</h4>
         <ul class="space-y-2 text-gray-600">
@@ -320,6 +585,8 @@
         </ul>
       </div>
     </div>
+
+    <!-- Bottom -->
     <div class="border-t border-gray-200 mt-10 pt-6 pb-8 text-center text-gray-500 text-sm">
       <p>&copy; 2025 <span class="font-semibold text-primary">JobsAlign</span>. All rights reserved.</p>
       <p class="mt-2 text-blue-500">
@@ -331,138 +598,310 @@
     </div>
   </footer>
 
-  <!-- INLINE JS (FULL BACKEND INTEGRATION + SYNC + POLLING) -->
+  <!-- INLINE JS (FULL BACKEND INTEGRATION + RESPONSIVE + ZERO SIDE SCROLL) -->
   <script>
-    /********************
-     * CONFIG & GUARDS  *
-     ********************/
+    /* ----------------------------
+     * CONFIG & GUARDS
+     * ---------------------------- */
     const API = "http://127.0.0.1:8000/api";
     const $ = (id)=>document.getElementById(id);
     const money=(n)=>"$"+(parseFloat(n||0)).toFixed(2);
     const nowStr=()=>new Date().toLocaleTimeString();
+    function token(){ return localStorage.getItem("access_token"); }
+    (function guard(){ if(!token()) window.location.href="/login/"; })();
 
-    function getToken(){ return localStorage.getItem("access_token"); }
-    (function authGuard(){
-      if(!getToken()) window.location.href="/login/";
-    })();
+    // Lucide icons (initialize after DOM load)
+    document.addEventListener("DOMContentLoaded", () => { if(window.lucide) lucide.createIcons(); });
 
+    /* ----------------------------
+     * HELPERS
+     * ---------------------------- */
     function toast(msg,type="success"){
       const t=document.createElement("div");
       t.className="fixed z-[9999] bottom-6 right-6 px-4 py-3 rounded-lg text-sm text-white "+(type==="success"?"bg-emerald-600":"bg-rose-600");
       t.textContent=msg; document.body.appendChild(t);
-      setTimeout(()=>t.remove(),2800);
+      setTimeout(()=>t.remove(),2600);
     }
-
+    function escapeHtml(s){
+      return String(s||"").replace(/[&<>"'`=\/]/g, t => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;','/':'&#x2F;','`':'&#x60;','=':'&#x3D;'}[t]));
+    }
+    async function apiTry(paths, opt={}){
+      for(const path of paths){
+        try{
+          const r=await fetch(API+path,{headers:{Authorization:"Bearer "+token(), ...(opt.headers||{})}, method: opt.method||"GET", body: opt.body||null});
+          if(r.ok){ return await r.json(); }
+        }catch(e){ /* ignore */ }
+      }
+      return null;
+    }
     async function apiGet(path){
       try{
-        const r=await fetch(API+path,{headers:{Authorization:"Bearer "+getToken()}});
+        const r=await fetch(API+path,{headers:{Authorization:"Bearer "+token()}});
         if(!r.ok) throw new Error(path+" → "+r.status);
         return await r.json();
       }catch(e){ console.warn("GET",path,e); return null; }
     }
     async function apiPost(path,body={}){
       try{
-        const r=await fetch(API+path,{method:"POST",headers:{"Content-Type":"application/json",Authorization:"Bearer "+getToken()},body:JSON.stringify(body)});
+        const r=await fetch(API+path,{
+          method:"POST",
+          headers:{"Content-Type":"application/json",Authorization:"Bearer "+token()},
+          body:JSON.stringify(body)
+        });
         if(!r.ok) throw new Error(path+" → "+r.status);
         return await r.json();
       }catch(e){ console.warn("POST",path,e); return null; }
     }
+    async function apiForm(path, formData){
+      try{
+        const r=await fetch(API+path,{ method:"POST", headers:{Authorization:"Bearer "+token()}, body:formData });
+        if(!r.ok) throw new Error(path+" → "+r.status);
+        return await r.json();
+      }catch(e){ console.warn("FORM",path,e); return null; }
+    }
 
-    /********************
-     * PROFILE & SYNC   *
-     ********************/
+    /* ----------------------------
+     * PROFILE & SYNC
+     * ---------------------------- */
     async function loadProfile(){
-      let me = await apiGet("/accounts/me/");
-      if(!me) me = await apiGet("/accounts/profile/");
+      const me = await apiTry(["/accounts/profile/","/accounts/me/"]);
       if(!me) return;
 
-      $("greetName").textContent = me.first_name || me.full_name || me.username || "Freelancer";
-      $("userName").textContent = me.username || "Freelancer";
-      $("userLevelSmall").textContent = me.level || "Level —";
-      if(me.avatar_url || me.profile_photo) $("avatarImg").src = me.avatar_url || me.profile_photo;
+      const name = me.full_name || me.first_name || me.username || "Freelancer";
+      const email = me.email || "";
+      const role = (me.user_type || me.role || "Freelancer");
+      const level = me.level || me.tier || "—";
+      const plan  = (me.plan_name || me.subscription_plan || "Free");
+      const verified = !!(me.is_verified || me.email_verified || me.is_identity_verified);
+      const avatar = me.avatar_url || me.photo || "";
 
-      // skills
-      const skills = Array.isArray(me.skills)? me.skills : (typeof me.skills==="string"? me.skills.split(",").map(s=>s.trim()).filter(Boolean):[]);
+      $("greetName").textContent = name;
+      $("userName").textContent  = name;
+      $("userLevelSmall").textContent = "Level " + (level || "—");
+      $("profileEmail").textContent = email || "—";
+      $("profileSubtitle").textContent = email || "—";
+      $("roleBadge").textContent  = "Role: " + role;
+      $("levelBadge").textContent = "Level: " + level;
+      $("planBadge").textContent  = "Plan: " + plan;
+      if(verified) $("verifyBadge").classList.remove("hidden");
+
+      if(avatar){
+        ["avatarImg","heroAvatar"].forEach(id => { const el=$(id); if(el) el.src = avatar; });
+      }
+
+      // Skills → display as chips
       const container=document.getElementById("skillBadges");
       container.innerHTML="";
-      skills.slice(0,8).forEach(s=>{
+      const skills = (Array.isArray(me.skills)?me.skills:(me.skills?String(me.skills).split(","):[])).map(s=>String(s).trim()).filter(Boolean);
+      skills.slice(0,12).forEach(s=>{
         const span=document.createElement("span");
         span.className="chip chip-gray";
         span.textContent=s;
         container.appendChild(span);
       });
 
-      localStorage.setItem("profile_cache", JSON.stringify({name:me.username, level:me.level, avatar:me.avatar_url||me.profile_photo, skills}));
+      // cache for other pages + cross-tab sync
+      localStorage.setItem("profile_cache", JSON.stringify({name, level, avatar, skills}));
     }
+
     window.addEventListener("storage",(ev)=>{
       if(ev.key==="profile_updated" && ev.newValue==="1"){
         loadProfile();
         setTimeout(()=>localStorage.removeItem("profile_updated"),200);
       }
-      if(ev.key==="wallet_changed" && ev.newValue){
-        loadWalletAndKPIs();
-      }
-      if(ev.key==="contract_updated" && ev.newValue){
-        loadContracts();
-      }
+      if(ev.key==="wallet_changed" && ev.newValue){ loadWalletAndKPIs(); }
+      if(ev.key==="contract_updated" && ev.newValue){ loadContracts(); }
+      if(ev.key==="project_updated" && ev.newValue){ loadProjects(); }
     });
 
-    /********************
-     * KPIs & ANALYTICS *
-     ********************/
+    /* ----------------------------
+     * NOTIFICATIONS
+     * ---------------------------- */
+    async function loadNotifications(){
+      const res = await apiTry(["/notifications/","/notifications/list/"]);
+      const countBox = $("notifCount"), ul = $("notifList"), ulInline = $("notifListInline");
+      if(!res){
+        countBox.classList.add("hidden");
+        ul.innerHTML='<li class="p-4 text-sm text-gray-500">No notifications.</li>';
+        ulInline.innerHTML='<li class="text-sm text-gray-500">No notifications.</li>';
+        return;
+      }
+      const items = res.results || res || [];
+      let unread = 0;
+      const renderItem = (n) => {
+        const isUnread = (n.read===false || n.read===0 || n.is_read===false);
+        if(isUnread) unread++;
+        const level = (n.level||"info").toLowerCase();
+        const color = level==="success"?"#10B981":level==="warning"?"#F59E0B":level==="critical"?"#EF4444":"#64748B";
+        const title = n.title || n.verb || "Notification";
+        const text  = n.message || n.description || "";
+        return `
+          <li class="p-3 hover:bg-gray-50 text-sm">
+            <div class="flex items-start gap-3">
+              <span class="mt-1 w-2 h-2 rounded-full" style="background:${color}"></span>
+              <div class="min-w-0">
+                <div class="font-medium truncate">${escapeHtml(title)}</div>
+                <div class="text-gray-600 truncate">${escapeHtml(text)}</div>
+              </div>
+            </div>
+          </li>
+        `;
+      };
+
+      ul.innerHTML = items.slice(0,12).map(renderItem).join("");
+      ulInline.innerHTML = items.slice(0,8).map(n=>{
+        const level = (n.level||"info").toLowerCase();
+        const color = level==="success"?"#10B981":level==="warning"?"#F59E0B":level==="critical"?"#EF4444":"#64748B";
+        const title = n.title || n.verb || "Notification";
+        const text  = n.message || n.description || "";
+        return `
+          <li class="flex items-start gap-3">
+            <span class="dot" style="background:${color}"></span>
+            <div class="min-w-0">
+              <div class="text-sm font-medium truncate">${escapeHtml(title)}</div>
+              <div class="text-xs text-gray-500 truncate">${escapeHtml(text)}</div>
+            </div>
+          </li>
+        `;
+      }).join("");
+
+      if(unread>0){ countBox.textContent = unread; countBox.classList.remove("hidden"); } else { countBox.classList.add("hidden"); }
+
+      const markAll = async ()=>{
+        const ids = items.filter(i=>i && i.id).map(i=>i.id);
+        if(ids.length){
+          await apiPost("/notifications/read/", { ids });
+          toast("All notifications marked as read");
+          countBox.classList.add("hidden");
+          loadNotifications();
+        }
+      };
+      $("markAllReadBtn").onclick = markAll;
+      $("markAllReadBtn2").onclick = markAll;
+    }
+
+    /* ----------------------------
+     * KPIs & CHARTS
+     * ---------------------------- */
     let earningsChart, mixChart;
 
-    function drawEarningsChart(labels=[], data=[]){
+    const centerTextPlugin = {
+      id: 'centerText',
+      afterDraw(chart){
+        if(chart.config.type!=='doughnut') return;
+        const {ctx, chartArea:{width, height}} = chart;
+        const total = chart.data.datasets[0].data.reduce((a,b)=>a+b,0);
+        ctx.save();
+        ctx.font = '600 14px Inter, ui-sans-serif';
+        ctx.fillStyle = '#0F172A';
+        ctx.textAlign='center'; ctx.textBaseline='middle';
+        ctx.fillText('Total', width/2, height/2 - 8);
+        ctx.font = '700 18px Inter, ui-sans-serif';
+        ctx.fillText(total, width/2, height/2 + 12);
+        ctx.restore();
+      }
+    };
+    Chart.register(centerTextPlugin);
+
+    function ensureSize(canvas){
+      const parent = canvas.parentElement;
+      if(parent){ canvas.style.width='100%'; canvas.style.height='100%'; }
+    }
+
+    function initEarningsChart(labels=[], data=[]){
       const ctx = document.getElementById("earningsChart");
+      ensureSize(ctx);
       if(earningsChart) earningsChart.destroy();
-      earningsChart = new Chart(ctx,{
+      earningsChart = new Chart(ctx, {
         type:"line",
-        data:{ labels, datasets:[{label:"Earnings ($)", data, borderColor:"#4F46E5", backgroundColor:"rgba(79,70,229,.12)", tension:.35, fill:true, pointRadius:2}]},
-        options:{ responsive:true, maintainAspectRatio:true, plugins:{legend:{display:false}}, scales:{y:{beginAtZero:true}} }
+        data:{ labels, datasets:[{
+          label:"Earnings ($)",
+          data,
+          borderColor:"#4F46E5",
+          backgroundColor:"rgba(79,70,229,.12)",
+          tension:.35, fill:true, pointRadius:2
+        }]},
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          animation:{duration:480, easing:'easeOutQuart'},
+          plugins:{legend:{display:false}, tooltip:{mode:'index', intersect:false}},
+          scales:{x:{grid:{display:false}}, y:{beginAtZero:true}}
+        }
       });
     }
 
-    function drawMixChart(d=[50,30,15,5]){
+    function initMixChart(arr=[50,30,15,5]){
       const ctx=document.getElementById("mixChart");
+      ensureSize(ctx);
       if(mixChart) mixChart.destroy();
       mixChart=new Chart(ctx,{
         type:"doughnut",
-        data:{ labels:["Fixed","Hourly","Milestone","Others"], datasets:[{data:d, backgroundColor:["#4F46E5","#22C55E","#F59E0B","#06B6D4"]}]},
-        options:{ plugins:{legend:{display:false}}, cutout:"62%", responsive:true, maintainAspectRatio:true }
+        data:{ labels:["Fixed","Hourly","Milestone","Others"], datasets:[{
+          data:arr,
+          backgroundColor:["#4F46E5","#10B981","#F59E0B","#06B6D4"],
+          borderWidth:0
+        }]},
+        options:{
+          responsive:true, maintainAspectRatio:false,
+          cutout:"62%",
+          animation:{animateRotate:true, duration:480, easing:'easeOutQuart'},
+          plugins:{legend:{display:false}}
+        }
       });
     }
 
+    async function inferWorkMixFromContracts(){
+      const list = await apiTry(["/marketplace/contracts/me/","/marketplace/contracts/?mine=true"]);
+      const c={fixed:0, hourly:0, milestone:0, others:0};
+      (list||[]).forEach(i=>{
+        const t=(i.type||i.contract_type||"").toLowerCase();
+        if(t.includes("fixed")) c.fixed++;
+        else if(t.includes("hour")) c.hourly++;
+        else if(t.includes("mile")) c.milestone++;
+        else c.others++;
+      });
+      const arr=[c.fixed,c.hourly,c.milestone,c.others];
+      const sum=arr.reduce((a,b)=>a+b,0);
+      return sum?arr:[50,30,15,5];
+    }
+
     async function loadWalletAndKPIs(){
-      const wallet = await apiGet("/payments/wallet/");
+      const wallet = await apiTry(["/payments/wallet/","/payments/wallet/me/"]);
       if(wallet){ $("walletBalance").textContent = money(wallet.balance||0); }
 
-      let stats = await apiGet("/analytics/freelancer/stats/");
-      if(!stats) stats = await apiGet("/analytics/freelancer/summary/");
+      const stats = await apiTry(["/analytics/freelancer/stats/","/analytics/freelancer/summary/"]);
       if(stats){
         $("totalEarnings").textContent = money(stats.total_earnings||0);
-        $("activeContracts").textContent = stats.active_projects || 0;
-        $("unreadChats").textContent = stats.unread_messages || 0;
-        $("userLevel").textContent = stats.level || "—";
-        $("successRate").textContent = "Success rate " + (stats.success_rate!=null ? (stats.success_rate+"%") : "—");
+        $("activeContracts").textContent = stats.active_projects || stats.active_contracts || 0;
+        $("unreadChats").textContent   = stats.unread_messages || 0;
+        $("userLevel").textContent     = stats.level || "—";
+        $("successRate").textContent   = "Success rate " + (stats.success_rate!=null ? (stats.success_rate+"%") : "—");
+
         if(typeof stats.delta_earnings_pct === "number"){
           const d=$("earningsDelta");
           d.classList.remove("hidden");
           d.textContent = (stats.delta_earnings_pct>=0?"↑ ":"↓ ")+Math.abs(stats.delta_earnings_pct).toFixed(1)+"% vs last month";
           d.className = "text-xs mt-1 "+(stats.delta_earnings_pct>=0?"text-green-600":"text-rose-600");
         }
-        drawEarningsChart(stats.labels||[], stats.earnings||[]);
-        drawMixChart(stats.mix || [50,30,15,5]);
+
+        const labels = stats.labels || stats.months || [];
+        const data   = stats.earnings || stats.monthly_earnings || [];
+        initEarningsChart(labels, data);
+
+        const mix = stats.mix || stats.work_mix || null;
+        if(mix && Array.isArray(mix) && mix.length) initMixChart(mix);
+        else initMixChart(await inferWorkMixFromContracts());
       }else{
-        drawEarningsChart(["Jan","Feb","Mar"], [0,0,0]);
-        drawMixChart([50,30,15,5]);
+        initEarningsChart(["Jan","Feb","Mar"], [0,0,0]);
+        initMixChart(await inferWorkMixFromContracts());
       }
     }
 
-    /********************
-     * CONTRACTS & FEED *
-     ********************/
+    /* ----------------------------
+     * CONTRACTS & REVIEWS
+     * ---------------------------- */
     async function loadContracts(){
-      const list = await apiGet("/marketplace/contracts/me/");
+      const list = await apiTry(["/marketplace/contracts/me/","/marketplace/contracts/?mine=true"]);
       const box = $("recentContracts");
       if(!box) return;
       if(!list || !list.length){
@@ -474,37 +913,173 @@
         const status = (c.status || "Pending");
         const chipClass = status.toLowerCase().includes("active")?"chip-green": status.toLowerCase().includes("complete")?"chip-blue":"chip-amber";
         const amount = typeof c.amount !== "undefined" ? money(c.amount) : "";
+        const client = c.client?.name || c.client_name || "Client";
         return `
-          <div class="p-5 flex items-center justify-between">
+          <div class="p-5 flex items-center justify-between gap-3">
             <div class="min-w-0">
-              <div class="font-medium truncate">${title}</div>
-              <div class="text-xs text-gray-500 mt-1">#${c.id || "—"} · ${c.client?.name || c.client_name || "Client"}</div>
+              <div class="font-medium truncate">${escapeHtml(title)}</div>
+              <div class="text-xs text-gray-500 mt-1 truncate">#${c.id || "—"} · ${escapeHtml(client)}</div>
             </div>
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-3 shrink-0">
               ${amount ? `<span class="hidden sm:inline-block text-indigo-600 font-semibold">${amount}</span>` : ""}
-              <span class="chip ${chipClass}">${status}</span>
+              <span class="chip ${chipClass}">${escapeHtml(status)}</span>
             </div>
           </div>
         `;
       }).join("");
     }
 
+    async function loadReviews(){
+      const res = await apiTry(["/reviews/freelancer/","/reviews/?mine=true"]);
+      const box = $("reviewsBox");
+      if(!res){ box.innerHTML = `<div class="text-sm text-gray-500">No reviews yet.</div>`; return; }
+      const items = res.results || res || [];
+      if(!items.length){ box.innerHTML = `<div class="text-sm text-gray-500">No reviews yet.</div>`; return; }
+
+      box.innerHTML = items.slice(0,4).map(r=>{
+        const author = r.author_name || r.client?.name || "Client";
+        const rating = r.rating || r.stars || 0;
+        const comment = r.comment || r.text || "";
+        const avatar = r.author_avatar || "";
+        return `
+          <div class="flex items-start gap-3">
+            <img src="${escapeHtml(avatar || '{% static "images/avatar.png" %}')}" class="w-10 h-10 rounded-full border object-cover" alt="">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2">
+                <div class="font-medium truncate">${escapeHtml(author)}</div>
+                <div class="text-amber-500 text-xs">${"★".repeat(Math.round(rating))}${"☆".repeat(5-Math.round(rating))}</div>
+              </div>
+              <div class="text-sm text-gray-600">${escapeHtml(comment)}</div>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    /* ----------------------------
+     * PROJECTS: UPLOAD + LIST
+     * ---------------------------- */
+    const fileDrop = $("fileDrop");
+    const projFiles = $("projFiles");
+    const fileList = $("fileList");
+    let selFiles = [];
+
+    function renderFileList(){
+      fileList.innerHTML = selFiles.map((f,i)=>`<div>• ${escapeHtml(f.name)} <span class="text-gray-400">(${Math.round(f.size/1024)} KB)</span> <button data-i="${i}" class="text-rose-600 hover:underline remove-file">remove</button></div>`).join("");
+      fileList.querySelectorAll(".remove-file").forEach(btn=>{
+        btn.addEventListener("click", (e)=>{
+          const idx = parseInt(e.target.getAttribute("data-i"));
+          selFiles.splice(idx,1);
+          renderFileList();
+        });
+      });
+    }
+
+    fileDrop.addEventListener("click", ()=> projFiles.click());
+    fileDrop.addEventListener("dragover", (e)=>{ e.preventDefault(); fileDrop.classList.add("drag"); });
+    fileDrop.addEventListener("dragleave", ()=> fileDrop.classList.remove("drag"));
+    fileDrop.addEventListener("drop", (e)=>{
+      e.preventDefault(); fileDrop.classList.remove("drag");
+      const files = Array.from(e.dataTransfer.files||[]);
+      selFiles = selFiles.concat(files);
+      renderFileList();
+    });
+    projFiles.addEventListener("change",(e)=>{
+      selFiles = selFiles.concat(Array.from(e.target.files||[]));
+      renderFileList();
+    });
+
+    $("projectForm").addEventListener("submit", async (e)=>{
+      e.preventDefault();
+      const msg = $("projMsg");
+      msg.textContent = "Uploading...";
+      msg.className = "text-xs text-indigo-600 text-center";
+
+      const title = $("projTitle").value.trim();
+      const desc  = $("projDesc").value.trim();
+      const cat   = $("projCategory").value.trim();
+      const tags  = $("projTags").value.trim();
+
+      const form = new FormData();
+      form.append("title", title);
+      form.append("description", desc);
+      if(cat)  form.append("category", cat);
+      if(tags) form.append("tags", tags);
+      selFiles.forEach((f,i)=> form.append("files", f, f.name));
+
+      // Prefer marketplace portfolio/project endpoints; fallbacks included
+      const created =
+        await apiForm("/marketplace/projects/create/", form) ||
+        await apiForm("/marketplace/portfolio/create/", form) ||
+        await apiForm("/marketplace/uploads/create/", form);
+
+      if(created && (created.id || created.success)){
+        msg.textContent = "✅ Project uploaded successfully!";
+        msg.className = "text-xs text-emerald-600 text-center";
+        localStorage.setItem("project_updated","1");
+        setTimeout(()=>localStorage.removeItem("project_updated"),400);
+        // reset
+        $("projectForm").reset(); selFiles = []; renderFileList();
+        loadProjects();
+      }else{
+        msg.textContent = "❌ Upload failed. Check server logs or endpoint.";
+        msg.className = "text-xs text-rose-600 text-center";
+      }
+    });
+
+    async function loadProjects(){
+      const list = await apiTry([
+        "/marketplace/projects/my/",
+        "/marketplace/portfolio/my/",
+        "/marketplace/projects/?mine=true",
+        "/marketplace/portfolio/?mine=true",
+      ]);
+      const box = $("projectsList");
+      if(!list || (Array.isArray(list) && list.length===0) || (list.results && !list.results.length)){
+        box.innerHTML = `<div class="p-6 text-sm text-gray-500">No projects yet. Upload your first project from the left panel.</div>`;
+        return;
+      }
+      const items = list.results || list;
+      box.innerHTML = items.slice(0,10).map(p=>{
+        const thumb = p.cover_url || p.thumbnail || "";
+        const title = p.title || "Untitled Project";
+        const dsc   = p.description || "";
+        const cat   = p.category || "";
+        const tags  = Array.isArray(p.tags)? p.tags.join(", ") : (p.tags||"");
+        return `
+          <div class="p-4 flex gap-3 items-start">
+            <img src="${escapeHtml(thumb || '{% static "images/avatar.png" %}')}" class="w-16 h-16 rounded-lg border object-cover" alt="">
+            <div class="flex-1 min-w-0">
+              <div class="font-semibold truncate">${escapeHtml(title)}</div>
+              <div class="text-xs text-gray-500 truncate">${escapeHtml(cat)} ${tags? "• "+escapeHtml(tags):""}</div>
+              <div class="text-sm text-gray-600 mt-1 line-clamp-2">${escapeHtml(dsc)}</div>
+            </div>
+            <a href="/freelancer/profile/" class="btn btn-soft shrink-0"><i class="fa-regular fa-eye"></i> View</a>
+          </div>
+        `;
+      }).join("");
+    }
+    $("refreshProjects").addEventListener("click", ()=>loadProjects());
+
+    /* ----------------------------
+     * ACTIVITY FEED
+     * ---------------------------- */
     async function loadActivityFeed(){
-      const feed = await apiGet("/notifications/");
+      const feed = await apiTry(["/notifications/","/notifications/list/"]);
       const ul=$("activityFeed");
       if(!feed){ ul.innerHTML='<li class="text-sm text-gray-500">No activity.</li>'; return; }
       const items = (feed.results || feed).slice(0,8);
       ul.innerHTML = items.map(n=>{
         const level=(n.level||"info").toLowerCase();
-        const color = level==="success"?"#22C55E":level==="warning"?"#F59E0B":level==="critical"?"#EF4444":"#64748B";
+        const color = level==="success"?"#10B981":level==="warning"?"#F59E0B":level==="critical"?"#EF4444":"#64748B";
         const title = n.title || n.verb || "Notification";
-        const text = n.message || n.description || "";
+        const text  = n.message || n.description || "";
         return `
           <li class="flex gap-3 items-start">
             <span class="dot" style="background:${color}"></span>
-            <div>
-              <div class="text-sm font-medium">${title}</div>
-              <div class="text-xs text-gray-500">${text}</div>
+            <div class="min-w-0">
+              <div class="text-sm font-medium truncate">${escapeHtml(title)}</div>
+              <div class="text-xs text-gray-500 truncate">${escapeHtml(text)}</div>
             </div>
           </li>
         `;
@@ -512,79 +1087,54 @@
       $("lastSync").textContent = "Updated " + nowStr();
     }
 
-    /********************
-     * NOTIFICATIONS    *
-     ********************/
-    async function loadNotifications(){
-      const res = await apiGet("/notifications/");
-      const countBox = $("notifCount"), ul = $("notifList");
-      if(!res){ countBox.classList.add("hidden"); ul.innerHTML='<li class="p-4 text-sm text-gray-500">No notifications.</li>'; return; }
+    /* ----------------------------
+     * MOBILE DRAWER & DROPDOWNS
+     * ---------------------------- */
+    const drawer = $("drawer"), drawerBackdrop=$("drawerBackdrop"), drawerClose=$("drawerClose");
+    $("mobileMenuBtn").addEventListener("click", ()=> drawer.classList.add("open"));
+    drawerBackdrop.addEventListener("click", ()=> drawer.classList.remove("open"));
+    drawerClose.addEventListener("click", ()=> drawer.classList.remove("open"));
 
-      const items = res.results || res || [];
-      let unread = 0;
-      ul.innerHTML = items.slice(0,12).map(n=>{
-        const isUnread = (n.read===false || n.read===0 || n.is_read===false);
-        if(isUnread) unread++;
-        const level = (n.level||"info").toLowerCase();
-        const dot = level==="success"?"bg-emerald-500":level==="warning"?"bg-amber-500":level==="critical"?"bg-rose-500":"bg-indigo-500";
-        return `
-          <li class="p-3 hover:bg-gray-50 text-sm">
-            <div class="flex items-start gap-3">
-              <span class="mt-1 w-2 h-2 rounded-full ${dot}"></span>
-              <div>
-                <div class="font-medium">${n.title || n.verb || "Notification"}</div>
-                <div class="text-gray-600">${n.message || ""}</div>
-              </div>
-            </div>
-          </li>
-        `;
-      }).join("");
-
-      if(unread>0){ countBox.textContent = unread; countBox.classList.remove("hidden"); } else { countBox.classList.add("hidden"); }
-
-      $("markAllReadBtn").onclick = async ()=>{
-        const ids = items.filter(i=>i && i.id).map(i=>i.id);
-        if(ids.length){
-          await apiPost("/notifications/read/", { ids });
-          toast("All notifications marked as read");
-          countBox.classList.add("hidden");
-          loadNotifications();
-        }
-      };
-    }
-
-    /********************
-     * UX BINDINGS      *
-     ********************/
     (function bindDropdowns(){
       const nb=$("notifBtn"), nd=$("notifDrop");
-      nb.addEventListener("click", ()=>{ nd.classList.toggle("hidden"); });
-      document.addEventListener("click", (e)=>{ if(!nb.contains(e.target) && !nd.contains(e.target)){ nd.classList.add("hidden"); }});
+      nb.addEventListener("click", (e)=>{ e.stopPropagation(); const v=nd.classList.toggle("hidden"); nb.setAttribute("aria-expanded", String(!v)); });
+      document.addEventListener("click", (e)=>{ if(!nd.contains(e.target)){ nd.classList.add("hidden"); nb.setAttribute("aria-expanded","false"); }});
+
       const pb=$("profileBtn"), pd=$("profileDrop");
-      pb.addEventListener("click", ()=>{ pd.classList.toggle("hidden"); });
-      document.addEventListener("click", (e)=>{ if(!pb.contains(e.target) && !pd.contains(e.target)){ pd.classList.add("hidden"); }});
+      pb.addEventListener("click", (e)=>{ e.stopPropagation(); const v=pd.classList.toggle("hidden"); pb.setAttribute("aria-expanded", String(!v)); });
+      document.addEventListener("click", (e)=>{ if(!pd.contains(e.target)){ pd.classList.add("hidden"); pb.setAttribute("aria-expanded","false"); }});
+
       $("refreshBtn").addEventListener("click", ()=>refreshAll(true));
     })();
 
-    /********************
-     * POLLING & REFRESH*
-     ********************/
+    /* ----------------------------
+     * MAIN REFRESH & POLLING
+     * ---------------------------- */
     async function refreshAll(showToast=false){
       await Promise.all([
         loadProfile(),
         loadWalletAndKPIs(),
         loadContracts(),
+        loadReviews(),
         loadNotifications(),
+        loadProjects(),
         loadActivityFeed()
       ]);
       if(showToast) toast("Dashboard refreshed");
     }
 
-    // initial load
+    // Initial
     refreshAll();
 
-    // background polling every 60s
-    setInterval(()=>refreshAll(false), 60000);
+    // Poll background every 75s (balanced)
+    setInterval(()=>refreshAll(false), 75000);
+
+    // Charts responsive: resize on container changes
+    const ro = new ResizeObserver(()=> {
+      if(earningsChart) earningsChart.resize();
+      if(mixChart) mixChart.resize();
+    });
+    ro.observe(document.body);
   </script>
 </body>
 </html>

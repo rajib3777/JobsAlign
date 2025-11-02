@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Freelancer Support | JobsAlign</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide-icons"></script>
+</head>
+<body class="bg-gray-50 min-h-screen flex flex-col">
+
+  <!-- HEADER -->
+  <header class="bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-semibold">🛠️ Support Center</h1>
+      <button id="refreshTickets" class="bg-white text-indigo-600 px-4 py-2 rounded-lg font-medium hover:bg-indigo-100 transition">
+        Refresh
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main class="flex-grow max-w-7xl mx-auto w-full px-4 py-6 space-y-8">
+
+    <!-- CREATE TICKET -->
+    <section class="bg-white p-6 rounded-2xl shadow-lg">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Create a New Support Ticket</h2>
+      <form id="createTicketForm" class="grid gap-4 md:grid-cols-2">
+        <input type="text" id="subject" placeholder="Subject" required class="border p-3 rounded-lg w-full focus:ring-2 focus:ring-indigo-500">
+        <select id="category" required class="border p-3 rounded-lg w-full focus:ring-2 focus:ring-indigo-500">
+          <option value="">Select Category</option>
+        </select>
+        <textarea id="description" placeholder="Describe your issue..." required class="md:col-span-2 border p-3 rounded-lg w-full h-32 resize-none focus:ring-2 focus:ring-indigo-500"></textarea>
+        <input type="file" id="attachment" class="md:col-span-2 border p-3 rounded-lg w-full">
+        <button type="submit" class="md:col-span-2 bg-indigo-600 text-white py-3 rounded-lg hover:bg-indigo-700 transition">
+          Submit Ticket
+        </button>
+      </form>
+      <p id="ticketMsg" class="text-center mt-4 text-sm text-gray-600"></p>
+    </section>
+
+    <!-- MY TICKETS -->
+    <section class="bg-white p-6 rounded-2xl shadow-lg">
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">My Tickets</h2>
+      <div id="ticketsList" class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3"></div>
+    </section>
+
+    <!-- TICKET THREAD -->
+    <section id="ticketThreadSection" class="hidden bg-white p-6 rounded-2xl shadow-lg">
+      <div class="flex justify-between items-center mb-4">
+        <h2 id="threadTitle" class="text-lg font-semibold text-gray-800"></h2>
+        <button id="closeThread" class="text-red-500 hover:text-red-700 transition">✖ Close</button>
+      </div>
+      <div id="messagesContainer" class="space-y-3 max-h-96 overflow-y-auto border rounded-lg p-3 bg-gray-50"></div>
+      <form id="replyForm" class="mt-4 flex gap-2">
+        <input type="text" id="replyContent" placeholder="Type your reply..." class="flex-grow border p-2 rounded-lg focus:ring-2 focus:ring-indigo-500">
+        <button type="submit" class="bg-indigo-600 text-white px-4 rounded-lg hover:bg-indigo-700 transition">Send</button>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="bg-gray-100 py-4 text-center text-gray-600 text-sm border-t">
+    © 2025 JobsAlign — Support & Trust Center
+  </footer>
+
+  <script>
+    const API_BASE = "/api/support/";
+    const token = localStorage.getItem("access");
+
+    // ✅ Load Categories
+    async function loadCategories() {
+      const res = await fetch(API_BASE + "categories/");
+      const cats = await res.json();
+      const select = document.getElementById("category");
+      cats.forEach(c => {
+        const opt = document.createElement("option");
+        opt.value = c.id;
+        opt.textContent = c.name;
+        select.appendChild(opt);
+      });
+    }
+
+    // ✅ Load Tickets
+    async function loadTickets() {
+      const res = await fetch(API_BASE + "tickets/me/", {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const tickets = await res.json();
+      const list = document.getElementById("ticketsList");
+      list.innerHTML = "";
+      tickets.forEach(t => {
+        const card = document.createElement("div");
+        card.className = "border rounded-xl p-4 shadow hover:shadow-md transition cursor-pointer bg-gradient-to-tr from-indigo-50 to-white";
+        card.innerHTML = `
+          <h3 class="font-semibold text-gray-800 mb-1">${t.subject}</h3>
+          <p class="text-sm text-gray-600">${t.category?.name || 'General'}</p>
+          <p class="text-xs text-gray-400 mt-2">${new Date(t.updated_at).toLocaleString()}</p>
+          <span class="inline-block mt-3 px-2 py-1 text-xs font-medium rounded-full ${
+            t.status === 'open' ? 'bg-green-100 text-green-700' :
+            t.status === 'resolved' ? 'bg-blue-100 text-blue-700' :
+            'bg-yellow-100 text-yellow-700'
+          }">${t.status}</span>
+        `;
+        card.onclick = () => openThread(t.id, t.subject);
+        list.appendChild(card);
+      });
+    }
+
+    // ✅ Create Ticket
+    document.getElementById("createTicketForm").onsubmit = async (e) => {
+      e.preventDefault();
+      const formData = new FormData();
+      formData.append("subject", subject.value);
+      formData.append("category", category.value);
+      formData.append("description", description.value);
+      if (attachment.files[0]) formData.append("attachments", attachment.files[0]);
+
+      const res = await fetch(API_BASE + "tickets/create/", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData
+      });
+
+      if (res.ok) {
+        ticketMsg.textContent = "✅ Ticket submitted successfully!";
+        loadTickets();
+      } else {
+        ticketMsg.textContent = "⚠️ Failed to submit ticket.";
+      }
+    };
+
+    // ✅ Open Ticket Thread
+    async function openThread(id, subject) {
+      document.getElementById("ticketThreadSection").classList.remove("hidden");
+      document.getElementById("threadTitle").textContent = subject;
+
+      const res = await fetch(API_BASE + `tickets/${id}/`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      const container = document.getElementById("messagesContainer");
+      container.innerHTML = "";
+      data.messages.forEach(m => {
+        const div = document.createElement("div");
+        div.className = `p-3 rounded-lg ${
+          m.sender?.id === data.user.id
+            ? 'bg-indigo-100 ml-auto text-right'
+            : 'bg-gray-200'
+        } max-w-xs md:max-w-md`;
+        div.innerHTML = `<p class="text-sm">${m.content}</p><p class="text-xs text-gray-500 mt-1">${new Date(m.created_at).toLocaleString()}</p>`;
+        container.appendChild(div);
+      });
+
+      document.getElementById("replyForm").onsubmit = async (e) => {
+        e.preventDefault();
+        const reply = document.getElementById("replyContent").value.trim();
+        if (!reply) return;
+        await fetch(API_BASE + "messages/post/", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ ticket: id, content: reply }),
+        });
+        openThread(id, subject);
+        replyContent.value = "";
+      };
+    }
+
+    // ✅ Close Thread
+    document.getElementById("closeThread").onclick = () => {
+      document.getElementById("ticketThreadSection").classList.add("hidden");
+    };
+
+    // ✅ Refresh
+    document.getElementById("refreshTickets").onclick = loadTickets;
+
+    // INIT
+    loadCategories();
+    loadTickets();
+  </script>
+
+</body>
+</html>
