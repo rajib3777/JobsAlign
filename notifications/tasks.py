@@ -55,3 +55,10 @@ def send_email_notification(self, notification_id):
         return True
     except Exception as exc:
         raise self.retry(exc=exc)
+    
+
+
+
+def get_create_notification():
+    from notifications.utils import create_notification
+    return create_notification

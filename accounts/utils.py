@@ -37,3 +37,27 @@ def send_verification_email(request, user):
 
     email = EmailMessage(subject, message, settings.DEFAULT_FROM_EMAIL, [user.email])
     email.send(fail_silently=False)
+
+
+def calculate_profile_completion(user):
+    score = 0
+    # 75% from profile info
+    if user.bio and user.skills.exists() and user.profile_image and user.country:
+        score += 75
+    
+    # 5% from English Test
+    if user.has_passed_basic_english_test:
+        score += 5
+    
+    # 10% from category-based test
+    if user.has_passed_category_test:
+        score += 10
+    
+    # 10% from video intro
+    if user.has_video_intro:
+        score += 10
+    
+    user.profile_completion = min(score, 100)
+    user.save(update_fields=["profile_completion"])
+    return user.profile_completion
+

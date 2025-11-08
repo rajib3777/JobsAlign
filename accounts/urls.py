@@ -5,7 +5,7 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .api_views import (
     RegisterView, UserProfileView, GoogleLoginView, LogoutView,
     PasswordChangeView, PasswordResetConfirmView, PasswordResetRequestView,VerifyEmailView
-    ,KYCUploadView
+    ,KYCUploadView,ProfileUpdateView
 )
 from .import views
 
@@ -33,6 +33,7 @@ urlpatterns = [
     #🔹 Google Authentication
     path("google/login/", GoogleLoginView.as_view(), name="google_login"),
     path("kyc/upload/", KYCUploadView.as_view(), name="kyc_upload"),
+    path('profile/update/', ProfileUpdateView.as_view(), name='profile-update'),
 
     
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

@@ -6,6 +6,7 @@ from notifications.utils import create_notification
 from recommendations.tasks import compute_recommendations_for_project
 from django.utils import timezone
 from .utils import suggest_category_for_text
+from .models import SubCategory
 
 @receiver(post_save, sender=Project)
 def on_project_created(sender, instance, created, **kwargs):
@@ -41,4 +42,12 @@ def on_project_created(sender, instance, created, **kwargs):
     try:
         compute_recommendations_for_project.delay(str(instance.id))
     except Exception:
+        pass
+
+
+
+@receiver(post_save, sender=SubCategory)
+def notify_new_test(sender, instance, created, **kwargs):
+    if created and instance.has_test:
+        
         pass

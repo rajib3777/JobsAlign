@@ -106,3 +106,10 @@ class PortfolioSerializer(serializers.ModelSerializer):
         model = Portfolio
         fields = "__all__"
         read_only_fields = ["user", "created_at"]
+
+
+def validate(self, attrs):
+    user = self.context['request'].user
+    if user.profile_completion_score < 80:
+        raise serializers.ValidationError("Your profile must be 80% complete to place a bid.")
+    return attrs

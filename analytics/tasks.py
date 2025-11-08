@@ -45,3 +45,9 @@ def update_job_market_insights():
         print(f"[Analytics] Updated market insights for {len(result)} categories")
     except Exception as e:
         print(f"[Analytics] Job market insights failed: {e}")
+
+
+def calculate_profile_completion_metrics():
+    total = User.objects.filter(user_type='freelancer').count()
+    completed = User.objects.filter(profile_completion_score__gte=100).count()
+    print(f"[{timezone.now()}] {completed}/{total} freelancers have 80% profiles.")

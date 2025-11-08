@@ -23,6 +23,8 @@ urlpatterns = [
     path("api/recommendations/", include("recommendations.urls")),
     path("api/support/", include("support.urls")),
     path("api/referrals/", include("referrals.urls")),
+    path('api/assesments/', include('assesments.urls')),
+
 
     # 🔹 Frontend pages
     path('', TemplateView.as_view(template_name='index.html'), name='home'),

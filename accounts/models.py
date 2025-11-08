@@ -7,9 +7,7 @@ import uuid
 
 
 
-# ======================================
-# 🔹 Custom User Manager
-# ======================================
+
 class UserManager(BaseUserManager):
     def create_user(self, email, full_name=None, password=None, **extra_fields):
         if not email:
@@ -27,9 +25,7 @@ class UserManager(BaseUserManager):
         return self.create_user(email, full_name, password, **extra_fields)
 
 
-# ======================================
-# 🔹 User Model (Google Auth Ready)
-# ======================================
+
 class User(AbstractBaseUser, PermissionsMixin):
     USER_TYPES = [
         ("buyer", "Buyer"),
@@ -98,32 +94,37 @@ class User(AbstractBaseUser, PermissionsMixin):
         help_text="Government ID or Passport"
     )
 
-    # 🏆 Professional Metrics (Levels / Scores)
+    
     level = models.CharField(max_length=50, default="New", help_text="Freelancer level like Level 1, Level 2, Top Rated")
     trust_score = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal("0.00"))
 
-    # 💼 Portfolio & Skills
+    
     skills = models.JSONField(default=list, blank=True, help_text="List of key skills")
     portfolio_url = models.URLField(blank=True, null=True, help_text="External portfolio link")
     portfolio_description = models.TextField(blank=True, null=True)
 
-    # 📊 Marketplace Analytics
+    
     total_projects = models.PositiveIntegerField(default=0)
     completed_orders = models.PositiveIntegerField(default=0)
     total_earnings = models.DecimalField(max_digits=12, decimal_places=2, default=Decimal("0.00"))
 
-    # 👥 Social Metrics
+    
     followers = models.ManyToManyField('self', symmetrical=False, related_name='following', blank=True)
 
-    # 🕵️ Login Tracking (for security and insights)
+    
     last_login_ip = models.GenericIPAddressField(blank=True, null=True)
     last_login_device = models.CharField(max_length=255, blank=True, null=True)
 
-    # 🔔 Notification Preferences
+   
     allow_email_notifications = models.BooleanField(default=True)
     allow_system_notifications = models.BooleanField(default=True)
 
-    # # 💰 External Relations (via other apps)
+
+    has_passed_basic_english_test = models.BooleanField(default=False)
+    has_passed_category_test = models.BooleanField(default=False)
+    has_video_intro = models.BooleanField(default=False)
+    profile_completion = models.FloatField(default=0.0)
+
     # referral = models.OneToOneField(
     #     "referral.ReferralAccount",
     #     on_delete=models.SET_NULL,
@@ -155,9 +156,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     def __str__(self):
         return f"{self.full_name} ({self.email})"
 
-    # ======================================
-    # 🔹 Helper Methods
-    # ======================================
+  
     def update_rating(self, new_rating):
         total = self.total_reviews + 1
         self.rating = ((self.rating * self.total_reviews) + new_rating) / total
@@ -193,15 +192,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         self.save(update_fields=["is_online", "last_seen"])
 
     def generate_google_auth_user(self, google_data):
-        """
-        Create or update user via Google OAuth.
-        google_data = {
-            'id': 'google_id',
-            'email': 'user@gmail.com',
-            'name': 'User Name',
-            'picture': 'https://googleusercontent.com/...'
-        }
-        """
+        
         self.google_id = google_data.get("id")
         self.google_auth = True
         self.is_verified = True

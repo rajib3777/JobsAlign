@@ -67,6 +67,7 @@ INSTALLED_APPS = [
     'subscriptions',
     'categories',
     'verification',
+    'assesments',
 
 ]
 
@@ -191,6 +192,10 @@ REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': (
         'rest_framework.permissions.IsAuthenticated',
     ),
+    "DEFAULT_THROTTLE_RATES": {
+        "assesments_burst": "30/min",
+        "assesments_sustained": "300/day",
+    },
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
 }
 

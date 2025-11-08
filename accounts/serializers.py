@@ -42,7 +42,8 @@ class UserSerializer(serializers.ModelSerializer):
             'level', 'trust_score', 'skills', 'portfolio_url', 'portfolio_description',
             'total_projects', 'completed_orders', 'total_earnings',
             'followers', 'rating', 'total_reviews',
-            'is_online', 'last_seen', 'profile_completion', 'date_joined', 'last_login'
+            'is_online', 'last_seen', 'date_joined', 'last_login', 'profile_completion', 
+            'has_passed_basic_english_test', 'has_passed_category_test', 'has_video_intro'
         ]
         read_only_fields = [
             'id', 'rating', 'total_reviews', 'profile_completion',

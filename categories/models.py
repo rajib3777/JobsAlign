@@ -12,9 +12,7 @@ VISIBILITY_CHOICES = [
 ]
 
 class Category(models.Model):
-    """
-    Top-level category. Admin-created only.
-    """
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     name = models.CharField(max_length=150, unique=True)
     slug = models.SlugField(max_length=150, unique=True)
@@ -46,6 +44,10 @@ class SubCategory(models.Model):
     is_active = models.BooleanField(default=True)
     metadata = models.JSONField(default=dict, blank=True)
 
+    has_test = models.BooleanField(default=False)
+    test_reference = models.UUIDField(null=True, blank=True, help_text="Reference ID for associated test")
+
+
     class Meta:
         unique_together = ('category','slug')
         ordering = ['name']
@@ -55,9 +57,7 @@ class SubCategory(models.Model):
 
 
 class Skill(models.Model):
-    """
-    Micro-skill or tag attached to subcategory and users/projects.
-    """
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     subcategory = models.ForeignKey(SubCategory, on_delete=models.CASCADE, related_name='skills')
     name = models.CharField(max_length=150)
@@ -74,10 +74,7 @@ class Skill(models.Model):
 
 
 class FreelancerCategory(models.Model):
-    """
-    Which categories/subcategories a freelancer claims expertise in.
-    Admin can approve (verified flag).
-    """
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='freelancer_categories')
     category = models.ForeignKey(Category, on_delete=models.CASCADE)
@@ -95,10 +92,7 @@ class FreelancerCategory(models.Model):
 
 
 class CategoryMetric(models.Model):
-    """
-    Stores computed metrics for category/subcategory (demand, supply, avg_price, trending)
-    updated by Celery.
-    """
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, related_name='metrics')
     subcategory = models.ForeignKey(SubCategory, null=True, blank=True, on_delete=models.CASCADE)
@@ -121,9 +115,7 @@ class CategoryMetric(models.Model):
 
 
 class CategoryNotificationPreference(models.Model):
-    """
-    Optional: per-user preference to receive new job alerts per category.
-    """
+    
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='category_prefs')
     category = models.ForeignKey(Category, on_delete=models.CASCADE)

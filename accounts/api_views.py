@@ -25,21 +25,22 @@ from .serializers import (
     UserSerializer, RegisterSerializer, LoginSerializer, ChangePasswordSerializer
 )
 from .permissions import IsOwnerOrAdmin
+from .utils import calculate_profile_completion
 
 
-# ✅ Custom JWT Token View (kept simple)
+
 class CustomTokenObtainPairView(TokenObtainPairView):
-    """Default view - override serializer_class if customizing claims."""
+    
     pass
 
 
-# ✅ Registration View
+
 class RegisterView(generics.CreateAPIView):
     serializer_class = RegisterSerializer
     permission_classes = [permissions.AllowAny]
 
 
-# ✅ Login View
+
 class LoginView(APIView):
     permission_classes = [permissions.AllowAny]
     serializer_class = LoginSerializer
@@ -57,7 +58,7 @@ class LoginView(APIView):
         return Response(data, status=status.HTTP_200_OK)
 
 
-# ✅ Logout View
+
 class LogoutView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
@@ -73,7 +74,7 @@ class LogoutView(APIView):
             return Response({"detail": "Invalid token"}, status=status.HTTP_400_BAD_REQUEST)
 
 
-# ✅ User Profile View (Retrieve + Update)
+
 class UserProfileView(generics.RetrieveUpdateAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAuthenticated, IsOwnerOrAdmin]
@@ -88,24 +89,21 @@ class UserProfileView(generics.RetrieveUpdateAPIView):
         return self.update(request, *args, **kwargs)
 
 
-# ✅ User List View (Admin only)
+
 class UserListView(generics.ListAPIView):
     permission_classes = [permissions.IsAdminUser]
     serializer_class = UserSerializer
     queryset = User.objects.all().order_by('-date_joined')
 
 
-# ✅ Google Login View
+
 class GoogleLoginView(SocialLoginView):
-    """
-    Google OAuth2 Login API
-    Accepts access_token from frontend and logs in or creates the user.
-    """
+    
     adapter_class = GoogleOAuth2Adapter
     permission_classes = [AllowAny]
 
 
-# ✅ Password Change View (using serializer to utilize ChangePasswordSerializer)
+
 class PasswordChangeView(UpdateAPIView):
     serializer_class = ChangePasswordSerializer
     permission_classes = [IsAuthenticated]
@@ -134,7 +132,7 @@ class PasswordChangeView(UpdateAPIView):
         return Response({"detail": "Password changed successfully!"}, status=status.HTTP_200_OK)
 
 
-# ✅ Password Reset Request View
+
 class PasswordResetRequestView(APIView):
     permission_classes = [AllowAny]
 
@@ -164,7 +162,6 @@ class PasswordResetRequestView(APIView):
         return Response({"success": "Reset link sent to your email!"}, status=status.HTTP_200_OK)
 
 
-# ✅ Password Reset Confirm View
 class PasswordResetConfirmView(APIView):
     permission_classes = [AllowAny]
 
@@ -218,3 +215,24 @@ class KYCUploadView(APIView):
         user.is_identity_verified = False  # Admin must verify manually
         user.save()
         return Response({"message": "KYC document uploaded. Pending verification."})
+
+
+
+
+class ProfileUpdateView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data)
+
+    def patch(self, request):
+        
+        serializer = UserSerializer(request.user, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            calculate_profile_completion(request.user)
+            return Response({"message": "Profile updated successfully", 
+                             "profile_completion": request.user.profile_completion})
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

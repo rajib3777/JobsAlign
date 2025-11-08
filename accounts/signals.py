@@ -4,6 +4,8 @@ from django.conf import settings
 from .models import User
 # from referral.models import ReferralAccount
 from .utils import generate_referral_code
+from .utils import calculate_profile_completion
+
 
 @receiver(pre_save, sender=User)
 def ensure_referral_code(sender, instance, **kwargs):
@@ -47,3 +49,14 @@ def create_related_accounts(sender, instance, created, **kwargs):
     except Exception:
         # avoid infinite loop
         pass
+
+
+@receiver(post_save, sender=User)
+def update_profile_completion(sender, instance, **kwargs):
+    calculate_profile_completion(instance)
+
+
+
+
+
+

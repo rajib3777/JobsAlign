@@ -18,6 +18,7 @@ from .serializers import PortfolioSerializer
 from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.exceptions import ValidationError
 
 
 class ProjectCreateView(APIView):
@@ -172,3 +173,11 @@ class PortfolioListCreateView(APIView):
             serializer.save(user=request.user)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+
+def perform_create(self, serializer):
+    user = self.request.user
+    if user.profile_completion_score < 100:
+        raise ValidationError("You must complete your profile (100%) before bidding.")
+    serializer.save(user=user)
