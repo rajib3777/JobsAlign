@@ -17,7 +17,7 @@ SECRET_KEY = 'django-insecure-m)+ori8z52b_q%b^e(zmlmz$)=bb-2dui_(0s9xx^%l7@z4p0b
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ["jobsalign.com","www.jobsalign.com", "15.204.40.207"]
+ALLOWED_HOSTS = ["jobsalign.com","www.jobsalign.com", "15.204.40.207","127.0.0.1","localhost"]
 
 
 # Application definition
@@ -84,6 +84,7 @@ INSTALLED_APPS = [
 #my add
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware', 
     'django.contrib.sessions.middleware.SessionMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',

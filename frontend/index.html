@@ -2,295 +2,909 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>JobsAlign – Smarter Freelance Marketplace</title>
+  <meta charset="utf-8" />
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>JobsAlign — Hire Smarter. Work Faster.</title>
 
-  <!-- Tailwind CSS CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- SEO -->
+  <meta name="description" content="JobsAlign is a full-stack freelance marketplace with verified profiles, category-wise assessments, secure escrow and real-time job bidding.">
 
-  <!-- Custom inline Tailwind config -->
+  <!-- Favicon -->
+  <link rel="icon" href="{% static 'images/logo.jpeg' %}">
+
+  <!-- Perf: preconnect -->
+  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
+  <link rel="dns-prefetch" href="//cdn.tailwindcss.com">
+
+  <!-- Tailwind (CDN) -->
+  <script src="https://cdn.tailwindcss.com" defer></script>
+
+  <!-- AOS (Animate On Scroll) -->
+  <link rel="preload" as="style" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
+
   <script>
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            primary: '#2563eb',
-            secondary: '#1e293b',
-            accent: '#06b6d4',
-          },
-        },
-      },
-    };
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.tailwind) {
+        tailwind.config = {
+          theme: {
+            extend: {
+              colors: {
+                primary: '#2563eb',
+                ink: '#0f172a',
+                sea: '#06b6d4',
+                lime: '#84cc16',
+                grape: '#7c3aed',
+                flamingo: '#f43f5e',
+                sun: '#f59e0b',
+                teal: '#14b8a6'
+              },
+              boxShadow: {
+                smooth: '0 10px 30px rgba(2,6,23,.08)',
+                card: '0 14px 38px rgba(2,6,23,.12)'
+              },
+              animation: {
+                float: 'float 6s ease-in-out infinite',
+                shine: 'shine 1.4s linear infinite'
+              },
+              keyframes: {
+                float: {'0%,100%':{transform:'translateY(0)'}, '50%':{transform:'translateY(-6px)'}},
+                shine: {'0%':{backgroundPosition:'-200% 0'}, '100%':{backgroundPosition:'200% 0'}}
+              }
+            }
+          }
+        }
+      }
+    });
   </script>
 
-  <!-- Custom CSS -->
   <style>
-    html {
-      scroll-behavior: smooth;
+    html{scroll-behavior:smooth; overflow-x:hidden}
+    body{overflow-x:hidden}
+    .fade-up{opacity:0;transform:translateY(16px);transition:all .7s ease}
+    .fade-up.visible{opacity:1;transform:translateY(0)}
+    .nav-blur{backdrop-filter:saturate(1.2) blur(10px); background:rgba(255,255,255,.82)}
+    .line-1{-webkit-line-clamp:1;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+    .line-2{-webkit-line-clamp:2;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+    .line-3{-webkit-line-clamp:3;display:-webkit-box;-webkit-box-orient:vertical;overflow:hidden}
+    .shine{
+      background:linear-gradient(90deg, rgba(226,232,240,0) 0%, rgba(226,232,240,1) 50%, rgba(226,232,240,0) 100%);
+      background-size:200% 100%;
+      animation:shine 1.4s linear infinite;
     }
-    .nav-shadow {
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+    /* Marquee */
+    .marquee-track{display:flex;gap:1rem;will-change:transform}
+    @media (prefers-reduced-motion:no-preference){
+      .marquee-animate{animation:marquee 30s linear infinite}
+      .marquee-animate:hover{animation-play-state:paused}
+      @keyframes marquee{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
     }
-    .fade-up {
-      opacity: 0;
-      transform: translateY(20px);
-      transition: all 0.8s ease;
-    }
-    .fade-up.visible {
-      opacity: 1;
-      transform: translateY(0);
-    }
-    @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-    }
-    .animate-fadeIn {
-      animation: fadeIn 1.5s ease-in-out;
-    }
-
-    
+    /* Dropdown accessibility */
+    .dropdown[aria-expanded="true"] .dropdown-menu {display:block}
+    .dropdown-menu{display:none}
   </style>
 </head>
-<body class="font-sans text-gray-800 bg-gray-50">
 
-  <!-- Navbar -->
-  <nav id="navbar" class="fixed top-0 left-0 w-full bg-white z-50 nav-shadow transition-all duration-300">
-    <div class="max-w-7xl mx-auto flex items-center justify-between px-6 py-4">
+<body class="bg-gray-50 text-gray-800 antialiased">
+<!-- ================= NAVBAR (Upwork-like) ================= -->
+<nav id="nav" class="fixed top-0 inset-x-0 z-50 nav-blur shadow-sm">
+  <div class="max-w-7xl mx-auto px-4 md:px-6">
+    <div class="flex items-center justify-between py-3">
+      <!-- Brand -->
+      <a href="/" class="flex items-center gap-2">
+        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign" class="w-28 h-auto object-contain" loading="eager" decoding="async">
+      </a>
 
-      <div class="flex items-center space-x-2">
-        <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
-      </div>
-
-      <div class="hidden md:flex items-center space-x-8">
-        <a href="#features" class="hover:text-primary">Features</a>
-        <a href="#categories" class="hover:text-primary">Categories</a>
-        <a href="#pricing" class="hover:text-primary">Pricing</a>
-        <a href="#contact" class="hover:text-primary">Contact</a>
-      </div>
-      <div class="space-x-3 hidden md:flex">
-        <a href="{% url 'login_page' %}">
-          <button class="px-4 py-2 rounded-md border border-primary text-white bg-primary text-white hover:bg-blue-700">
-            Login
+      <!-- Desktop Nav -->
+      <div class="hidden lg:flex items-center gap-6 text-sm">
+        <!-- Hire Freelancers -->
+        <div class="relative dropdown">
+          <button class="flex items-center gap-1 hover:text-primary" aria-expanded="false" aria-haspopup="true">
+            Hire Freelancers
+            <svg width="16" height="16" fill="currentColor"><path d="M4 6l4 4 4-4"/></svg>
           </button>
-        </a>
-        <a href="{% url 'register_page' %}">
-          <button class="px-4 py-2 rounded-md bg-primary text-white hover:bg-blue-700">
-            Sign Up
+          <div class="absolute dropdown-menu left-0 mt-3 w-[680px] bg-white shadow-xl rounded-xl p-5 border border-gray-100">
+            <div class="grid grid-cols-3 gap-5">
+              <a href="/categories/web-development/" class="group">
+                <div class="flex items-center gap-3">
+                  <span class="p-2 rounded-lg bg-blue-50 text-primary">
+                    <!-- code icon -->
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="group-hover:scale-110 transition">
+                      <path d="M16 18l6-6-6-6" stroke="currentColor" stroke-width="2" fill="none"/>
+                      <path d="M8 6L2 12l6 6" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="font-semibold">Web Development</div>
+                    <div class="text-xs text-gray-500">Sites, CMS, landing pages</div>
+                  </div>
+                </div>
+              </a>
+              <a href="/categories/software-development/" class="group">
+                <div class="flex items-center gap-3">
+                  <span class="p-2 rounded-lg bg-violet-50 text-grape">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="group-hover:scale-110 transition">
+                      <path d="M4 4h16v12H4zM2 20h20" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="font-semibold">Software Development</div>
+                    <div class="text-xs text-gray-500">APIs, microservices, desktop</div>
+                  </div>
+                </div>
+              </a>
+              <a href="/categories/graphics-and-design/" class="group">
+                <div class="flex items-center gap-3">
+                  <span class="p-2 rounded-lg bg-pink-50 text-flamingo">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="group-hover:scale-110 transition">
+                      <path d="M4 4h16v12H4zM8 20h8" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="font-semibold">Graphics & Design</div>
+                    <div class="text-xs text-gray-500">Branding, UI/UX, illustration</div>
+                  </div>
+                </div>
+              </a>
+              <a href="/categories/digital-marketing/" class="group">
+                <div class="flex items-center gap-3">
+                  <span class="p-2 rounded-lg bg-yellow-50 text-sun">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="group-hover:scale-110 transition">
+                      <path d="M3 12h18M12 3v18" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="font-semibold">Digital Marketing</div>
+                    <div class="text-xs text-gray-500">SEO, ads, social media</div>
+                  </div>
+                </div>
+              </a>
+              <a href="/categories/admin-and-hr-support/" class="group">
+                <div class="flex items-center gap-3">
+                  <span class="p-2 rounded-lg bg-teal-50 text-teal">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="group-hover:scale-110 transition">
+                      <path d="M4 7h16M4 12h10M4 17h7" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="font-semibold">Admin & HR Support</div>
+                    <div class="text-xs text-gray-500">VA, recruiting, back-office</div>
+                  </div>
+                </div>
+              </a>
+              <a href="/categories/bookkeeping-and-accounting/" class="group">
+                <div class="flex items-center gap-3">
+                  <span class="p-2 rounded-lg bg-green-50 text-lime">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" class="group-hover:scale-110 transition">
+                      <path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h8" stroke="currentColor" stroke-width="2" fill="none"/>
+                    </svg>
+                  </span>
+                  <div>
+                    <div class="font-semibold">Bookkeeping & Accounting</div>
+                    <div class="text-xs text-gray-500">Books, payroll, tax</div>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="mt-4 text-right">
+              <a href="/categories" class="text-primary hover:underline text-sm">Browse all categories →</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- Find Work -->
+        <div class="relative dropdown">
+          <button class="flex items-center gap-1 hover:text-primary" aria-expanded="false" aria-haspopup="true">
+            Find Work
+            <svg width="16" height="16" fill="currentColor"><path d="M4 6l4 4 4-4"/></svg>
           </button>
-        </a>
-      </div>
-      <button id="menuBtn" class="md:hidden text-2xl focus:outline-none">
-        ☰
-      </button>
-    </div>
-
-    <!-- Mobile menu -->
-    <div id="mobileMenu" class="hidden bg-white border-t border-gray-100 flex flex-col px-6 py-4 space-y-3">
-      <a href="#features">Features</a>
-      <a href="#categories">Categories</a>
-      <a href="#pricing">Pricing</a>
-      <a href="#contact">Contact</a>
-      <hr />
-      <button class="px-4 py-2 rounded-md border border-primary text-primary">Login</button>
-      <button class="px-4 py-2 rounded-md bg-primary text-white">Sign Up</button>
-    </div>
-  </nav>
-
-  <section class="relative w-full h-[85vh] overflow-hidden flex items-center justify-center text-center text-white">
-  
-    <!-- Background Slider -->
-    <div id="slider" class="absolute inset-0 flex transition-transform duration-[1500ms] ease-in-out">
-      <img src="{% static 'images/tran1.jpg' %}" class="w-full h-full object-cover flex-shrink-0" alt="Hero 1">
-      <img src="{% static 'images/tran2.jpg' %}" class="w-full h-full object-cover flex-shrink-0" alt="Hero 2">
-      <img src="{% static 'images/tran3.jpg' %}" class="w-full h-full object-cover flex-shrink-0" alt="Hero 3">
-      <img src="{% static 'images/tran4.jpg' %}" class="w-full h-full object-cover flex-shrink-0" alt="Hero 4">
-      <img src="{% static 'images/tran5.jpg' %}" class="w-full h-full object-cover flex-shrink-0" alt="Hero 5">
-    </div>
-
-    <!-- Dark Overlay -->
-    <div class="absolute inset-0 bg-black/60 backdrop-blur-[1px]"></div>
-
-    <!-- Hero Content -->
-    <div class="relative z-10 max-w-4xl px-6 animate-fadeIn">
-      <h1 class="text-4xl md:text-6xl font-bold mb-6 leading-tight">
-        Connect, Collaborate, and Get Work Done Smarter
-      </h1>
-      <p class="text-lg md:text-xl text-gray-200 mb-8">
-        JobsAlign helps you find the best talent or the right project, powered by AI-matching,
-        verified profiles, and secure payments.
-      </p>
-      <div class="flex justify-center space-x-4">
-        <button class="px-6 py-3 bg-primary text-white rounded-md hover:bg-blue-700 shadow-lg">Find Work</button>
-        <button class="px-6 py-3 bg-accent text-white rounded-md hover:bg-cyan-500 shadow-lg">Hire Talent</button>
-      </div>
-    </div>
-  </section>
-
-  <!-- Features Section -->
-  <section id="features" class="py-20 bg-white fade-up">
-    <div class="max-w-6xl mx-auto px-6 text-center">
-      <h2 class="text-3xl md:text-4xl font-bold mb-10">Why Choose JobsAlign?</h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="p-6 bg-gray-50 rounded-lg shadow hover:shadow-lg transition">
-          <h3 class="font-semibold text-xl mb-2 text-primary">AI-Powered Matching</h3>
-          <p>We connect clients with freelancers using smart matching algorithms that ensure skill and need alignment.</p>
+          <div class="absolute dropdown-menu left-0 mt-3 w-[520px] bg-white shadow-xl rounded-xl p-5 border border-gray-100">
+            <div class="grid grid-cols-2 gap-4">
+              <a href="/jobs?type=fixed" class="block p-3 rounded-lg hover:bg-gray-50">
+                <div class="font-semibold">Fixed-price</div>
+                <div class="text-xs text-gray-500">Milestone-based projects</div>
+              </a>
+              <a href="/jobs?type=hourly" class="block p-3 rounded-lg hover:bg-gray-50">
+                <div class="font-semibold">Hourly</div>
+                <div class="text-xs text-gray-500">Time-tracked engagements</div>
+              </a>
+              <a href="/jobs?type=featured" class="block p-3 rounded-lg hover:bg-gray-50">
+                <div class="font-semibold">Featured</div>
+                <div class="text-xs text-gray-500">Top visibility (+budget)</div>
+              </a>
+              <a href="/jobs?verified=1" class="block p-3 rounded-lg hover:bg-gray-50">
+                <div class="font-semibold">Verified clients</div>
+                <div class="text-xs text-gray-500">Payment method verified</div>
+              </a>
+            </div>
+            <div class="mt-4 text-right">
+              <a href="/jobs" class="text-primary hover:underline text-sm">Browse all jobs →</a>
+            </div>
+          </div>
         </div>
-        <div class="p-6 bg-gray-50 rounded-lg shadow hover:shadow-lg transition">
-          <h3 class="font-semibold text-xl mb-2 text-primary">Secure Payments</h3>
-          <p>Our escrow-based system ensures peace of mind for both freelancers and clients throughout the project.</p>
-        </div>
-        <div class="p-6 bg-gray-50 rounded-lg shadow hover:shadow-lg transition">
-          <h3 class="font-semibold text-xl mb-2 text-primary">Verified Profiles</h3>
-          <p>Every freelancer is ID-verified to maintain trust and quality across the JobsAlign ecosystem.</p>
-        </div>
-      </div>
-    </div>
-  </section>
 
-  <!-- Categories Section -->
-  <section id="categories" class="py-20 bg-blue-50 fade-up">
-    <div class="max-w-6xl mx-auto px-6 text-center">
-      <h2 class="text-3xl md:text-4xl font-bold mb-10">Explore Top Categories</h2>
-      <div class="grid sm:grid-cols-2 md:grid-cols-4 gap-6">
-        <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg">Web Development</div>
-        <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg">Graphic Design</div>
-        <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg">Digital Marketing</div>
-        <div class="bg-white p-6 rounded-lg shadow hover:shadow-lg">Writing & Translation</div>
-      </div>
-    </div>
-  </section>
+        <!-- Why JobsAlign -->
+        <div class="relative dropdown">
+          <button class="flex items-center gap-1 hover:text-primary" aria-expanded="false" aria-haspopup="true">
+            Why JobsAlign
+            <svg width="16" height="16" fill="currentColor"><path d="M4 6l4 4 4-4"/></svg>
+          </button>
+          <div class="absolute dropdown-menu left-0 mt-3 w-[520px] bg-white shadow-xl rounded-xl p-5 border border-gray-100">
+            <div class="grid grid-cols-2 gap-4">
+              <a href="/verification" class="block p-3 rounded-lg hover:bg-gray-50">
+                <div class="font-semibold">Verified profiles</div>
+                <div class="text-xs text-gray-500">KYC + assessments</div>
+              </a>
+              <a href="/assessments" class="block p-3 rounded-lg hover:bg-gray-50">
+                <div class="font-semibold">Skill tests</div>
+                <div class="text-xs text-gray-500">English + category</div>
+              </a>
+              <a href="/payments" class="block p-3 rounded-lg hover:bg-gray-50">
+                <div class="font-semibold">Secure escrow</div>
+                <div class="text-xs text-gray-500">Milestone payouts</div>
+              </a>
+              <a href="/support" class="block p-3 rounded-lg hover:bg-gray-50">
+                <div class="font-semibold">24/7 support</div>
+                <div class="text-xs text-gray-500">Disputes & resolution</div>
+              </a>
+            </div>
+            <div class="mt-4 text-right">
+              <a href="/about" class="text-primary hover:underline text-sm">Learn more →</a>
+            </div>
+          </div>
+        </div>
 
-  <!-- Pricing Section -->
-  <section id="pricing" class="py-20 bg-white fade-up">
-    <div class="max-w-6xl mx-auto px-6 text-center">
-      <h2 class="text-3xl md:text-4xl font-bold mb-10">Flexible Plans for Everyone</h2>
-      <div class="grid md:grid-cols-3 gap-8">
-        <div class="p-8 border rounded-lg shadow hover:shadow-lg">
-          <h3 class="text-xl font-bold mb-4">Free</h3>
-          <p class="text-gray-600 mb-6">Best for beginners exploring freelancing.</p>
-          <p class="text-3xl font-bold mb-6">$0</p>
-          <button class="px-6 py-2 bg-primary text-white rounded-md">Get Started</button>
-        </div>
-        <div class="p-8 border rounded-lg shadow-lg border-primary">
-          <h3 class="text-xl font-bold mb-4 text-primary">Pro</h3>
-          <p class="text-gray-600 mb-6">For experienced freelancers and small teams.</p>
-          <p class="text-3xl font-bold mb-6">$29/mo</p>
-          <button class="px-6 py-2 bg-primary text-white rounded-md">Subscribe</button>
-        </div>
-        <div class="p-8 border rounded-lg shadow hover:shadow-lg">
-          <h3 class="text-xl font-bold mb-4">Enterprise</h3>
-          <p class="text-gray-600 mb-6">For agencies and large organizations.</p>
-          <p class="text-3xl font-bold mb-6">Custom</p>
-          <button class="px-6 py-2 bg-accent text-white rounded-md">Contact Sales</button>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Contact / Footer -->
-  <footer id="contact" class="relative bg-gradient-to-b from-gray-50 to-white text-gray-800 border-t border-gray-200 mt-20">
-    <div class="max-w-7xl mx-auto px-6 py-14 grid grid-cols-1 md:grid-cols-4 gap-10 text-sm">
-      
-      <!-- Brand Section -->
-      <div>
-        <div class="flex items-center space-x-2 mb-3">
-          <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign Logo" class="w-32 h-auto object-contain">
-        </div>
-        <p class="text-gray-600 leading-relaxed">
-          Empowering freelancers, clients, and businesses to collaborate, innovate, and succeed — all in one place.
-        </p>
-        <div class="flex space-x-4 mt-4">
-          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-facebook-f"></i></a>
-          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-twitter"></i></a>
-          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-linkedin-in"></i></a>
-          <a href="#" class="text-gray-500 hover:text-primary"><i class="fab fa-instagram"></i></a>
+        <!-- What's New (Affiliate) -->
+        <div class="relative dropdown">
+          <button class="flex items-center gap-1 hover:text-primary" aria-expanded="false" aria-haspopup="true">
+            What’s New
+            <svg width="16" height="16" fill="currentColor"><path d="M4 6l4 4 4-4"/></svg>
+          </button>
+          <div class="absolute dropdown-menu left-0 mt-3 w-[420px] bg-white shadow-xl rounded-xl p-5 border border-gray-100">
+            <a href="/affiliate" class="block p-3 rounded-lg hover:bg-gray-50">
+              <div class="font-semibold">Affiliate Marketing</div>
+              <div class="text-xs text-gray-500">Earn commission by referring clients & freelancers</div>
+            </a>
+            <div class="mt-4 text-right">
+              <a href="/whats-new" class="text-primary hover:underline text-sm">See all updates →</a>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Platform Links -->
-      <div>
-        <h4 class="text-lg font-semibold mb-3 text-secondary">Platform</h4>
-        <ul class="space-y-2 text-gray-600">
-          <li><a href="#marketplace" class="hover:text-primary">Marketplace</a></li>
-          <li><a href="#jobs" class="hover:text-primary">Job Listings</a></li>
-          <li><a href="#chats" class="hover:text-primary">Chats & Collaboration</a></li>
-          <li><a href="#notifications" class="hover:text-primary">Notifications</a></li>
-        </ul>
+      <!-- Auth -->
+      <div class="hidden lg:flex items-center gap-2">
+        <a href="{% url 'login_page' %}" class="px-4 py-2 rounded-md border border-primary text-primary hover:bg-primary hover:text-white transition">Login</a>
+        <a href="{% url 'register_page' %}" class="px-4 py-2 rounded-md bg-primary text-white hover:bg-blue-700 transition">Sign Up</a>
       </div>
 
-      <!-- Resources -->
-      <div>
-        <h4 class="text-lg font-semibold mb-3 text-secondary">Resources</h4>
-        <ul class="space-y-2 text-gray-600">
-          <li><a href="#analytics" class="hover:text-primary">Analytics Dashboard</a></li>
-          <li><a href="#support" class="hover:text-primary">Help & Support</a></li>
-          <li><a href="#disputes" class="hover:text-primary">Dispute Center</a></li>
-          <li><a href="#verification" class="hover:text-primary">Profile Verification</a></li>
-        </ul>
-      </div>
-
-      <!-- About / Legal -->
-      <div>
-        <h4 class="text-lg font-semibold mb-3 text-secondary">About</h4>
-        <ul class="space-y-2 text-gray-600">
-          <li><a href="#about" class="hover:text-primary">About Us</a></li>
-          <li><a href="#team" class="hover:text-primary">Our Team</a></li>
-          <li><a href="#terms" class="hover:text-primary">Terms & Conditions</a></li>
-          <li><a href="#privacy" class="hover:text-primary">Privacy Policy</a></li>
-        </ul>
-      </div>
-
+      <!-- Mobile menu button -->
+      <button id="menuBtn" class="lg:hidden text-2xl" aria-label="Open menu">☰</button>
     </div>
 
-    <!-- Bottom Section -->
-    <div class="border-t border-gray-200 mt-10 pt-6 pb-8 text-center text-gray-500 text-sm">
-      <p>&copy; 2025 <span class="font-semibold text-primary">JobsAlign</span>. All rights reserved.</p>
-      <p class="mt-2 text-blue-500">
-        Developed by 
-        <a href="https://somadhansoft.com/" class="hover:underline font-semibold text-blue-600" target="_blank" rel="noopener noreferrer">
-          SomadhanSoft
-        </a>
-      </p>
+    <!-- Mobile Nav -->
+    <div id="mobileMenu" class="hidden lg:hidden px-4 pb-4 space-y-3 bg-white border-t border-gray-100">
+      <details>
+        <summary class="py-2 cursor-pointer">Hire Freelancers</summary>
+        <div class="pl-3 space-y-2">
+          <a href="/categories/web-development/" class="block">Web Development</a>
+          <a href="/categories/software-development/" class="block">Software Development</a>
+          <a href="/categories/graphics-and-design/" class="block">Graphics & Design</a>
+          <a href="/categories/digital-marketing/" class="block">Digital Marketing</a>
+          <a href="/categories/admin-and-hr-support/" class="block">Admin & HR Support</a>
+          <a href="/categories/bookkeeping-and-accounting/" class="block">Bookkeeping & Accounting</a>
+          <a href="/categories" class="block text-primary">Browse all →</a>
+        </div>
+      </details>
+
+      <details>
+        <summary class="py-2 cursor-pointer">Find Work</summary>
+        <div class="pl-3 space-y-2">
+          <a href="/jobs?type=fixed" class="block">Fixed-price</a>
+          <a href="/jobs?type=hourly" class="block">Hourly</a>
+          <a href="/jobs?type=featured" class="block">Featured</a>
+          <a href="/jobs?verified=1" class="block">Verified clients</a>
+        </div>
+      </details>
+
+      <details>
+        <summary class="py-2 cursor-pointer">Why JobsAlign</summary>
+        <div class="pl-3 space-y-2">
+          <a href="/verification" class="block">Verified profiles</a>
+          <a href="/assessments" class="block">Skill tests</a>
+          <a href="/payments" class="block">Secure escrow</a>
+          <a href="/support" class="block">24/7 support</a>
+        </div>
+      </details>
+
+      <details open>
+        <summary class="py-2 cursor-pointer">What’s New</summary>
+        <div class="pl-3 space-y-2">
+          <a href="/affiliate" class="block">Affiliate Marketing</a>
+          <a href="/whats-new" class="block text-primary">See all updates →</a>
+        </div>
+      </details>
+
+      <hr>
+      <a href="{% url 'login_page' %}" class="block px-4 py-2 rounded-md border border-primary text-primary text-center">Login</a>
+      <a href="{% url 'register_page' %}" class="block px-4 py-2 rounded-md bg-primary text-white text-center">Sign Up</a>
     </div>
-  </footer>
+  </div>
+</nav>
 
+<!-- ================= HERO ================= -->
+<header class="relative pt-24 md:pt-28">
+  <!-- Background slider -->
+  <div class="relative w-full h-[72vh] md:h-[78vh] overflow-hidden">
+    <div id="slider" class="absolute inset-0 flex transition-transform duration-[1400ms] ease-in-out">
+      <img src="{% static 'images/tran1.jpg' %}" class="w-full h-full object-cover flex-shrink-0" alt="Collaborate" loading="eager">
+      <img src="{% static 'images/tran2.jpg' %}" class="w-full h-full object-cover flex-shrink-0" alt="Design" loading="lazy">
+      <img src="{% static 'images/tran3.jpg' %}" class="w-full h-full object-cover flex-shrink-0" alt="Development" loading="lazy">
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-black/10"></div>
 
-  <!-- JS for animations + menu -->
-  <script>
-    const nav = document.getElementById('navbar');
-    window.addEventListener('scroll', () => {
-      if (window.scrollY > 20) nav.classList.add('shadow-lg');
-      else nav.classList.remove('shadow-lg');
+    <!-- Content -->
+    <div class="absolute inset-0 flex items-center">
+      <div class="max-w-7xl mx-auto px-4 md:px-6 grid md:grid-cols-2 gap-8">
+        <div class="text-white fade-up">
+          <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">Find Work. Hire Talent. <span class="text-sea">Aligned.</span></h1>
+          <p class="mt-4 text-gray-100 text-lg">AI matching, verified profiles, secure escrow — everything you need to hire or get hired.</p>
+          <div class="mt-6 flex gap-3">
+            <button id="btnFindWork" class="px-5 py-3 bg-primary text-white rounded-md shadow-smooth hover:bg-blue-700">Find Work</button>
+            <button id="btnHireTalent" class="px-5 py-3 bg-sea text-white rounded-md shadow-smooth hover:bg-cyan-500">Hire Talent</button>
+          </div>
+          <div class="mt-4 text-sm text-gray-200">Trusted by teams worldwide • Fast payouts • 24/7 support</div>
+        </div>
+
+        <!-- Animated Search Box (hidden initially) -->
+        <div class="relative fade-up">
+          <div id="searchPane" class="hidden bg-white/90 rounded-xl shadow-card p-4 backdrop-blur">
+            <div class="flex items-center gap-2 border rounded-lg p-2">
+              <svg width="20" height="20" fill="currentColor" class="text-gray-500"><path d="M11 17a6 6 0 1 1 4.472-2.028l3.778 3.778-1.414 1.414-3.778-3.778A6 6 0 0 1 11 17z"/></svg>
+              <input id="globalSearch" type="text" class="w-full outline-none bg-transparent" placeholder="Search jobs, freelancers, categories..." />
+              <button id="searchBtn" class="px-3 py-2 bg-primary text-white rounded-md">Search</button>
+            </div>
+            <div class="text-xs text-gray-500 mt-1">Try: “React developer”, “Logo designer”, “SEO specialist”</div>
+            <div id="searchResults" class="mt-3 grid sm:grid-cols-2 gap-3"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ================= CATEGORIES (6 icons, colorful) ================= -->
+<section id="categories" class="py-16 md:py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 md:px-6">
+    <div class="flex items-end justify-between mb-8">
+      <h2 class="text-3xl md:text-4xl font-bold">Top Categories</h2>
+      <a href="/categories" class="text-primary text-sm hover:underline">View all</a>
+    </div>
+
+    <!-- skeleton -->
+    <div id="cat-skeleton" class="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+      {% for _ in "123456" %}
+      <div class="bg-gray-50 p-5 rounded-xl animate-pulse">
+        <div class="w-10 h-10 rounded-lg bg-gray-200 mb-4"></div>
+        <div class="h-4 bg-gray-200 w-3/4 rounded"></div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div id="cat-grid" class="hidden grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4"></div>
+
+    <!-- preferred mapping + endpoint -->
+    <div id="cat-config"
+         data-url="/api/categories/?limit=24"
+         data-media="{{ MEDIA_URL|default:'' }}">
+    </div>
+  </div>
+</section>
+
+<!-- ================= FEATURED JOBS ================= -->
+<section id="jobs" class="py-16 md:py-20 bg-blue-50">
+  <div class="max-w-7xl mx-auto px-4 md:px-6">
+    <div class="flex items-end justify-between mb-8">
+      <h2 class="text-3xl md:text-4xl font-bold">Featured Jobs</h2>
+      <a href="/jobs" class="text-primary text-sm hover:underline">Browse all jobs</a>
+    </div>
+
+    <div id="jobs-skeleton" class="grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+      {% for _ in "1234" %}
+      <div class="bg-white p-5 rounded-xl shadow animate-pulse">
+        <div class="h-5 w-3/4 bg-gray-200 rounded mb-3"></div>
+        <div class="h-4 w-1/2 bg-gray-200 rounded mb-4"></div>
+        <div class="h-3 w-full bg-gray-200 rounded mb-1"></div>
+        <div class="h-3 w-5/6 bg-gray-200 rounded mb-1"></div>
+        <div class="h-3 w-2/3 bg-gray-200 rounded"></div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div id="jobs-grid" class="hidden grid md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4"></div>
+
+    <div id="jobs-config" data-url="/api/marketplace/jobs/?featured=true&limit=8"></div>
+  </div>
+</section>
+
+<!-- ================= FREELANCERS (marquee) ================= -->
+<section id="freelancers" class="py-16 md:py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 md:px-6">
+    <div class="flex items-end justify-between mb-6">
+      <h2 class="text-3xl md:text-4xl font-bold">Trending Freelancers</h2>
+      <a href="/freelancers" class="text-primary text-sm hover:underline">View all</a>
+    </div>
+
+    <!-- skeleton -->
+    <div id="fr-skeleton" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+      {% for _ in "123456" %}
+      <div class="bg-gray-50 p-4 rounded-xl animate-pulse">
+        <div class="w-16 h-16 bg-gray-200 rounded-full mb-3 mx-auto"></div>
+        <div class="h-3 bg-gray-200 rounded w-3/4 mx-auto mb-2"></div>
+        <div class="h-3 bg-gray-200 rounded w-1/2 mx-auto"></div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div id="fr-marquee" class="relative overflow-hidden rounded-xl border border-gray-100 hidden">
+      <div class="marquee-track marquee-animate p-4" id="fr-track"></div>
+    </div>
+
+    <div id="fr-config"
+         data-url="/api/accounts/freelancers/?featured=true&limit=24"
+         data-media="{{ MEDIA_URL|default:'' }}"
+         data-placeholder="{% static 'images/avatar-placeholder.png' %}">
+    </div>
+  </div>
+</section>
+
+<!-- ================= WHAT'S NEW (Affiliate) ================= -->
+<section class="py-12 bg-gradient-to-r from-primary via-grape to-flamingo text-white">
+  <div class="max-w-7xl mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center gap-6">
+    <div class="flex-1">
+      <h3 class="text-2xl md:text-3xl font-bold">What’s New — Affiliate Marketing</h3>
+      <p class="mt-2 text-white/90">Earn commission by referring clients & freelancers. Share your unique link, track performance in real-time, and get paid fast.</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/affiliate" class="px-5 py-3 bg-white text-ink rounded-md shadow-smooth hover:bg-gray-100">Join as Affiliate</a>
+      <a href="/whats-new" class="px-5 py-3 bg-black/20 text-white rounded-md shadow-smooth hover:bg-black/30">Learn more</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= HOW IT WORKS ================= -->
+<section class="py-16 md:py-20 bg-white">
+  <div class="max-w-7xl mx-auto px-4 md:px-6">
+    <h2 class="text-3xl md:text-4xl font-bold text-center mb-12">How JobsAlign Works</h2>
+    <div class="grid md:grid-cols-4 gap-6">
+      <div class="p-6 rounded-xl shadow bg-blue-50" data-aos="fade-up">
+        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mb-3 shadow">
+          <svg width="22" height="22" fill="none" stroke="currentColor" class="text-primary"><path d="M12 2l4 4-4 4-4-4 4-4zM2 20h20" stroke-width="2"/></svg>
+        </div>
+        <div class="font-semibold">Create Profile</div>
+        <div class="text-sm text-gray-600">Add skills, portfolio & verify identity</div>
+      </div>
+      <div class="p-6 rounded-xl shadow bg-green-50" data-aos="fade-up" data-aos-delay="100">
+        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mb-3 shadow">
+          <svg width="22" height="22" fill="none" stroke="currentColor" class="text-lime"><path d="M4 7h16M4 12h10M4 17h7" stroke-width="2"/></svg>
+        </div>
+        <div class="font-semibold">Take Assessments</div>
+        <div class="text-sm text-gray-600">English + skill tests to stand out</div>
+      </div>
+      <div class="p-6 rounded-xl shadow bg-yellow-50" data-aos="fade-up" data-aos-delay="200">
+        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mb-3 shadow">
+          <svg width="22" height="22" fill="none" stroke="currentColor" class="text-sun"><path d="M3 12h18M12 3v18" stroke-width="2"/></svg>
+        </div>
+        <div class="font-semibold">Get Matched</div>
+        <div class="text-sm text-gray-600">AI recommends best-fit projects</div>
+      </div>
+      <div class="p-6 rounded-xl shadow bg-pink-50" data-aos="fade-up" data-aos-delay="300">
+        <div class="w-10 h-10 bg-white rounded-lg flex items-center justify-center mb-3 shadow">
+          <svg width="22" height="22" fill="none" stroke="currentColor" class="text-flamingo"><path d="M4 4h16v12H4zM2 20h20" stroke-width="2"/></svg>
+        </div>
+        <div class="font-semibold">Earn Safely</div>
+        <div class="text-sm text-gray-600">Escrow & milestone-based payouts</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= REVIEWS ================= -->
+<section id="reviews" class="py-16 md:py-20 bg-gray-50">
+  <div class="max-w-7xl mx-auto px-4 md:px-6">
+    <div class="flex items-end justify-between mb-8">
+      <h2 class="text-3xl md:text-4xl font-bold">What Clients Say</h2>
+      <a href="/reviews" class="text-primary text-sm hover:underline">All reviews</a>
+    </div>
+
+    <div id="rv-skeleton" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+      {% for _ in "123" %}
+      <div class="bg-white p-5 rounded-xl shadow animate-pulse">
+        <div class="h-4 w-2/3 bg-gray-200 rounded mb-3"></div>
+        <div class="h-3 w-full bg-gray-200 rounded mb-2"></div>
+        <div class="h-3 w-5/6 bg-gray-200 rounded mb-1"></div>
+        <div class="h-3 w-2/3 bg-gray-200 rounded"></div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div id="rv-grid" class="hidden grid md:grid-cols-2 lg:grid-cols-3 gap-4"></div>
+
+    <div id="rv-config"
+         data-url="/api/reviews/?featured=true&limit=6"
+         data-media="{{ MEDIA_URL|default:'' }}"
+         data-avatar="{% static 'images/avatar-placeholder.png' %}">
+    </div>
+  </div>
+</section>
+
+<!-- ================= CTA ================= -->
+<section id="cta" class="py-16 md:py-24 bg-gradient-to-br from-blue-600 via-blue-500 to-cyan-500 text-white">
+  <div class="max-w-7xl mx-auto px-4 md:px-6 text-center">
+    <h2 class="text-3xl md:text-4xl font-bold">Ready to get aligned?</h2>
+    <p class="mt-3 text-blue-100">Create your profile, pass assessments and start winning projects today.</p>
+    <div class="mt-6 flex justify-center gap-3">
+      <a href="{% url 'register_page' %}" class="px-6 py-3 bg-white text-blue-700 rounded-md shadow-smooth hover:bg-gray-100">Join us</a>
+    </div>
+  </div>
+</section>
+
+<!-- ================= FOOTER ================= -->
+<footer class="bg-white border-t border-gray-200">
+  <div class="max-w-7xl mx-auto px-4 md:px-6 py-12 grid md:grid-cols-4 gap-8 text-sm">
+    <div>
+      <img src="{% static 'images/logo.jpeg' %}" alt="JobsAlign" class="w-28 h-auto object-contain mb-3">
+      <p class="text-gray-600">A modular freelance marketplace with assessments, escrow and verified profiles.</p>
+    </div>
+    <div>
+      <h4 class="font-semibold mb-3">Platform</h4>
+      <ul class="space-y-2 text-gray-600">
+        <li><a href="/marketplace" class="hover:text-primary">Marketplace</a></li>
+        <li><a href="/jobs" class="hover:text-primary">Jobs</a></li>
+        <li><a href="/chats" class="hover:text-primary">Chats</a></li>
+        <li><a href="/notifications" class="hover:text-primary">Notifications</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-semibold mb-3">Resources</h4>
+      <ul class="space-y-2 text-gray-600">
+        <li><a href="/analytics" class="hover:text-primary">Analytics</a></li>
+        <li><a href="/support" class="hover:text-primary">Support</a></li>
+        <li><a href="/disputes" class="hover:text-primary">Disputes</a></li>
+        <li><a href="/verification" class="hover:text-primary">Verification</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4 class="font-semibold mb-3">Legal</h4>
+      <ul class="space-y-2 text-gray-600">
+        <li><a href="/terms" class="hover:text-primary">Terms</a></li>
+        <li><a href="/privacy" class="hover:text-primary">Privacy</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-gray-200 py-6 text-center text-sm text-gray-500">
+    © {{ now|date:"Y" }} JobsAlign. All rights reserved.
+  </div>
+</footer>
+
+<!-- ================= SCRIPTS ================= -->
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>
+  // ---------- AOS init ----------
+  AOS.init({ duration: 700, once: true });
+
+  // ---------- Navbar dropdowns ----------
+  const dropdowns = document.querySelectorAll('.dropdown');
+  dropdowns.forEach(dd=>{
+    const btn = dd.querySelector('button');
+    btn?.addEventListener('click', (e)=>{
+      const expanded = dd.getAttribute('aria-expanded') === 'true';
+      // close others
+      dropdowns.forEach(x=>x.setAttribute('aria-expanded','false'));
+      dd.setAttribute('aria-expanded', expanded ? 'false' : 'true');
+      e.stopPropagation();
     });
+  });
+  // click away
+  document.addEventListener('click', ()=> dropdowns.forEach(x=>x.setAttribute('aria-expanded','false')));
 
-    const menuBtn = document.getElementById('menuBtn');
-    const mobileMenu = document.getElementById('mobileMenu');
-    menuBtn.addEventListener('click', () => {
-      mobileMenu.classList.toggle('hidden');
-    });
+  // mobile menu
+  const menuBtn = document.getElementById('menuBtn');
+  const mobileMenu = document.getElementById('mobileMenu');
+  menuBtn?.addEventListener('click', ()=> mobileMenu.classList.toggle('hidden'));
 
-    const fadeElements = document.querySelectorAll('.fade-up');
-    const observer = new IntersectionObserver(entries => {
-      entries.forEach(entry => {
-        if (entry.isIntersecting) entry.target.classList.add('visible');
-      });
-    }, { threshold: 0.2 });
+  // sticky nav shadow on scroll (optional)
+  const nav = document.getElementById('nav');
+  window.addEventListener('scroll', ()=> {
+    if (window.scrollY > 8) nav.classList.add('shadow-lg'); else nav.classList.remove('shadow-lg');
+  });
 
-    fadeElements.forEach(el => observer.observe(el));
+  // ---------- Hero slider ----------
+  const slider = document.getElementById('slider');
+  const slides = slider?.children || [];
+  let sIndex = 0;
+  function nextSlide(){ sIndex = (sIndex + 1) % slides.length; slider.style.transform = `translateX(-${sIndex*100}%)`; }
+  if (slides.length) setInterval(nextSlide, 4000);
 
-    const slider = document.getElementById('slider');
-    const slides = slider.children;
-    const totalSlides = slides.length;
-    let index = 0;
+  // ---------- Animated Search ----------
+  const searchPane = document.getElementById('searchPane');
+  const btnFindWork = document.getElementById('btnFindWork');
+  const btnHireTalent = document.getElementById('btnHireTalent');
+  const globalSearch = document.getElementById('globalSearch');
+  const searchBtn = document.getElementById('searchBtn');
+  const searchResults = document.getElementById('searchResults');
 
-    function nextSlide() {
-      index = (index + 1) % totalSlides;
-      slider.style.transform = `translateX(-${index * 100}%)`;
+  function showSearch(){
+    searchPane.classList.remove('hidden');
+    searchPane.classList.add('animate-[fadeIn_.3s_ease]');
+    globalSearch.focus();
+  }
+  btnFindWork?.addEventListener('click', showSearch);
+  btnHireTalent?.addEventListener('click', showSearch);
+
+  async function doSearch(){
+    const q = (globalSearch.value || '').trim();
+    if(!q) return;
+    searchResults.innerHTML = `<div class="col-span-full text-gray-500 text-sm">Searching “${q}”...</div>`;
+    try{
+      const res = await fetch(`/api/search/?q=${encodeURIComponent(q)}`, {headers:{'Accept':'application/json'}});
+      if(!res.ok) throw 0;
+      const data = await res.json();
+      // Expect {jobs:[...], freelancers:[...], categories:[...]}
+      const jobs = data.jobs || [];
+      const people = data.freelancers || data.users || [];
+      const cats = data.categories || [];
+
+      const parts = [];
+      if(jobs.length){
+        parts.push(`<div class="col-span-full font-semibold mt-2">Jobs</div>`);
+        parts.push(jobs.slice(0,4).map(j=>`
+          <a href="${j.slug ? '/jobs/'+j.slug+'/' : ('/jobs/'+(j.id||''))}" class="block p-3 rounded-lg border bg-white hover:shadow">
+            <div class="font-semibold line-1">${j.title || 'Untitled Job'}</div>
+            <div class="text-xs text-gray-500 line-1">${(j.currency||'$')}${j.budget||''}</div>
+          </a>
+        `).join(''));
+      }
+      if(people.length){
+        parts.push(`<div class="col-span-full font-semibold mt-2">Freelancers</div>`);
+        parts.push(people.slice(0,6).map(u=>`
+          <a href="${u.slug ? '/freelancer/'+u.slug+'/' : (u.id ? '/freelancer/'+u.id+'/' : '#')}" class="block p-3 rounded-lg border bg-white hover:shadow">
+            <div class="font-semibold line-1">${u.full_name || u.username || 'Freelancer'}</div>
+            <div class="text-xs text-gray-500 line-1">${u.level || 'New'} • ${u.country || ''}</div>
+          </a>
+        `).join(''));
+      }
+      if(cats.length){
+        parts.push(`<div class="col-span-full font-semibold mt-2">Categories</div>`);
+        parts.push(cats.slice(0,6).map(c=>`
+          <a href="${c.slug ? '/category/'+c.slug+'/' : '/categories'}" class="block p-3 rounded-lg border bg-white hover:shadow">
+            <div class="font-semibold line-1">${c.name || c.title}</div>
+          </a>
+        `).join(''));
+      }
+      searchResults.innerHTML = parts.length ? parts.join('') : `<div class="col-span-full text-gray-500 text-sm">No results.</div>`;
+    }catch(e){
+      searchResults.innerHTML = `<div class="col-span-full text-gray-500 text-sm">Something went wrong. Try again.</div>`;
     }
+  }
+  searchBtn?.addEventListener('click', doSearch);
+  globalSearch?.addEventListener('keydown', e=>{ if(e.key==='Enter') doSearch(); });
 
-    setInterval(nextSlide, 3000);
+  // ---------- Helpers ----------
+  const qs = s => document.querySelector(s);
+  const mediaBaseCat = (qs('#cat-config')?.dataset?.media || '').trim();
+  const resolveImage = (url, fallback) => {
+    if(!url) return fallback;
+    if(url.startsWith('http')) return url;
+    if(url.startsWith('/')) return url;
+    if(mediaBaseCat) return mediaBaseCat.replace(/\/?$/,'/') + url.replace(/^\/?/,'');
+    return fallback;
+  };
 
-  </script>
+  // ---------- Categories (icons + colors) ----------
+  (async ()=>{
+    const box = qs('#cat-grid'), sk = qs('#cat-skeleton'), cfg = qs('#cat-config');
+    const endpoint = cfg?.dataset?.url || '/api/categories/?limit=24';
+
+    // Icon map + tile color classes
+    const icon = {
+      'web development': `<svg width="26" height="26" fill="none" stroke="currentColor"><path d="M16 18l6-6-6-6M8 6L2 12l6 6" stroke-width="2"/></svg>`,
+      'software development': `<svg width="26" height="26" fill="none" stroke="currentColor"><path d="M4 4h16v12H4zM2 20h20" stroke-width="2"/></svg>`,
+      'graphics & design': `<svg width="26" height="26" fill="none" stroke="currentColor"><path d="M4 4h16v12H4zM8 20h8" stroke-width="2"/></svg>`,
+      'digital marketing': `<svg width="26" height="26" fill="none" stroke="currentColor"><path d="M3 12h18M12 3v18" stroke-width="2"/></svg>`,
+      'admin & hr support': `<svg width="26" height="26" fill="none" stroke="currentColor"><path d="M4 7h16M4 12h10M4 17h7" stroke-width="2"/></svg>`,
+      'bookkeeping & accounting': `<svg width="26" height="26" fill="none" stroke="currentColor"><path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h8" stroke-width="2"/></svg>`
+    };
+    const tiles = [
+      {name:'Web Development', color:'from-blue-500 to-sky-500'},
+      {name:'Software Development', color:'from-violet-500 to-fuchsia-500'},
+      {name:'Graphics & Design', color:'from-pink-500 to-rose-500'},
+      {name:'Digital Marketing', color:'from-amber-500 to-yellow-500'},
+      {name:'Admin & HR Support', color:'from-teal-500 to-emerald-500'},
+      {name:'Bookkeeping & Accounting', color:'from-lime-500 to-green-500'},
+    ];
+
+    try{
+      const res = await fetch(endpoint, {headers:{'Accept':'application/json'}});
+      if(!res.ok) throw 0;
+      const data = await res.json();
+      const list = (Array.isArray(data) ? data : (data.results || data.categories || []))
+        .map(x => ({
+          name: x.name || x.title,
+          slug: x.slug || x.id || '',
+          count: x.count || x.jobs_count || null,
+          icon: x.icon || ''
+        }))
+        .filter(x=>x.name);
+
+      // keep order by tiles (preferred 6)
+      const picked = tiles.map(t => {
+        const found = list.find(i => i.name.toLowerCase() === t.name.toLowerCase());
+        return { ...t, slug: found?.slug || '', count: found?.count, icon: found?.icon };
+      });
+
+      const html = picked.map(t=>{
+        const slugUrl = t.slug ? `/category/${t.slug}/` : '/categories';
+        const key = t.name.toLowerCase();
+        const svg = icon[key] || `<svg width="26" height="26" fill="none" stroke="currentColor"><circle cx="13" cy="13" r="10" stroke-width="2"/></svg>`;
+        return `
+          <a href="${slugUrl}" class="block rounded-xl p-4 bg-gradient-to-br ${t.color} text-white shadow hover:shadow-lg transition">
+            <div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center mb-3">${svg}</div>
+            <div class="font-semibold">${t.name}</div>
+            ${t.count ? `<div class="text-xs text-white/90">${t.count} listings</div>` : ``}
+          </a>
+        `;
+      }).join('');
+
+      box.innerHTML = html; sk.classList.add('hidden'); box.classList.remove('hidden');
+    }catch{
+      box.innerHTML = `<div class="col-span-full text-center text-gray-500">Categories will appear here soon.</div>`;
+      sk.classList.add('hidden'); box.classList.remove('hidden');
+    }
+  })();
+
+  // ---------- Featured Jobs ----------
+  (async ()=>{
+    const box = document.getElementById('jobs-grid'), sk = document.getElementById('jobs-skeleton');
+    const endpoint = document.getElementById('jobs-config')?.dataset?.url || '/api/marketplace/jobs/?featured=true&limit=8';
+    try{
+      const res = await fetch(endpoint, {headers:{'Accept':'application/json'}});
+      if(!res.ok) throw 0;
+      const data = await res.json();
+      const items = (Array.isArray(data) ? data : (data.results || data.jobs || []))
+        .map(j => ({
+          id: j.id,
+          title: j.title || 'Untitled Job',
+          budget: j.budget || j.price || null,
+          currency: j.currency || '$',
+          short: j.description || j.summary || '',
+          tags: j.tags || j.skills || [],
+          slug: j.slug || ''
+        }));
+      box.innerHTML = items.map(j => `
+        <a href="${j.slug ? '/jobs/'+j.slug+'/' : ('/jobs/'+(j.id||''))}" class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition block">
+          <div class="flex items-start justify-between gap-3">
+            <h3 class="font-semibold line-2">${j.title}</h3>
+            ${j.budget ? `<span class="text-xs px-2 py-1 bg-blue-50 text-blue-700 rounded">${j.currency}${j.budget}</span>`:''}
+          </div>
+          <p class="text-sm text-gray-600 mt-2 line-3">${j.short}</p>
+          <div class="mt-3 flex flex-wrap gap-2">
+            ${(j.tags||[]).slice(0,4).map(t=>`<span class="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">${t}</span>`).join('')}
+          </div>
+        </a>
+      `).join('');
+      sk.classList.add('hidden'); box.classList.remove('hidden');
+    }catch{
+      box.innerHTML = `<div class="col-span-full text-center text-gray-500">Featured jobs will appear here soon.</div>`;
+      sk.classList.add('hidden'); box.classList.remove('hidden');
+    }
+  })();
+
+  // ---------- Freelancers (marquee) ----------
+  (async ()=>{
+    const frBox = document.getElementById('fr-marquee'), sk = document.getElementById('fr-skeleton'), track = document.getElementById('fr-track');
+    const cfg = document.getElementById('fr-config');
+    const endpoint = cfg?.dataset?.url || '/api/accounts/freelancers/?featured=true&limit=24';
+    const media = cfg?.dataset?.media || '';
+    const placeholder = cfg?.dataset?.placeholder || "{% static 'images/avatar-placeholder.png' %}";
+
+    const resolveAvatar = (url) => {
+      if(!url) return placeholder;
+      if(url.startsWith('http')) return url;
+      if(url.startsWith('/')) return url;
+      if(media) return media.replace(/\/?$/,'/') + url.replace(/^\/?/,'');
+      return placeholder;
+    };
+
+    try{
+      const res = await fetch(endpoint, {headers:{'Accept':'application/json'}});
+      if(!res.ok) throw 0;
+      const data = await res.json();
+      const list = (Array.isArray(data) ? data : (data.results || data.users || []))
+        .map(u => ({
+          id: u.id,
+          name: u.full_name || u.username || 'Freelancer',
+          title: u.tagline || u.bio || '',
+          level: u.level || 'New',
+          country: u.country || '',
+          avatar: resolveAvatar(u.profile_photo || u.avatar),
+          url: u.slug ? `/freelancer/${u.slug}/` : (u.id ? `/freelancer/${u.id}/` : '#')
+        }));
+
+      const doubled = [...list, ...list];
+      track.innerHTML = doubled.map(f => `
+        <a href="${f.url}" class="min-w-[230px] max-w-[230px] bg-white p-4 rounded-xl shadow hover:shadow-lg transition block">
+          <div class="flex items-center gap-3">
+            <img src="${f.avatar}" alt="${f.name}" class="w-12 h-12 rounded-full object-cover" loading="lazy" decoding="async">
+            <div>
+              <div class="font-semibold line-1">${f.name}</div>
+              <div class="text-xs text-gray-500 line-1">${f.level} • ${f.country}</div>
+            </div>
+          </div>
+          <div class="text-xs text-gray-600 mt-2 line-2">${f.title}</div>
+        </a>
+      `).join('');
+
+      sk.classList.add('hidden'); frBox.classList.remove('hidden');
+    }catch{
+      sk.innerHTML = `<div class="col-span-full text-center text-gray-500">Freelancers will appear here soon.</div>`;
+    }
+  })();
+
+  // ---------- Reviews ----------
+  (async ()=>{
+    const box = document.getElementById('rv-grid'), sk = document.getElementById('rv-skeleton');
+    const cfg = document.getElementById('rv-config');
+    const endpoint = cfg?.dataset?.url || '/api/reviews/?featured=true&limit=6';
+    const avatarPh = cfg?.dataset?.avatar || "{% static 'images/avatar-placeholder.png' %}";
+
+    const mediaBase = (cfg?.dataset?.media || '').trim();
+    const resolve = (url) => {
+      if(!url) return avatarPh;
+      if(url.startsWith('http')) return url;
+      if(url.startsWith('/')) return url;
+      if(mediaBase) return mediaBase.replace(/\/?$/,'/') + url.replace(/^\/?/,'');
+      return avatarPh;
+    };
+
+    try{
+      const res = await fetch(endpoint, {headers:{'Accept':'application/json'}});
+      if(!res.ok) throw 0;
+      const data = await res.json();
+      const list = (Array.isArray(data) ? data : (data.results || data.reviews || []))
+        .map(r => ({
+          user: (r.user && (r.user.full_name || r.user.username)) || r.author_name || 'User',
+          avatar: resolve((r.user && (r.user.profile_photo||r.user.avatar)) || r.avatar),
+          rating: r.rating || r.stars || 5,
+          text: r.comment || r.text || '',
+          job: r.job_title || r.project || ''
+        }));
+
+      box.innerHTML = list.map(rv => `
+        <div class="bg-white p-5 rounded-xl shadow hover:shadow-lg transition" data-aos="fade-up">
+          <div class="flex items-center gap-3 mb-3">
+            <img src="${rv.avatar}" alt="${rv.user}" class="w-10 h-10 rounded-full object-cover">
+            <div>
+              <div class="font-semibold text-sm line-1">${rv.user}</div>
+              <div class="text-xs text-yellow-500">${'★'.repeat(Math.round(rv.rating))}<span class="text-gray-300">${'★'.repeat(5-Math.round(rv.rating))}</span></div>
+            </div>
+          </div>
+          <div class="text-sm text-gray-700 line-3">${rv.text}</div>
+          ${rv.job ? `<div class="mt-2 text-xs text-gray-500">Project: ${rv.job}</div>` : ''}
+        </div>
+      `).join('');
+      sk.classList.add('hidden'); box.classList.remove('hidden');
+    }catch{
+      box.innerHTML = `<div class="col-span-full text-center text-gray-500">Reviews will appear here soon.</div>`;
+      sk.classList.add('hidden'); box.classList.remove('hidden');
+    }
+  })();
+
+  // ---------- Fade-up observer ----------
+  const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.15});
+  document.querySelectorAll('.fade-up').forEach(el=>io.observe(el));
+</script>
 </body>
 </html>
