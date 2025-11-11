@@ -317,6 +317,6 @@ STATIC_URL = "/static/"
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [BASE_DIR / 'frontend']
+STATICFILES_DIRS = [BASE_DIR / 'frontend' / 'dist']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'

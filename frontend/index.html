@@ -15,11 +15,9 @@
   <link rel="icon" href="{% static 'images/logo.jpeg' %}">
 
   <!-- Perf: preconnect -->
-  <link rel="preconnect" href="https://cdn.tailwindcss.com" crossorigin>
-  <link rel="dns-prefetch" href="//cdn.tailwindcss.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" integrity="sha512-jQdD8I5LbiQ6J92frP7P+KhDPPcJ6PIRZKnyP0DUL9R47FwbN1lsnpT3IlZUpT7Q2DCW8Bn4tzwIl0xEk83p0A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 
-  <!-- Tailwind (CDN) -->
-  <script src="https://cdn.tailwindcss.com" defer></script>
+  <link href="{% static 'style.css' %}" rel="stylesheet">
 
   <!-- AOS (Animate On Scroll) -->
   <link rel="preload" as="style" href="https://unpkg.com/aos@2.3.4/dist/aos.css">
@@ -84,6 +82,27 @@
     /* Dropdown accessibility */
     .dropdown[aria-expanded="true"] .dropdown-menu {display:block}
     .dropdown-menu{display:none}
+
+
+    
+    .text-ink{color:#0f172a !important;}
+    .text-sea{color:#06b6d4 !important;}
+    .text-lime{color:#84cc16 !important;}
+    .text-grape{color:#7c3aed !important;}
+    .text-flamingo{color:#f43f5e !important;}
+    .text-sun{color:#f59e0b !important;}
+    .text-teal{color:#14b8a6 !important;}
+    .bg-sea{background-color:#06b6d4 !important;}
+    .bg-lime{background-color:#84cc16 !important;}
+    .bg-grape{background-color:#7c3aed !important;}
+    .bg-flamingo{background-color:#f43f5e !important;}
+    .bg-sun{background-color:#f59e0b !important;}
+    .bg-teal{background-color:#14b8a6 !important;}
+    .shadow-smooth{box-shadow:0 10px 30px rgba(2,6,23,.08) !important;}
+    .shadow-card{box-shadow:0 14px 38px rgba(2,6,23,.12) !important;}
+    
+
+    
   </style>
 </head>
 
@@ -353,7 +372,7 @@
           <p class="mt-4 text-gray-100 text-lg">AI matching, verified profiles, secure escrow — everything you need to hire or get hired.</p>
           <div class="mt-6 flex gap-3">
             <button id="btnFindWork" class="px-5 py-3 bg-primary text-white rounded-md shadow-smooth hover:bg-blue-700">Find Work</button>
-            <button id="btnHireTalent" class="px-5 py-3 bg-sea text-white rounded-md shadow-smooth hover:bg-cyan-500">Hire Talent</button>
+            <button id="btnHireTalent" class="px-5 py-3 bg-primary text-white rounded-md shadow-smooth hover:bg-blue-700">Hire Talent</button>
           </div>
           <div class="mt-4 text-sm text-gray-200">Trusted by teams worldwide • Fast payouts • 24/7 support</div>
         </div>
@@ -374,6 +393,8 @@
     </div>
   </div>
 </header>
+
+
 
 <!-- ================= CATEGORIES (6 icons, colorful) ================= -->
 <section id="categories" class="py-16 md:py-20 bg-white">
@@ -402,6 +423,27 @@
     </div>
   </div>
 </section>
+
+<!-- ================= WHAT'S NEW (Affiliate) ================= -->
+<section class="py-12 text-white" 
+style="background: linear-gradient(to right, #2563eb, #7c3aed, #f43f5e);">
+  <div class="max-w-7xl mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center gap-6">
+    <div class="flex-1">
+      <h3 class="text-2xl md:text-3xl font-bold">What’s New — Affiliate Marketing</h3>
+      <p class="mt-2 text-white/90">
+        Earn commission by referring clients & freelancers. Share your unique link,
+        track performance in real-time, and get paid fast.
+      </p>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="/affiliate" class="px-5 py-3 bg-white text-ink rounded-md shadow-smooth hover:bg-gray-100">Join as Affiliate</a>
+      <a href="/whats-new" class="px-5 py-3 bg-black/20 text-white rounded-md shadow-smooth hover:bg-black/30">Learn more</a>
+    </div>
+  </div>
+</section>
+
+
+
 
 <!-- ================= FEATURED JOBS ================= -->
 <section id="jobs" class="py-16 md:py-20 bg-blue-50">
@@ -456,20 +498,6 @@
          data-url="/api/accounts/freelancers/?featured=true&limit=24"
          data-media="{{ MEDIA_URL|default:'' }}"
          data-placeholder="{% static 'images/avatar-placeholder.png' %}">
-    </div>
-  </div>
-</section>
-
-<!-- ================= WHAT'S NEW (Affiliate) ================= -->
-<section class="py-12 bg-gradient-to-r from-primary via-grape to-flamingo text-white">
-  <div class="max-w-7xl mx-auto px-4 md:px-6 flex flex-col md:flex-row items-center gap-6">
-    <div class="flex-1">
-      <h3 class="text-2xl md:text-3xl font-bold">What’s New — Affiliate Marketing</h3>
-      <p class="mt-2 text-white/90">Earn commission by referring clients & freelancers. Share your unique link, track performance in real-time, and get paid fast.</p>
-    </div>
-    <div class="flex items-center gap-3">
-      <a href="/affiliate" class="px-5 py-3 bg-white text-ink rounded-md shadow-smooth hover:bg-gray-100">Join as Affiliate</a>
-      <a href="/whats-new" class="px-5 py-3 bg-black/20 text-white rounded-md shadow-smooth hover:bg-black/30">Learn more</a>
     </div>
   </div>
 </section>
@@ -902,9 +930,29 @@
     }
   })();
 
+
+  // Django CSRF helper
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
   // ---------- Fade-up observer ----------
   const io = new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)e.target.classList.add('visible')}),{threshold:.15});
   document.querySelectorAll('.fade-up').forEach(el=>io.observe(el));
 </script>
+<script src="https://kit.fontawesome.com/a2b5e6fa7f.js" crossorigin="anonymous"></script>
 </body>
 </html>
+
+
