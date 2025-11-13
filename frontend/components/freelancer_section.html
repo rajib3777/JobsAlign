@@ -1,0 +1,109 @@
+<!-- ================= FREELANCER VALUE SECTION (PURE HTML+SVG) ================= -->
+<section id="freelancer-value"
+  class="relative bg-gradient-to-b from-cyan-50 via-white to-cyan-50 py-28 mt-2 overflow-hidden">
+
+  <!-- Scoped styles (no external deps) -->
+  <style>
+    /* scope only to this section */
+    #freelancer-value .icon-wrap{
+      width:5rem;height:5rem;border-radius:1.25rem;
+      display:flex;align-items:center;justify-content:center;
+      color:#fff;box-shadow:0 10px 25px rgba(0,0,0,.12);
+      transition:transform .25s ease;
+    }
+    #freelancer-value .card{transition:transform .25s ease, box-shadow .25s ease;}
+    #freelancer-value .card:hover{transform:scale(1.05)}
+    #freelancer-value .icon-wrap svg{width:34px;height:34px;display:block;}
+    #freelancer-value .glow-a{position:absolute;top:-80px;left:-80px;width:18rem;height:18rem;background:rgba(34,211,238,.35);filter:blur(80px);border-radius:9999px}
+    #freelancer-value .glow-b{position:absolute;right:-60px;bottom:-60px;width:24rem;height:24rem;background:rgba(56,189,248,.25);filter:blur(90px);border-radius:9999px}
+  </style>
+
+  <div class="max-w-7xl mx-auto px-6 text-center mt-12">
+    <!-- Heading -->
+    <h2 class="text-4xl md:text-5xl font-extrabold text-gray-900 mb-4">
+      Make it all happen with freelancers
+    </h2>
+    <p class="text-gray-600 text-lg mb-20 max-w-2xl mx-auto">
+      Work with top verified professionals from 700+ skill categories and bring your ideas to life effortlessly.
+    </p>
+
+    <!-- Features -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-12 mb-12">
+
+      <!-- Card 1: Layers / Grid -->
+      <div class="card flex flex-col items-center text-center mt-4">
+        <div class="icon-wrap" style="background:linear-gradient(135deg,#22d3ee,#0ea5e9)">
+          <!-- layers/grid icon (SVG) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M12 3L3 8l9 5 9-5-9-5z" stroke="#ffffff" fill="none"/>
+            <path d="M3 12l9 5 9-5" stroke="#ffffff" fill="none"/>
+            <path d="M3 16l9 5 9-5" stroke="#ffffff" fill="none"/>
+          </svg>
+        </div>
+        <h4 class="font-semibold text-lg text-gray-800 mb-2 mt-4">Access top talent</h4>
+        <p class="text-gray-500 text-sm">Find skilled experts across 700+ categories to match your business needs.</p>
+      </div>
+
+      <!-- Card 2: Rotate arrows -->
+      <div class="card flex flex-col items-center text-center mt-4">
+        <div class="icon-wrap" style="background:linear-gradient(135deg,#34d399,#10b981)">
+          <!-- arrows-rotate icon (SVG) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
+            <path d="M4 7a8 8 0 0 1 13-2" stroke="#ffffff" />
+            <path d="M17 5h-4v-4" stroke="#ffffff" />
+            <path d="M20 17a8 8 0 0 1-13 2" stroke="#ffffff" />
+            <path d="M7 19h4v4" stroke="#ffffff" />
+          </svg>
+        </div>
+        <h4 class="font-semibold text-lg text-gray-800 mb-2 mt-4">Easy matching</h4>
+        <p class="text-gray-500 text-sm">Enjoy a simple, AI-powered matching experience tailored to your project.</p>
+      </div>
+
+      <!-- Card 3: Bolt -->
+      <div class="card flex flex-col items-center text-center mt-4">
+        <div class="icon-wrap" style="background:linear-gradient(135deg,#f59e0b,#fbbf24)">
+          <!-- bolt icon (SVG) -->
+          <svg viewBox="0 0 24 24" fill="#ffffff">
+            <path d="M11 2L3 14h6l-2 8 10-12h-6l2-8z"/>
+          </svg>
+        </div>
+        <h4 class="font-semibold text-lg text-gray-800 mb-2 mt-4">Quality work fast</h4>
+        <p class="text-gray-500 text-sm">Get high-quality work delivered efficiently and within your budget.</p>
+      </div>
+
+      <!-- Card 4: Smile -->
+      <div class="card flex flex-col items-center text-center mt-4">
+        <div class="icon-wrap" style="background:linear-gradient(135deg,#fb7185,#f43f5e)">
+          <!-- smile icon (SVG) -->
+          <svg viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="1.8">
+            <circle cx="12" cy="12" r="9"/>
+            <path d="M8 10h.01M16 10h.01"/>
+            <path d="M8 15c1.3 1 2.7 1.5 4 1.5s2.7-.5 4-1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <h4 class="font-semibold text-lg text-gray-800 mb-2 mt-4">Pay when satisfied</h4>
+        <p class="text-gray-500 text-sm">Pay safely through escrow — only when you’re fully satisfied with the work.</p>
+      </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div class="mt-6 flex justify-center gap-3 mb-12">
+      <a href="{% url 'register_page' %}" class="px-6 py-3 bg-white text-blue-700 rounded-md shadow-smooth hover:bg-gray-100">Join us</a>
+    </div>
+  <!-- Decorative glows -->
+  <div class="glow-a"></div>
+  <div class="glow-b"></div>
+
+  <!-- Optional tiny JS to open a modal if present -->
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const btn = document.getElementById("openJoinModal");
+      btn?.addEventListener("click", () => {
+        const modal = document.getElementById("joinModal");
+        if (modal){ modal.classList.remove("hidden"); modal.classList.add("flex"); }
+        else { window.location.href = "/register/"; }
+      });
+    });
+  </script>
+</section>
