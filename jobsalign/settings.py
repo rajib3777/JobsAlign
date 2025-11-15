@@ -1,4 +1,5 @@
-
+import ssl
+import certifi
 from pathlib import Path
 from decouple import config
 from datetime import timedelta
@@ -264,6 +265,10 @@ EMAIL_HOST_USER = config("EMAIL")
 EMAIL_HOST_PASSWORD = config("EMAIL_PASSWORD")
 DEFAULT_FROM_EMAIL = config("EMAIL")
 
+
+EMAIL_SSL_CONTEXT = ssl.create_default_context(cafile=certifi.where())
+EMAIL_SSL_CERTFILE = certifi.where()
+EMAIL_SSL_KEYFILE = certifi.where()
 
 
 # --- Compatibility patch for old packages ---
